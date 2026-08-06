@@ -1,6 +1,6 @@
-# Resolución TP9: Fundamentos de Spring Boot
+# Resolución TP1: Fundamentos de Spring Boot
 
-En este documento se detallará el proceso paso a paso de la resolución del Trabajo Práctico de la Unidad 9.
+En este documento se detallará el proceso paso a paso de la resolución del Trabajo Práctico de la Unidad 1.
 
 ## 1. Migración del Proyecto Anterior (Unidad 8 - JPA - Programación 3)
 Dado que las anotaciones de Hibernate y la estructura de las entidades son compatibles con Spring Data JPA, se procedió a reciclar el modelo de dominio del trabajo anterior, que ya contaba con un análisis del UML y una implementación funcional.
@@ -13,7 +13,7 @@ Se importaron al nuevo proyecto de Spring Boot los siguientes paquetes:
 *(Los repositorios manuales y archivos como `persistence.xml` y `Main.java` fueron descartados, ya que Spring Boot gestiona el contexto de persistencia a través de `application.properties` y las interfaces de `JpaRepository`).*
 
 ## 2. Configuración y Corrección de Packages
-Al migrar los archivos, se actualizaron todas las declaraciones de `package` y las importaciones (`import`) en las clases Java para reflejar la estructura de directorios del nuevo proyecto: `com.tpUnidad9.unidad9_fundamentosSpringboot`. Esto solucionó los errores de sintaxis del IDE y dejó la base lista para trabajar en la nueva arquitectura.
+Al migrar los archivos, se actualizaron todas las declaraciones de `package` y las importaciones (`import`) en las clases Java para reflejar la estructura de directorios del nuevo proyecto: `com.tpUnidad1.unidad1_fundamentosSpringboot`. Esto solucionó los errores de sintaxis del IDE y dejó la base lista para trabajar en la nueva arquitectura.
 
 ## 3. Creación de la capa DTO (Data Transfer Object)
 Siguiendo las buenas prácticas y las consignas del trabajo práctico, se comenzó a estructurar la capa DTO para separar el modelo de base de datos de los datos expuestos en la API. Se utilizó la característica nativa `record` de Java por su inmutabilidad y concisión.
