@@ -86,3 +86,13 @@ Para lograr esto, **se tomó una decisión de diseño apegada a los materiales t
 - **Uso de `@Component`:** La clase fue decorada con este estereotipo para que el contenedor de IoC de Spring la detecte y gestione su ciclo de vida automáticamente de forma independiente.
 - **Inyección por Constructor:** Se inyectaron todos los servicios requeridos (`UsuarioService`, `CategoriaService`, `ProductoService`, `PedidoService`) mediante el constructor de la clase, acatando con firmeza las buenas prácticas y conclusiones esperadas del Trabajo Práctico.
 - **Uso de `@PostConstruct`:** Todo el código de instanciación fue encapsulado dentro de un método anotado con `@PostConstruct`. Según el marco teórico de la cursada, esta es la forma ideal de ejecutar lógica de inicialización, ya que Spring asegura que el método se ejecute de manera automática exactamente después de crear el Bean y resolver sus dependencias, logrando el mismo resultado pero con una arquitectura más limpia y desacoplada.
+
+
+## 8. Corrección del Timestamp de Creación (`createdAt`)
+Durante el desarrollo se detectó que el campo `createdAt` heredado de la clase abstracta `Base` persistía como `null` en la base de datos al momento de crear nuevas entidades.
+
+Para solucionarlo de forma delegada al ORM, se modificó la entidad `Base`:
+- Se incorporó la anotación `@CreationTimestamp` de Hibernate, la cual se encarga de asignar automáticamente la marca de tiempo actual (timestamp) justo antes de realizar el `INSERT` en la base de datos.
+- Se agregó la anotación `@Column(updatable = false)` de JPA para proteger el campo, garantizando que el timestamp de creación sea inmutable y no pueda ser alterado accidentalmente durante posteriores consultas `UPDATE`.
+
+Este enfoque garantiza que todas las entidades que extienden de `Base` conserven un registro cronológico veraz y automático de su creación.

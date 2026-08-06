@@ -1,4 +1,6 @@
-# PROGRAMACIÓN IIITrabajo Práctico - Fundamentos de SpringOBJETIVO GENERAL
+# PROGRAMACIÓN III Trabajo Práctico - Fundamentos de Spring
+
+# OBJETIVO GENERAL
 
 Desarrollar un Sistema de Gestión de Pedidos que demuestre tu comprensión de la arquitectura Spring Boot y las buenas prácticas de desarrollo.
 
