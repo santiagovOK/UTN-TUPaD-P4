@@ -9,7 +9,9 @@ package com.tpUnidad2.unidad2_APIRestSpringBoot.repository;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.entities.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+    Optional<Usuario> findByMail(String mail);
 }

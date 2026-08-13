@@ -32,6 +32,12 @@ public class UsuarioServiceImp implements UsuarioService {
     }
 
     @Override
+    public UsuarioDto findByMail(String mail) {
+        Usuario usuario = usuarioRepository.findByMail(mail).orElseThrow(() -> new NullPointerException("No se encontró el usuario con mail: " + mail));
+        return UsuarioDto.toDto(usuario);
+    }
+
+    @Override
     public List<UsuarioDto> findAll() {
         List<Usuario> usuarios = usuarioRepository.findAll();
         return usuarios.stream().map(UsuarioDto::toDto).toList();

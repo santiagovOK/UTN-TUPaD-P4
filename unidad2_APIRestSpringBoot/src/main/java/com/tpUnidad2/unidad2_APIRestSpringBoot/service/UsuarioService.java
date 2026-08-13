@@ -9,6 +9,7 @@ import java.util.List;
 public interface UsuarioService {
     public UsuarioDto save(UsuarioCreate usuarioCreate);
     public UsuarioDto findById(Long id);
+    public UsuarioDto findByMail(String mail);
     public List<UsuarioDto> findAll();
     public UsuarioDto update(UsuarioEdit usuarioEdit, Long idUsuario);
     public void deleteById(Long id);
