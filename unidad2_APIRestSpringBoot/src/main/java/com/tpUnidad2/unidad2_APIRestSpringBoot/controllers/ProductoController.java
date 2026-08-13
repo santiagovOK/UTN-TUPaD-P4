@@ -6,6 +6,7 @@ import com.tpUnidad2.unidad2_APIRestSpringBoot.dtos.producto.ProductoCreate;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.dtos.producto.ProductoDto;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.dtos.producto.ProductoEdit;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.service.ProductoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -29,14 +30,15 @@ public class ProductoController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductoDto> save(@RequestBody ProductoCreate productoCreate) {
+    public ResponseEntity<ProductoDto> save(@Valid @RequestBody ProductoCreate productoCreate) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productoService.save(productoCreate));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductoDto> update(@RequestBody ProductoEdit productoEdit, @PathVariable Long id) {
+    public ResponseEntity<ProductoDto> update(@Valid @RequestBody ProductoEdit productoEdit, @PathVariable Long id) {
         return ResponseEntity.ok(productoService.update(productoEdit, id));
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {

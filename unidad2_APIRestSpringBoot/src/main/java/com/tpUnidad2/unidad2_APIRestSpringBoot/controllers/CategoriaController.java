@@ -6,6 +6,7 @@ import com.tpUnidad2.unidad2_APIRestSpringBoot.dtos.categoria.CategoriaCreate;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.dtos.categoria.CategoriaDto;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.dtos.categoria.CategoriaEdit;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.service.CategoriaService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,14 +32,15 @@ public class CategoriaController {
     // TP2 - Se usa `HttpStatus.` + retorno por legibilidad y porque es autoexplicativo del código que se está devolviendo.
 
     @PostMapping
-    public ResponseEntity<CategoriaDto> save(@RequestBody CategoriaCreate categoriaCreate) {
+    public ResponseEntity<CategoriaDto> save(@Valid @RequestBody CategoriaCreate categoriaCreate) {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoriaService.save(categoriaCreate));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoriaDto> update(@RequestBody CategoriaEdit categoriaEdit, @PathVariable Long id) {
+    public ResponseEntity<CategoriaDto> update(@Valid @RequestBody CategoriaEdit categoriaEdit, @PathVariable Long id) {
         return ResponseEntity.ok(categoriaService.update(categoriaEdit, id));
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {

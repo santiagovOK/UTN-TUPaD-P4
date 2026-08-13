@@ -28,19 +28,19 @@ Para exponer nuestra lógica de negocio, se creó el paquete `controllers` y las
 - `PedidoController` (`/api/pedidos`)
 - `UsuarioController` (`/api/usuarios`)
 
-Todos incluyen métodos estándar (GET, POST, PUT, DELETE) y retornan estructuras `ResponseEntity<?>` con sus respectivos códigos de estado HTTP (`200 OK`, `201 CREATED`, `204 NO CONTENT`).
+Todos incluyen métodos estándar (GET, POST, PUT, DELETE) y retornan estructuras `ResponseEntity` parametrizadas con sus DTOs específicos (por ejemplo, `ResponseEntity<CategoriaDto>`), haciendo uso de las constantes de `HttpStatus` (`HttpStatus.OK`, `HttpStatus.CREATED`, `HttpStatus.NO_CONTENT`) para definir los códigos de estado.
+Además, se incorporó la anotación `@Valid` junto a los parámetros `@RequestBody` (en métodos POST y PUT) para ejecutar automáticamente las validaciones de entrada configuradas en los DTOs.
 En particular, para cumplir con las consignas, en `UsuarioController` se añadieron las sentencias `System.out.println` en los métodos de búsqueda (por ID y por el nuevo endpoint `/search?mail=...`) para garantizar que la información se imprima por consola al ser solicitada.
 
 ## 5. Manejo Global de Excepciones (AdviceController)
 Para lograr una API robusta y evitar que las excepciones internas de Java rompan la respuesta JSON, se creó `AdviceController` decorado con `@RestControllerAdvice`.
 Este controlador intercepta globalmente:
-- `ResourceNotFoundException`: Excepción personalizada creada para cuando nuestros servicios no encuentran un recurso (retorna `404 Not Found`).
+- `NullPointerException`: Utilizada para cuando nuestros servicios no encuentran un recurso (retorna `404 Not Found`).
 - `MethodArgumentNotValidException` e `IllegalArgumentException`: Utilizadas para capturar errores de validación de los DTOs y peticiones inválidas (retornan `400 Bad Request`).
 - `Exception`: Captura errores genéricos o imprevistos (retorna `500 Internal Server Error`).
 
 ---
 
-**Hasta aquí realicé el TP2, ya que lo use para ir un poco más paso a paso con la lógica en la capa de control, dado que usaré una estructura similar en el TPI**
 
 ## Estructura de Archivos Planificada
 
@@ -58,8 +58,6 @@ unidad2_APIRestSpringBoot/
 ├── dtos/
 ├── entities/
 ├── enums/
-├── exceptions/                        (NUEVO - A CREAR)
-│   └── ResourceNotFoundException.java (NUEVO - A CREAR)
 ├── interfaces/
 ├── repository/
 ├── service/
