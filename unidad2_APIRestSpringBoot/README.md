@@ -4,9 +4,7 @@ Cree un archivo Markdown para la resolución de cada una de las consignas (princ
 
 ---
 
-**Aclaración Importante**: Ya había realizado este mismo trabajo práctico durante la cursada de Programación 3, primer cuatrimestre 2026. Al mismo tiempo que lo entregué [unos meses atrás](https://github.com/santiagovOK/UTN-TUPaD-P3/tree/main/unidad9_fundamentosSpringboot), bloquearon esas unidades para dejarlas libres por si nosotros llegábamos y queríamos estudiarlas. Finalmente el trabajo no fue corregido en aquel entonces.
-
-Lo que hice fue revisar nuevamente este trabajo, aunque en aquel entonces lo consideraba entregable y acorde a la resolución de las consignas (suficiente para esta instancia, aunque arreglé algunos errores menores). Creo que debe ser considerado que estuve al día con la materia en aquel momento y, por lo tanto, que me permitan considerar esto como un repaso para hacer más énfasis en los nuevos temas de esta asignatura y las del resto.
+**Aclaración Importante**: Este trabajo parte del último trabajo realizado en la [unidad 1](https://github.com/santiagovOK/UTN-TUPaD-P4/tree/main/unidad1_fundamentosSpringboot)
 
 ---
 
@@ -19,7 +17,7 @@ Repositorio donde podrán encontrar mis trabajos de Programación IV: https://gi
 
 ---
 
-> **Nota:** Este proyecto está configurado en su `build.gradle` para compilar utilizando **Java 25**.
+> **Nota:** Este proyecto está configurado en su `build.gradle` para compilar utilizando **Java 25**, **org.springframework.boot 4.0.6** y **org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3**. Este último por compatibilidad con `org.springframework.boot` > 4.x.x.
 
 ### Base de Datos H2
 

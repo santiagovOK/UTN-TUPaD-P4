@@ -41,3 +41,27 @@ Este controlador intercepta globalmente:
 ---
 
 **Hasta aquí realicé el TP2, ya que lo use para ir un poco más paso a paso con la lógica en la capa de control, dado que usaré una estructura similar en el TPI**
+
+## Estructura de Archivos Planificada
+
+A continuación se detalla cómo quedará la estructura del proyecto en `src/main/java/com/tpUnidad2/unidad2_APIRestSpringBoot/` para cumplir con todas las consignas. Se señalan específicamente los archivos que **aún no existen** y deben crearse.
+
+```text
+unidad2_APIRestSpringBoot/
+├── config/
+├── controllers/                       (NUEVO - A CREAR)
+│   ├── AdviceController.java          (NUEVO - A CREAR)
+│   ├── CategoriaController.java       (NUEVO - A CREAR)
+│   ├── PedidoController.java          (NUEVO - A CREAR)
+│   ├── ProductoController.java        (NUEVO - A CREAR)
+│   └── UsuarioController.java         (NUEVO - A CREAR)
+├── dtos/
+├── entities/
+├── enums/
+├── exceptions/                        (NUEVO - A CREAR)
+│   └── ResourceNotFoundException.java (NUEVO - A CREAR)
+├── interfaces/
+├── repository/
+├── service/
+└── Unidad2APIRestSpringBootApplication.java
+```
