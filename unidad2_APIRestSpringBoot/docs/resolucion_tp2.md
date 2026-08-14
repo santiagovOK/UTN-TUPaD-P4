@@ -39,22 +39,45 @@ Este controlador intercepta globalmente:
 - `MethodArgumentNotValidException` e `IllegalArgumentException`: Utilizadas para capturar errores de validación de los DTOs y peticiones inválidas (retornan `400 Bad Request`).
 - `Exception`: Captura errores genéricos o imprevistos (retorna `500 Internal Server Error`).
 
+
+## 6. Pruebas y Ejecución de la API (Postman y Swagger)
+Para validar el correcto funcionamiento de la API y cumplir con la carga de datos solicitada en las consignas, se realizarán las siguientes operaciones utilizando herramientas cliente como Postman o directamente desde Swagger UI:
+
+1. **Carga de Datos Inicial (POST)**:
+   - Se crearán y persistirán 2 Usuarios mediante `/api/usuarios`.
+   - Se crearán 3 Categorías mediante `/api/categorias`.
+   - Se insertarán 10 Productos distribuidos en las categorías, a través de `/api/productos`.
+   - Se generarán 3 Pedidos (asegurando al menos 2 detalles de pedido por cada uno) mediante `/api/pedidos`.
+2. **Actualización de Registros (PUT)**:
+   - Se actualizará la información de 1 Categoría existente apuntando a su ID (`/api/categorias/{id}`).
+3. **Consultas y Verificación por Consola (GET)**:
+   - Se buscarán Usuarios por ID (`/api/usuarios/{id}`).
+   - Se buscarán Usuarios por correo electrónico (`/api/usuarios/search?mail={mail}`).
+   - En ambos casos se verificará que la información del usuario buscado se imprima correctamente en la consola del servidor (a través de los `System.out.println` definidos en los controladores).
+4. **Documentación Interactiva (Swagger UI)**:
+   - Se verificará el correcto despliegue de la interfaz de Swagger navegando a `http://localhost:8080/swagger-ui/index.html` (o el puerto configurado). Desde allí se podrán observar todos los endpoints expuestos, sus esquemas (DTOs) y realizar pruebas directamente desde el navegador.
+
+## 7. Conclusiones
+A través de la resolución de este Trabajo Práctico, se lograron cumplir los objetivos generales planteados en las consignas:
+- **Diseño y construcción de una API REST completa:** Se implementaron los endpoints necesarios para la gestión integral de entidades (Usuarios, Pedidos, Categorías, Productos).
+- **Aplicación de métodos HTTP:** Se utilizaron de forma semánticamente correcta los métodos `GET` (lectura), `POST` (creación) y `PUT` (actualización completa) en función del propósito de cada operación.
+- **Arquitectura en capas profesional:** Se separó claramente la responsabilidad del código en controladores (exposición de la API), servicios (lógica de negocio y transformación DTO), repositorios (persistencia JPA) y un controlador de consejos (`AdviceController`) para el manejo centralizado de excepciones y validaciones.
+
 ---
 
+## Estructura de Archivos Final
 
-## Estructura de Archivos Planificada
-
-A continuación se detalla cómo quedará la estructura del proyecto en `src/main/java/com/tpUnidad2/unidad2_APIRestSpringBoot/` para cumplir con todas las consignas. Se señalan específicamente los archivos que **aún no existen** y deben crearse.
+A continuación se detalla cómo quedó la estructura del proyecto en `src/main/java/com/tpUnidad2/unidad2_APIRestSpringBoot/` tras cumplir con todas las consignas:
 
 ```text
 unidad2_APIRestSpringBoot/
 ├── config/
-├── controllers/                       (NUEVO - A CREAR)
-│   ├── AdviceController.java          (NUEVO - A CREAR)
-│   ├── CategoriaController.java       (NUEVO - A CREAR)
-│   ├── PedidoController.java          (NUEVO - A CREAR)
-│   ├── ProductoController.java        (NUEVO - A CREAR)
-│   └── UsuarioController.java         (NUEVO - A CREAR)
+├── controllers/
+│   ├── AdviceController.java
+│   ├── CategoriaController.java
+│   ├── PedidoController.java
+│   ├── ProductoController.java
+│   └── UsuarioController.java
 ├── dtos/
 ├── entities/
 ├── enums/
