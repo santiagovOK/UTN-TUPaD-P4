@@ -59,6 +59,8 @@ Para validar el correcto funcionamiento de la API y cumplir con la carga de dato
 4. **Documentación Interactiva (Swagger UI)**:
    - Se verificará el correcto despliegue de la interfaz de Swagger navegando a `http://localhost:8080/swagger-ui/index.html` (o el puerto configurado). Desde allí se podrán observar todos los endpoints expuestos, sus esquemas (DTOs) y realizar pruebas directamente desde el navegador.
 
+Ver en detalle en [docs/pruebas_api.md](docs/pruebas_api.md)
+
 ## 7. Conclusiones
 A través de la resolución de este Trabajo Práctico, se lograron cumplir los objetivos generales planteados en las consignas:
 - **Diseño y construcción de una API REST completa:** Se implementaron los endpoints necesarios para la gestión integral de entidades (Usuarios, Pedidos, Categorías, Productos).

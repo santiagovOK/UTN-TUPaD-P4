@@ -1,6 +1,8 @@
-# Trabajo Práctico - Unidad 2 (Java -  )
+# Trabajo Práctico - Unidad 2 (Java - API Rest con Spring Boot )
 
-Cree un archivo Markdown para la resolución de cada una de las consignas (principalmente para guiarme yo y poder revisar los cambios unidad por unidad en el proyecto.). Pueden verlo aquí: [docs/resolucion_tp2.md](docs/resolucion_tp1.md)
+Cree un archivo Markdown para la resolución de cada una de las consignas (principalmente para guiarme yo y poder revisar los cambios unidad por unidad en el proyecto.). Pueden verlo aquí: [docs/resolucion_tp2.md](docs/resolucion_tp2.md)
+
+Las imágenes con el paso a paso de la ejecución de las pruebas de API en Postman y Swagger según las [consignas](docs/consignas.md), se puede ver en [docs/pruebas_api.md](docs/pruebas_api.md)
 
 ---
 
