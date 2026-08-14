@@ -5,6 +5,8 @@ import com.tpUnidad2.unidad2_APIRestSpringBoot.dtos.usuario.UsuarioDto;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.dtos.usuario.UsuarioEdit;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.entities.Usuario;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.repository.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,10 +39,12 @@ public class UsuarioServiceImp implements UsuarioService {
         return UsuarioDto.toDto(usuario);
     }
 
+    // TP2 - Se cambió el método findALL para que devuelva páginas (`Page<UsuarioDto>`) recibiendo un objeto `Pageable`. Si bien en este ejercicio hay un listado corto de usuarios, esta es una práctica correcta en caso de querer listar usuarios masivamente pero evitando el riesgo de cargar una gran cantidad de usuarios en BD grandes. Podría también valer para otras entidades.
+
     @Override
-    public List<UsuarioDto> findAll() {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        return usuarios.stream().map(UsuarioDto::toDto).toList();
+    public Page<UsuarioDto> findAll(Pageable pageable) {
+        Page<Usuario> usuarios = usuarioRepository.findAll(pageable);
+        return usuarios.map(UsuarioDto::toDto);
     }
 
     @Override

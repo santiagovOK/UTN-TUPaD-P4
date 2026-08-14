@@ -32,6 +32,8 @@ Todos incluyen métodos estándar (GET, POST, PUT, DELETE) y retornan estructura
 Además, se incorporó la anotación `@Valid` junto a los parámetros `@RequestBody` (en métodos POST y PUT) para ejecutar automáticamente las validaciones de entrada configuradas en los DTOs.
 En particular, para cumplir con las consignas, en `UsuarioController` se añadieron las sentencias `System.out.println` en los métodos de búsqueda (por ID y por el nuevo endpoint `/search?mail=...`) para garantizar que la información se imprima por consola al ser solicitada.
 
+Como buena práctica de desarrollo para evitar la sobrecarga de memoria, se agregó adicionalmente el endpoint `GET /api/usuarios` implementando paginación a través de la interfaz `Pageable` de Spring Data.
+
 ## 5. Manejo Global de Excepciones (AdviceController)
 Para lograr una API robusta y evitar que las excepciones internas de Java rompan la respuesta JSON, se creó `AdviceController` decorado con `@RestControllerAdvice`.
 Este controlador intercepta globalmente:

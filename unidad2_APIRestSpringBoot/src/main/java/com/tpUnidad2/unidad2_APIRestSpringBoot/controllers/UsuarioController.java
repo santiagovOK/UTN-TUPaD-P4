@@ -7,6 +7,9 @@ import com.tpUnidad2.unidad2_APIRestSpringBoot.dtos.usuario.UsuarioDto;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.dtos.usuario.UsuarioEdit;
 import com.tpUnidad2.unidad2_APIRestSpringBoot.service.UsuarioService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,13 @@ public class UsuarioController {
 
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
+    }
+
+    // TP2 - Inyección directa de `@PageableDefault(size = 10) Pageable pageable` para devolver solo una cantidad determinada de usuarios cuando se busca con `findAll`.  Podría también valer para otras entidades
+
+    @GetMapping
+    public ResponseEntity<Page<UsuarioDto>> findAll(@PageableDefault(size = 15) Pageable pageable) {
+        return ResponseEntity.ok(usuarioService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
