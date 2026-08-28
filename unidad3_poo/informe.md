@@ -72,34 +72,36 @@ Dado que varios ítems del checklist no estaban presentes, aquí se documentan l
 
 ### 3. Código propuesto para `demo_sintomas.py`
 
-Este script prueba que la trampa del `default mutable` y el `super().__init__` olvidado causan síntomas graves detectables en el código de partida.
+Este script prueba que al menos dos de los java-ismos puros de la **Tabla 1** (`getters/setters` y `type hints engañosos`) causan síntomas graves o permiten corromper el estado del programa.
 
 ```python
-from parte1_diagnostico import Poligono
+from assets.parte1_diagnostico import Poligono, Lado
 
-def demo_default_mutable():
-    print("--- Demostrando el default mutable ---")
-    p1 = Poligono("P1", "rojo")
-    p1.agregar_observacion("Primera observación de p1")
-    
-    p2 = Poligono("P2", "azul")
-    
-    print("Observaciones de P2 (debería estar vacío):", p2._observaciones)
-    print("¿Son la misma lista en memoria?:", p1._observaciones is p2._observaciones)
-    print()
+def demo_getter_setter_bypass():
+    print("--- Demostrando Javismo #1: Getters/Setters (Bypass de validación) ---")
+    # Al depender de un setter estilo Java para validar, es común que el __init__ 
+    # asigne directamente a la variable "privada" (_longitud), evadiendo la regla.
+    l_invalido = Lado(-10)
+    print(f"Lado instanciado con longitud: {l_invalido.getLongitud()}")
+    print("El lado se creó con longitud negativa. La validación fue evadida.\n")
 
-def demo_super_olvidado():
-    print("--- Demostrando super().__init__() olvidado ---")
+def demo_type_hint_enganioso():
+    print("--- Demostrando Javismo #7: Type hints engañosos ---")
     p = Poligono("P", "verde")
+    resultado = p.area()
+    
+    print(f"El método area() indica en su firma que devuelve un 'int'.")
+    print(f"Valor real devuelto: '{resultado}' (Tipo real: {type(resultado).__name__})")
+    print("Intentando sumar 10 al área confiando ciegamente en el type hint...")
+    
     try:
-        # Lanzará AttributeError porque Figura.__init__ no corrió
-        print(p._construida)
-    except AttributeError as e:
-        print("Atrapado AttributeError:", e)
+        total = resultado + 10
+    except TypeError as e:
+        print("Atrapado TypeError en runtime:", e)
 
 if __name__ == "__main__":
-    demo_default_mutable()
-    demo_super_olvidado()
+    demo_getter_setter_bypass()
+    demo_type_hint_enganioso()
 ```
 
 ### 4. Antes y Después del Getter/Setter con Lógica (Lado)
