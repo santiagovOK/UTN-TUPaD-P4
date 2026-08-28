@@ -2,7 +2,7 @@
 
 TP integrador de **Programación Orientada a Objetos: de Java a Python** (UTN-TUPaD — Programación IV).
 
-Guía de resolución por unidad: [docs/resolucion_tp3.md](docs/resolucion_tp3.md).
+Informe para este trabajo en: [informe.md](informe.md).
 
 ---
 
@@ -19,7 +19,7 @@ Repositorio donde podrán encontrar mis trabajos de Programación IV: https://gi
 
 Por práctica, este proyecto se inicializó siguiendo el flujo descrito en [docs/ecosistema_esencial.md](docs/ecosistema_esencial.md): **pyenv** (versión de Python), **pipx** (herramientas globales), **Poetry** (gestor del proyecto) y **PyPI** (fuente de paquetes). El criterio central es que ninguna herramienta toque el sistema ni compita con `apt`; cada una opera en un espacio aislado (usuario o proyecto).
 
-> Poetry se usa para reproducibilidad (entorno `.venv` propio del proyecto y `poetry.lock` bloqueado), no porque el código lo exija.
+> Poetry se usa para reproducibilidad (entorno `.venv` propio del proyecto y `poetry.lock` bloqueado), no porque el código lo exija. En este caso ni siquiera se pide instalar dependencias.
 
 ---
 
