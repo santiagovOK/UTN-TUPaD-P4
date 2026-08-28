@@ -146,3 +146,20 @@ print(l.longitud)    # Pasa por la property
 ```
 
 *Nota: Con este enfoque idiomático, incluso dentro del constructor `__init__` se debe usar `self.longitud = longitud` (sin guion bajo) para que la validación garantice que los valores corruptos no entren jamás al objeto.*
+
+---
+
+## Parte 2 — Relaciones estructurales
+
+### 5. Pregunta Obligatoria: Diferenciación de relaciones en código
+
+Si la sintaxis de guardar la referencia es idéntica en los tres casos (`self._atributo = valor`), la diferencia conceptual entre composición, agregación y asociación se ve más claramente en dónde se inyecta el objeto y cómo se gestiona su ciclo de vida:
+
+1. **Composición (Polígono — Lado)**: Existe una dependencia de vida fuerte; si el todo desaparece, las partes también.
+   * **Línea que lo delata**: La exigencia de recibir los lados en el constructor para nacer y, sobre todo, la **copia defensiva** al asignarlos (`self._lados = list(lados)`). Al hacer esa copia, el Polígono se apropia de la lista y garantiza que nadie desde afuera pueda alterar sus lados de forma subrepticia, sellando el ciclo de vida compartido. Además, en la instanciación típica (por ejemplo, `Triangulo("...", [Lado(3)])`), los lados se crean anónimamente y no existen fuera del polígono.
+
+2. **Agregación (Taller — Polígono)**: Las partes existen de manera independiente y sobreviven si el contenedor es destruido. 
+   * **Línea que lo delata**: El hecho de que la lista nace vacía en el `__init__` (`self._poligonos = []`) y los polígonos se inyectan en un momento posterior de la vida del objeto a través del método `def recibir(self, poligono: Poligono)`.
+
+3. **Asociación (Lado — Etiqueta)**: Es una relación de conocimiento estructural sin dependencia obligatoria. Un objeto conoce opcionalmente a otro.
+   * **Línea que lo delata**: La multiplicidad evidenciada en la firma del constructor `def __init__(self, longitud: float, etiqueta: Etiqueta | None = None)`. La posibilidad de ser explícitamente `None` delata que el lado no necesita a la etiqueta para existir.
