@@ -1,0 +1,21 @@
+[project]
+name = "unidad3-poo"
+version = "0.1.0"
+description = "TP Unidad 3 - POO: de Java a Python (UTN-TUPaD)"
+authors = [
+    {name = "Santiago Varela",email = "121682758+santiagovOK@users.noreply.github.com"}
+]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+]
+
+[project.scripts]
+main = "python:main.py"
+demo-sintomas = "python:demo-sintomas.py"
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
