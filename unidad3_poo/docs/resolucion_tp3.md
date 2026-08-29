@@ -327,3 +327,59 @@ class PoligonoRegular(Protocol):
 ```
 De esta manera, cualquier polígono que implemente `apotema()` es considerado un `PoligonoRegular` estructuralmente, liberando al dominio de herencias artificiales.
 
+---
+
+## Parte 4 — ABC vs. Protocol
+
+### 1. Implementación del contrato Exportable (Protocol)
+
+Para asegurar que tanto nuestras clases de dominio (`Poligono`) como las de una librería externa inmodificable (`PlanoCAD`) puedan ser tratadas bajo un mismo tipo sin forzarlas a heredar de una clase base común, utilizamos un **Contrato Estructural** mediante `typing.Protocol`. 
+
+Esto formaliza el *Duck Typing*: si un objeto tiene el método `exportar() -> str`, es `Exportable`, sin importar quién es su clase padre ni si conoce este contrato.
+
+### 2. Función exportar_todo
+
+Aprovechando el protocolo definido, escribimos una función que recibe una lista tipada con `Exportable`. Gracias al tipado estructural, esta función acepta sin problemas tanto instancias de nuestras clases (por ejemplo, `Triangulo`) como de clases externas (`PlanoCAD`), procesándolas exitosamente en *runtime* (polimorfismo / duck typing).
+
+**Código propuesto:**
+```python
+def exportar_todo(items: list[Exportable]) -> list[str]:
+    """Itera sobre cualquier objeto que cumpla el contrato estructural."""
+    return [item.exportar() for item in items]
+```
+
+### 3. Por qué una ABC no serviría para PlanoCAD
+
+Si `Exportable` hubiese sido definida como una clase abstracta (`abc.ABC`), el contrato exigiría **tipado nominal** (herencia explícita: `class PlanoCAD(Exportable):`). 
+
+Dado que `PlanoCAD` proviene de una librería de terceros (`libreria_externa.py`) cuyo código fuente no podemos ni debemos modificar, nos sería imposible forzar esa herencia. Pesea a que`PlanoCAD` ya implementa el método `exportar() -> str`, un analizador estático lo rechazaría por no ser "hijo" directo de la ABC. 
+
+Al usar `Protocol`, confiamos en el **tipado estructural**: si el objeto sabe exportar, nos sirve, sin importar quiénes sean sus ancestros.
+
+### 4. Actualización de Poligono para cumplir el contrato
+
+Para que `Poligono` cumpla el contrato, simplemente debe implementar el método `exportar() -> str`. Dado que `Exportable` es un `Protocol`, **no** modificamos la declaración de la clase para que herede de él (no hacemos `class Poligono(Figura, ABC, Exportable):`). Al añadir el método con la firma correcta, la clase ya cumple el contrato automáticamente.
+
+**Código propuesto (fragmento a agregar en Poligono):**
+```python
+    def exportar(self) -> str:
+        """Implementación requerida para satisfacer estructuralmente a Exportable. `exportar` es un método propio de Polígono"""
+        return f"Exportando polígono {self._nombre} ({self.nro_lados} lados)"
+```
+
+### 5. Pregunta que cierra la unidad
+
+**La elección entre ABC y Protocol la decide siempre el dominio.**
+
+El lenguaje (Python) simplemente nos ofrece ambas herramientas libres de las reglas del compilador, para que elijamos según lo que nos dice el modelo (el UML):
+
+* **Elegimos `ABC`** cuando el dominio afirma un **"es-un"** absoluto y hay **implementación compartida**. Usamos `ABC` para `Poligono` porque en el dominio real todo polígono *es una* figura geométrica con un núcleo de datos compartido (nombre, color).
+* **Elegimos `Protocol`** cuando el dominio afirma un **"puede-hacer"** o **"actúa-como"**. Usamos Protocol para `Exportable` porque define una capacidad transversal compartida por objetos que no son familiares directos (un `Poligono` propio y un `PlanoCAD` externo).
+
+En Java elegíamos forzados por lo que el compilador necesitaba para armar una lista. En Python, la sintaxis se relaja para que la elección dependa de la verdadera naturaleza (el diseño) del objeto.
+
+#### Respecto a la advertencia
+
+Las Partes 3 y 4 piden tomar la misma decisión desde dos caminos distintos, mientras que la unidad se cierra cuando ambas se justifican con el mismo criterio. Hasta aquí se demostró que en la Parte 3 borramos `PoligonoRegular` porque su herencia era una trampa sintáctica del compilador Java y conservamos `Figura -> Poligono` porque el dominio lo exigía. Aquí es lo mismo, **la decide el dominio.**
+
+
