@@ -226,3 +226,104 @@ Si la sintaxis de guardar la referencia es idéntica en los tres casos (`self._a
 
 3. **Asociación (Lado — Etiqueta)**: Es una relación de conocimiento estructural sin dependencia obligatoria. Un objeto conoce opcionalmente a otro.
    * **Línea que lo delata**: La multiplicidad evidenciada en la firma del constructor `def __init__(self, longitud: float, etiqueta: Etiqueta | None = None)`. La posibilidad de ser explícitamente `None` delata que el lado no necesita a la etiqueta para existir.
+
+
+## Parte 3 - Herencia justificada por dominio
+
+### 1. Clase Polígono (Clase Abstracta)
+
+Para justificar la herencia por dominio y lograr que una instancia incompleta explote al construir (falla temprana), la clase `Poligono` debe heredar de `ABC` y marcar `lados_esperados` como `@abstractmethod`. Esto formaliza el contrato de que todo polígono debe indicar su cantidad de lados esperados sin proveer una implementación por defecto.
+
+Esto también irá luego en `figuras.py`
+
+**Código propuesto:**
+```python
+from abc import ABC, abstractmethod
+
+class Poligono(Figura, ABC):
+    def __init__(self, nombre: str, color: str, lados: list[Lado] | None = None, observaciones: list[str] | None = None):
+        super().__init__(nombre, color)
+        self._lados = list(lados) if lados else []
+        self._observaciones = list(observaciones) if observaciones else []
+
+    @abstractmethod
+    def lados_esperados(self) -> int:
+        """Cada subclase concreta refina la cantidad exacta."""
+        pass
+    
+```
+
+### 2. Subclases concretas: Pentágono, Hexágono, Triángulo y Cuadrado
+
+Al transformar `Poligono` en un ABC, las subclases se ven forzadas por contrato a implementar `lados_esperados()`. Se agregan `Pentagono` y `Hexagono`, y se refactorizan `Triangulo` y `Cuadrado` para eliminar el java-ismo de sobrecarga falsa.
+
+La validación estructural se puede delegar al padre (`Poligono`) mediante una propiedad que aprovecha el polimorfismo llamando a `self.lados_esperados()`, asegurando que la lista de lados cumpla la restricción del dominio. Además, centralizamos un constructor alternativo `desde_medidas` con `@classmethod` en la clase base. Al usar `cls`, las subclases lo heredan de forma transparente y devuelven el tipo correcto (ej. un `Triangulo`), evitando duplicar la lógica de inicialización o hacer la falsa sobrecarga vista en Java.
+
+**Código propuesto:**
+```python
+class Poligono(Figura, ABC):
+    def __init__(self, nombre: str, color: str, lados: list[Lado] | None = None, observaciones: list[str] | None = None):
+        super().__init__(nombre, color)
+        self._lados = list(lados) if lados else []
+        self._observaciones = list(observaciones) if observaciones else []
+
+    @classmethod
+    def desde_medidas(cls, nombre: str, color: str, *medidas: float) -> "Poligono":
+        """Constructor alternativo heredado por las subclases (por ejemplo, Triangulo.desde_medidas(...))."""
+        return cls(nombre, color, [Lado(m) for m in medidas])
+
+    @abstractmethod
+    def lados_esperados(self) -> int:
+        """Cada subclase concreta refina la cantidad exacta."""
+        pass
+    
+    @property
+    def estructura_valida(self) -> bool:
+        """La validación real ocurre delegando al método abstracto."""
+        esperados = self.lados_esperados()
+        if esperados == -1:
+            return len(self._lados) >= 3
+        return len(self._lados) == esperados
+
+
+# Una vez definida la clase abstracta, lo único que varía es lados_esperados para cada figura.
+
+class Triangulo(Poligono):
+    def lados_esperados(self) -> int:
+        return 3
+
+class Cuadrado(Poligono):
+    def lados_esperados(self) -> int:
+        return 4
+
+class Pentagono(Poligono):
+    def lados_esperados(self) -> int:
+        return 5
+
+class Hexagono(Poligono):
+    def lados_esperados(self) -> int:
+        return 6
+
+```
+### 3 y 4. Decisión sobre PoligonoRegular - Jerarquías
+
+En la jerarquía de herencia, nos enfrentamos a dos casos distintos:
+
+1. **La jerarquía que se queda (`Figura` -> `Poligono`)**: Esta herencia se justifica plenamente por el dominio (un polígono "es-una" figura) y, además, comparten implementación real (estado como `_nombre` y `_color`).
+2. **La jerarquía que se rediseña (`PoligonoRegular`)**: Según el análisis, esta clase existía en el diseño original de Java con el único propósito de proveer un "tipo común" para poder agrupar objetos regulares (como Cuadrado o Triángulo) dentro de una misma lista fuertemente tipada (`List<PoligonoRegular>`). 
+
+Como hemos visto, en Python esta necesidad impuesta por el compilador no existe. Las listas son heterogéneas y el polimorfismo es libre (Duck Typing). Crear una superclase o clase abstracta vacía solo para agrupar elementos es un java-ismo. 
+
+**¿Con qué se reemplaza?**
+Si simplemente necesitamos recorrer una lista y ejecutar métodos, no la reemplazamos con nada (Duck Typing). Sin embargo, si necesitamos establecer un contrato explícito para herramientas de tipado estático (como `mypy`), la forma idiomática de reemplazar esta falsa herencia es utilizando un **Contrato Estructural (`typing.Protocol`)**.
+
+*Ejemplo conceptual de reemplazo:*
+```python
+from typing import Protocol
+
+class PoligonoRegular(Protocol):
+    """Reemplaza a la clase base. No requiere que nadie herede de ella."""
+    def apotema(self) -> float: ...
+```
+De esta manera, cualquier polígono que implemente `apotema()` es considerado un `PoligonoRegular` estructuralmente, liberando al dominio de herencias artificiales.
+

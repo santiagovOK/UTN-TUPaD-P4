@@ -163,3 +163,29 @@ Si la sintaxis de guardar la referencia es idéntica en los tres casos (`self._a
 
 3. **Asociación (Lado — Etiqueta)**: Es una relación de conocimiento estructural sin dependencia obligatoria. Un objeto conoce opcionalmente a otro.
    * **Línea que lo delata**: La multiplicidad evidenciada en la firma del constructor `def __init__(self, longitud: float, etiqueta: Etiqueta | None = None)`. La posibilidad de ser explícitamente `None` delata que el lado no necesita a la etiqueta para existir.
+
+---
+
+## Parte 3 - Herencia justificada por dominio
+
+### 3 y 4. Decisión obligatoria sobre PoligonoRegular - Jerarquías
+
+En la jerarquía de herencia, nos enfrentamos a dos casos distintos:
+
+1. **La jerarquía que se queda (`Figura` -> `Poligono`)**: Esta herencia se justifica plenamente por el dominio (un polígono "es-una" figura) y, además, comparten implementación real (estado como `_nombre` y `_color`).
+2. **La jerarquía que se rediseña (`PoligonoRegular`)**: Según el análisis, esta clase existía en el diseño original de Java con el único propósito de proveer un "tipo común" para poder agrupar objetos regulares (como Cuadrado o Triángulo) dentro de una misma lista fuertemente tipada (`List<PoligonoRegular>`). 
+
+Como hemos visto, en Python esta necesidad impuesta por el compilador no existe. Las listas son heterogéneas y el polimorfismo es libre (Duck Typing). Crear una superclase o clase abstracta vacía solo para agrupar elementos es un java-ismo. 
+
+**¿Con qué se reemplaza?**
+Si simplemente necesitamos recorrer una lista y ejecutar métodos, no la reemplazamos con nada (Duck Typing). Sin embargo, si necesitamos establecer un contrato explícito para herramientas de tipado estático (como `mypy`), la forma idiomática de reemplazar esta falsa herencia es utilizando un **Contrato Estructural (`typing.Protocol`)**.
+
+*Ejemplo conceptual de reemplazo:*
+```python
+from typing import Protocol
+
+class PoligonoRegular(Protocol):
+    """Reemplaza a la clase base. No requiere que nadie herede de ella."""
+    def apotema(self) -> float: ...
+```
+De esta manera, cualquier polígono que implemente `apotema()` es considerado un `PoligonoRegular` estructuralmente, liberando al dominio de herencias artificiales.
