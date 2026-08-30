@@ -2,7 +2,7 @@
 
 import math
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
 from assets.libreria_externa import PlanoCAD # Se importa libreria_externa, pero no se modifica
@@ -38,21 +38,23 @@ class Lado:
     def etiqueta(self) -> Etiqueta | None:
         return self._etiqueta
 
-
 @dataclass
 class Figura:
     nombre: str
     color: str
+    _construida: bool = field(init=False, default=True)
 
     def area(self) -> float:
         return 0.0
 
-
 class Poligono(Figura, ABC):
+    cantidad_creados: int = 0 # El catálogo mutable global fue reemplazado por un contador inmutable (Trampa "A" resuelta)
+
     def __init__(self, nombre: str, color: str, lados: list[Lado] | None = None, observaciones: list[str] | None = None):
         super().__init__(nombre, color)
         self._lados = list(lados) if lados else []
         self._observaciones = list(observaciones) if observaciones else []
+        Poligono.cantidad_creados += 1
 
     @classmethod
     def desde_medidas(cls, nombre: str, color: str, *medidas: float) -> "Poligono":
