@@ -23,7 +23,7 @@ La consigna de la Parte 1 indica que "los siete del checklist están todos acá,
 |---|---|---|---|---|
 | 1 | **Getters/Setters explícitos** | `Figura` y `Lado` | Declaración → Runtime | **Presente:** Obliga al cliente a usar métodos como `f.getNombre()`. En Python se exponen atributos y se usa `@property` si hay lógica. |
 | 2 | **Uso de doble guion bajo (`__`)** | N/A | Declaración → Runtime | **No existe en el código (pese a la consigna):** Todas las clases en el archivo usan correctamente el guion simple de convención (`_nombre`, `_color`). |
-| 3 | **Herencia para tipo común** | N/A | Herencia → Duck typing | **No existe en el código (pese a la consigna):** La herencia de Triángulo/Cuadrado está justificada por dominio. *Nota: El comentario teórico haría referencia a este javismo aplicando a la clase `PoligonoRegular`, pero en realidad esa clase no existe en este archivo.* |
+| 3 | **Herencia para tipo común** | N/A | Herencia → Duck typing | **No existe en el código (pese a la consigna):** La herencia de Triángulo/Cuadrado está justificada por dominio. *Nota: El comentario teórico haría referencia a este java-ismo aplicando a la clase `PoligonoRegular`, pero en realidad esa clase no existe en este archivo.* |
 | 4 | **Interfaz vacía para implements** | N/A | Herencia → Duck typing | **No existe en el código (pese a la consigna):** Ninguna clase del código de partida es una interfaz vacía (se ve recién en la Parte 4). |
 | 5 | **`__init__` que solo asigna campos** | `Figura` y `Lado` | Declaración → Runtime | **Presente:** Los constructores de `Figura` y `Lado` solo reciben variables y las guardan en atributos, patrón candidato a `@dataclass`. |
 | 6 | **Stream manual con for y acumulador**| `Poligono.perimetro` | Declaración → Runtime | **Presente:** Se traduce un pipeline a mano con un `for` y acumulador. En Python se resuelve con una comprehension o `sum()`. |
@@ -58,7 +58,7 @@ Dado que varios ítems del checklist no estaban presentes, aquí se documentan l
    - Al requerir inyectar lógica de validación estricta en la asignación, se descarta el uso del decorador `@dataclass` y se privilegia la resolución mediante `@property`. **(Resuelve Javismo #5)**
 
 3. **`Poligono`**:
-   - Eliminar el atributo de clase estático `catalogo = []`, ya que muta el estado global de forma indeseada **(Resuelve Trampa A)**.
+   - Eliminar el atributo de clase estático `catalogo = []` que mutaba el estado global (almacenando referencias a objetos). Reemplazarlo por un contador entero inmutable `cantidad_creados = 0` que se incremente en el constructor para preservar la métrica sin riesgos **(Resuelve Trampa A)**.
    - Reemplazar los defaults de `__init__` que causan memoria compartida: usar `lados=None, observaciones=None` **(Resuelve Trampa B)**. 
    - Añadir la invocación al padre: `super().__init__(nombre, color)` al inicio del init **(Resuelve Trampa C)**.
    - Aplicar copia defensiva en la asignación interna: `self._lados = list(lados) if lados else []` **(Resuelve Trampa D)**.

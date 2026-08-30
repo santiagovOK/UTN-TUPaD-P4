@@ -33,10 +33,13 @@ class Lado:
 
 
 class Poligono(Figura):
+    cantidad_creados: int = 0 # El catálogo mutable global fue reemplazado por un contador inmutable (Trampa "A" resuelta)
+
     def __init__(self, nombre: str, color: str, lados: list[Lado] | None = None, observaciones: list[str] | None = None):
         super().__init__(nombre, color)
         self._lados = list(lados) if lados else []
         self._observaciones = list(observaciones) if observaciones else []
+        Poligono.cantidad_creados += 1
 
     def lados_esperados(self) -> int:
         return 0
@@ -79,6 +82,6 @@ if __name__ == "__main__":
         print(f"Perímetro del triángulo: {t.perimetro()}")
         print(f"Perímetro del cuadrado: {c.perimetro()}")
         t.agregar_observacion("revisar el vértice A")
-        # El catálogo estático global fue eliminado (Trampa A resuelta)
-        print("Figuras en el catálogo: (Eliminado por ser estado global indeseado)")
+        # El catálogo mutable global fue reemplazado por un contador inmutable (Trampa "A" resuelta)
+        print(f"Figuras creadas en total: {Poligono.cantidad_creados}")
         print(f"Nombre (via atributo): {t.nombre}")
