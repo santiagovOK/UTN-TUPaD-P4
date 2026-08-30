@@ -19,7 +19,7 @@ Repositorio donde podrán encontrar mis trabajos de Programación IV: https://gi
 
 Por práctica, este proyecto se inicializó siguiendo el flujo descrito en [docs/ecosistema_esencial.md](docs/ecosistema_esencial.md): **pyenv** (versión de Python), **pipx** (herramientas globales), **Poetry** (gestor del proyecto) y **PyPI** (fuente de paquetes). El criterio central es que ninguna herramienta toque el sistema ni compita con `apt`; cada una opera en un espacio aislado (usuario o proyecto).
 
-> Poetry se usa para reproducibilidad (entorno `.venv` propio del proyecto y `poetry.lock` bloqueado), no porque el código lo exija. En este caso ni siquiera se pide instalar dependencias.
+> Poetry se usa para reproducibilidad (entorno `.venv` propio del proyecto y `poetry.lock` bloqueado), no porque el código lo exija. En este caso la única dependencia instalada fue `mypy` para comprobaciones estáticas.
 
 ---
 
@@ -59,22 +59,26 @@ unidad3_poo/
 
 ---
 
-## ▶Ejecución
+## Ejecución
 
 **Con Poetry** (dentro del `.venv` del proyecto):
 
 ```bash
-poetry run main
-poetry run demo-sintomas
+poetry run python main.py
+poetry run python demo_sintomas.py
+poetry run mypy figuras.py
 ```
 
-**Sin Poetry**: como el proyecto no tiene dependencias de terceros, corre con cualquier Python 3.13+ directamente, sin instalar nada:
+**Sin Poetry**: Si no usás Poetry, podés ejecutar los scripts directamente con cualquier Python 3.13+ (el código fuente no requiere dependencias para correr). Sin embargo, para ejecutar el análisis de tipos, primero debés instalar `mypy` manualmente usando pip:
 
 ```bash
+pip install mypy
+
 python main.py
 python demo_sintomas.py
+python -m mypy figuras.py
 ```
 
-> Poetry solo aporta el entorno virtual aislado y el lockfile. No es obligatorio para que el código funcione.
+> Poetry solo aporta el entorno virtual aislado, el lockfile y la resolución de dependencias de desarrollo (como `mypy`). No es obligatorio para que el programa funcione.
 
 
