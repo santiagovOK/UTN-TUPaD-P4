@@ -1,8 +1,6 @@
-"""fix_parte1_diagnostico.py — El dominio Figura / Polígono / Lado, funcionando (corregido).
+# Parte 5 - `fix_parte1_diagnostico.py` — El dominio Figura / Polígono / Lado, funcionando (corregido).
 
-Se resolvieron los 8 javismos y trampas
-correspondientes a la Parte 1.
-"""
+# Se resolvieron los 8 javismos y trampas correspondientes a la Parte 1.
 
 from dataclasses import dataclass, field
 

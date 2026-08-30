@@ -43,6 +43,10 @@ Dado que varios ítems del checklist no estaban presentes, aquí se documentan l
 | C | **Olvido de llamada a constructor base** | `Poligono.__init__` | Compilador → Acuerdo | El atributo `_construida` del padre jamás se inicializa, ya que Python no inyecta implícitamente `super().__init__()`. |
 | D | **Alias sin copia defensiva** (Exposición) | `Poligono.__init__` y `.getLados` | Compilador → Acuerdo | Modificar la lista externa devuelta por el getter altera el estado interno del objeto directamente. |
 
+### Tabla de equivalencias
+
+
+
 ---
 
 ### 2. Correcciones a realizar (Paso a paso)
@@ -208,3 +212,5 @@ En Java elegíamos forzados por lo que el compilador necesitaba para armar una l
 #### Respecto a la advertencia
 
 Las Partes 3 y 4 piden tomar la misma decisión desde dos caminos distintos, mientras que la unidad se cierra cuando ambas se justifican con el mismo criterio. Hasta aquí se demostró que en la Parte 3 borramos `PoligonoRegular` porque su herencia era una trampa sintáctica del compilador Java y conservamos `Figura -> Poligono` porque el dominio lo exigía. Aquí es lo mismo, **la decide el dominio.**
+
+## Cierre
