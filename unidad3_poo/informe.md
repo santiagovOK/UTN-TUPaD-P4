@@ -2,18 +2,7 @@
 
 ## Parte 1 — Diagnóstico de java-ismos
 
-### Preámbulo: El Checklist de los 7 Java-ismos
-
-A partir de la teoría (`docs/7_javismos.md`), el checklist oficial de desintoxicación se compone de los siguientes 7 puntos:
-1. ¿Escribí `get_x()` / `set_x()`?
-2. ¿Puse `__doble_guion` creyendo que es `private`?
-3. ¿Heredé de una clase base solo para tener un tipo común?
-4. ¿Definí una interfaz vacía para hacer `implements`?
-5. ¿Escribí `__init__` que solo asigna campos?
-6. ¿Traduje un stream con `for` + `append` + acumulador?
-7. ¿Confío en que los type hints me protegen?
-
-La consigna de la Parte 1 indica que "los siete del checklist están todos acá, más un octavo". Sin embargo, al auditar el archivo `assets/parte1_diagnostico.py`, se evidencia que esto no es estrictamente cierto. A continuación se presentan dos tablas: la **Tabla 1** evalúa los 8 ítems basándose en la checklist teórica (aclarando con honestidad cuáles no existen realmente en el código de partida) y la **Tabla 2** agrupa los errores reales encontrados que quedaron fuera de esa checklist.
+La consigna de la Parte 1 indica que "los siete del checklist están todos acá, más un octavo". Sin embargo, al auditar el archivo `assets/parte1_diagnostico.py`, se evidencia que esto no es estrictamente cierto. A continuación se presentan dos tablas: la **Tabla 1** evalúa los 8 ítems basándose en la checklist teórica y la **Tabla 2** agrupa los errores encontrados que quedaron fuera de esa checklist.
 
 ---
 
@@ -32,9 +21,9 @@ La consigna de la Parte 1 indica que "los siete del checklist están todos acá,
 
 ---
 
-### Tabla 2: Errores reales fuera del checklist (Trampas del manual)
+### Tabla 2: Errores fuera del checklist (Trampas del manual)
 
-Dado que varios ítems del checklist no estaban presentes, aquí se documentan los otros errores explícitamente marcados por el profesor en el código, los cuales pertenecen a capítulos teóricos distintos ("Trampas que Java no te enseñó a ver").
+Dado que varios ítems del checklist no estaban presentes, aquí se documentan los otros errores explícitamente marcados en el código, los cuales pertenecen a capítulos teóricos distintos ("Trampas que Java no te enseñó a ver").
 
 | # | Error detectado (Trampa / Traducción) | Dónde (clase.método) | Inversión que lo explica | Síntoma observable |
 |---|---|---|---|---|
@@ -44,9 +33,14 @@ Dado que varios ítems del checklist no estaban presentes, aquí se documentan l
 | D | **Alias sin copia defensiva** (Exposición) | `Poligono.__init__` y `.getLados` | Compilador → Acuerdo | Modificar la lista externa devuelta por el getter altera el estado interno del objeto directamente. |
 
 ### Tabla de equivalencias
-
-
-
+| Elemento en Java | Cómo quedó en tu código Python | ¿Traducción directa o rediseño? | Por qué |
+| --- | --- | --- | --- |
+| Visibilidad `private` y `getters`/`setters` preventivos | Guion bajo `_atributo` por convención y `@property` solo si hay lógica | Rediseño | En Python no hay modificadores de acceso estrictos, el encapsulamiento es por convención. Solo se justifica ocultar el acceso (vía `@property`) si hay lógica de validación o cálculo. |
+| Interfaz vacía (`implements`) para agrupar tipos | Contrato estructural (`typing.Protocol`) | Rediseño | El compilador de Java obliga a heredar para tener polimorfismo. En Python rige el Duck Typing; con `Protocol` no hace falta heredar, basta con cumplir la firma. |
+| Atributos estáticos mutables (ej. `List` global) | Atributos de clase inmutables (ej. un `int` como contador) | Rediseño | Java protege referencias estáticas de otra forma. Un atributo de clase mutable en Python corrompe el estado de todas las instancias en silencio (Trampa A). |
+| Colecciones fuertemente tipadas (`List<Poligono>`) | Anotación de tipos `list[Poligono]` verificada por Mypy | Traducción directa | El comportamiento en runtime sigue siendo dinámico. Las comprobaciones de tipos se delegan a una herramienta de análisis estático (Mypy) fuera de la ejecución (Javismo #7). |
+| Clases DTO inmutables con variables `final` | `@dataclass(frozen=True)` (Ej. `Etiqueta`) | Rediseño | Python provee decoradores nativos que generan automáticamente el boilerplate (como `__init__` o representaciones) y aseguran la inmutabilidad. |
+| Asignación directa de colecciones (`this.l = l`) | Copia defensiva (`self._l = list(l)`) | Rediseño | Al no existir protección absoluta de memoria en objetos referenciados, se debe hacer una copia activa para garantizar el encapsulamiento y un ciclo de vida estricto (Composición). |
 ---
 
 ### 2. Correcciones a realizar (Paso a paso)
@@ -76,37 +70,7 @@ Dado que varios ítems del checklist no estaban presentes, aquí se documentan l
 
 ### 3. Código propuesto para `demo_sintomas.py`
 
-Este script prueba que al menos dos de los java-ismos puros de la **Tabla 1** (`getters/setters` y `type hints engañosos`) causan síntomas graves o permiten corromper el estado del programa.
-
-```python
-from assets.parte1_diagnostico import Poligono, Lado
-
-def demo_getter_setter_bypass():
-    print("--- Demostrando Javismo #1: Getters/Setters (Bypass de validación) ---")
-    # Al depender de un setter estilo Java para validar, es común que el __init__ 
-    # asigne directamente a la variable "privada" (_longitud), evadiendo la regla.
-    l_invalido = Lado(-10)
-    print(f"Lado instanciado con longitud: {l_invalido.getLongitud()}")
-    print("El lado se creó con longitud negativa. La validación fue evadida.\n")
-
-def demo_type_hint_enganioso():
-    print("--- Demostrando Javismo #7: Type hints engañosos ---")
-    p = Poligono("P", "verde")
-    resultado = p.area()
-    
-    print(f"El método area() indica en su firma que devuelve un 'int'.")
-    print(f"Valor real devuelto: '{resultado}' (Tipo real: {type(resultado).__name__})")
-    print("Intentando sumar 10 al área confiando ciegamente en el type hint...")
-    
-    try:
-        total = resultado + 10
-    except TypeError as e:
-        print("Atrapado TypeError en runtime:", e)
-
-if __name__ == "__main__":
-    demo_getter_setter_bypass()
-    demo_type_hint_enganioso()
-```
+Este script prueba que al menos dos de los java-ismos puros de la **Tabla 1** (`getters/setters` y `type hints engañosos`) causan síntomas graves, permitiendo corromper el estado del programa. Ver código en [demo_sintomas.py](demo_sintomas.py)
 
 ### 4. Antes y Después del Getter/Setter con Lógica (Lado)
 
@@ -155,19 +119,12 @@ print(l.longitud)    # Pasa por la property
 
 ## Parte 2 — Relaciones estructurales
 
-### 5. Pregunta Obligatoria: Diferenciación de relaciones en código
+### Pregunta Obligatoria: Diferenciación de relaciones en código
 
-Si la sintaxis de guardar la referencia es idéntica en los tres casos (`self._atributo = valor`), la diferencia conceptual entre composición, agregación y asociación se ve más claramente en dónde se inyecta el objeto y cómo se gestiona su ciclo de vida:
-
-1. **Composición (Polígono — Lado)**: Existe una dependencia de vida fuerte; si el todo desaparece, las partes también.
-   * **Línea que lo delata**: La exigencia de recibir los lados en el constructor para nacer y, sobre todo, la **copia defensiva** al asignarlos (`self._lados = list(lados)`). Al hacer esa copia, el Polígono se apropia de la lista y garantiza que nadie desde afuera pueda alterar sus lados de forma subrepticia, sellando el ciclo de vida compartido. Además, en la instanciación típica (por ejemplo, `Triangulo("...", [Lado(3)])`), los lados se crean anónimamente y no existen fuera del polígono.
-
-2. **Agregación (Taller — Polígono)**: Las partes existen de manera independiente y sobreviven si el contenedor es destruido. 
-   * **Línea que lo delata**: El hecho de que la lista nace vacía en el `__init__` (`self._poligonos = []`) y los polígonos se inyectan en un momento posterior de la vida del objeto a través del método `def recibir(self, poligono: Poligono)`.
-
-3. **Asociación (Lado — Etiqueta)**: Es una relación de conocimiento estructural sin dependencia obligatoria. Un objeto conoce opcionalmente a otro.
-   * **Línea que lo delata**: La multiplicidad evidenciada en la firma del constructor `def __init__(self, longitud: float, etiqueta: Etiqueta | None = None)`. La posibilidad de ser explícitamente `None` delata que el lado no necesita a la etiqueta para existir.
-
+Si bien la sintaxis de asignación es idéntica (`self._atributo = valor`), la diferencia radica en el ciclo de vida y cómo se inyectan las referencias:
+1. **Composición (Polígono—Lado)**: Delatada por la exigencia de inicialización y la **copia defensiva** en el constructor (`self._lados = list(lados)`), que apropia la lista y sella un ciclo de vida compartido.
+2. **Agregación (Taller—Polígono)**: Delatada por una colección que nace vacía (`self._poligonos = []`) y métodos posteriores (`def recibir()`) que inyectan los polígonos ya creados externamente.
+3. **Asociación (Lado—Etiqueta)**: Delatada por la opcionalidad explícita en la firma del constructor (`etiqueta: Etiqueta | None = None`), evidenciando independencia total.
 ---
 
 ## Parte 3 - Herencia justificada por dominio
@@ -214,3 +171,16 @@ En Java elegíamos forzados por lo que el compilador necesitaba para armar una l
 Las Partes 3 y 4 piden tomar la misma decisión desde dos caminos distintos, mientras que la unidad se cierra cuando ambas se justifican con el mismo criterio. Hasta aquí se demostró que en la Parte 3 borramos `PoligonoRegular` porque su herencia era una trampa sintáctica del compilador Java y conservamos `Figura -> Poligono` porque el dominio lo exigía. Aquí es lo mismo, **la decide el dominio.**
 
 ## Cierre
+
+Al transicionar de Java a Python, **el diseño conceptual del dominio (las relaciones de la vida real) se mantuvo intacto**, pero **la manera de implementarlo cambió** al liberarnos de las exigencias del compilador. 
+
+**Lo que se mantuvo idéntico:**
+La diferencia conceptual entre composición, agregación y asociación. Si bien en ambos lenguajes estas relaciones se traducen a la misma sintaxis básica de asignación (`this.x = x` o `self.x = x`), la decisión sobre quién administra el ciclo de vida de los objetos (creación y destrucción) y quién es el dueño exclusivo de las referencias sigue respondiendo puramente al modelo de dominio (UML), no al lenguaje.
+
+**Lo que cambió (Rediseño):**
+Todo lo que hacemos en Java es obligado por el compilador o por el tipado fuerte:
+1. **La protección de datos:** Pasamos de la coerción sintáctica (`private`) al acuerdo entre programadores (`_`) y el uso de `@property` solo bajo demanda funcional (por ejemplo, al hacer una validación).
+2. **Las jerarquías artificiales:** Eliminamos clases abstractas e interfaces vacías que solo servían para agrupar objetos bajo un mismo tipo (como `PoligonoRegular`), adoptando la filosofía de *duck typing* y formalizando con contratos estructurales (`Protocol`).
+3. **El estado de las referencias:** Constatamos que las variables de clase y los valores por defecto mutables en constructores requieren rediseños activos (uso de inmutables, `None` defaults y copias defensivas) para evitar compartir memoria de forma no intencionada (Trampas A y B).
+
+En resumen, Python requiere programar para el modelo de dominio y no para satisfacer al compilador. El verdadero salto exige **rediseñar en relación a la dinámica de runtime y la responsabilidad del desarrollador.**
