@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Protocol
 
-from assets.libreria_externa import PlanoCAD # Se importa libreria_externa, pero no se modifica
+from libreria_externa import PlanoCAD # Se importa libreria_externa, pero no se modifica
 
 
 class Exportable(Protocol):
