@@ -42,31 +42,34 @@ poetry install
 
 **Estructura del proyecto:**
 
-```
+```text
 unidad3_poo/
-├── README.md              # este archivo
-├── figuras.py             # dominio resuelto (Partes 1-4)
-├── parte1_diagnostico.py  # punto de partida (sin modificar)
-├── demo_sintomas.py       # 2 síntomas de la Parte 1
-├── libreria_externa.py    # PlanoCAD (librería externa)
-├── main.py                # demo ejecutable
-├── informe.md
-├── uml/modelo_final.md
+├── README.md                 # este archivo
+├── figuras.py                # dominio resuelto (Partes 1-4)
+├── fix_parte1_diagnostico.py # entregable ya corregido (prefijo 'fix_' para diferenciarlo del original)
+├── demo_sintomas.py          # 2 síntomas de la Parte 1
+├── libreria_externa.py       # PlanoCAD (librería externa - original sin modificar)
+├── main.py                   # demo ejecutable
+├── informe.md                # respuestas teóricas y decisiones
 ├── pyproject.toml
-├── poetry.lock            # ← TRACKED, garantiza reproducibilidad
-└── .venv/                 # ← UNTRACKED
+├── poetry.lock               # ← TRACKED, garantiza reproducibilidad
+├── uml/
+│   └── modelo_final.md       # diagrama de clases final
+├── assets/
+│   ├── parte1_diagnostico.py # código de partida original
+│   └── libreria_externa.py   # original sin modificar
+├── docs/                     # consignas y apuntes teóricos
 ```
 
 ---
 
 ## Ejecución
 
-**Con Poetry** (dentro del `.venv` del proyecto):
+**Con Poetry**:
 
 ```bash
 poetry run python main.py
 poetry run python demo_sintomas.py
-poetry run mypy figuras.py
 ```
 
 **Sin Poetry**: Si no usás Poetry, podés ejecutar los scripts directamente con cualquier Python 3.13+ (el código fuente no requiere dependencias para correr). Sin embargo, para ejecutar el análisis de tipos, primero debés instalar `mypy` manualmente usando pip:
@@ -81,4 +84,20 @@ python -m mypy figuras.py
 
 > Poetry solo aporta el entorno virtual aislado, el lockfile y la resolución de dependencias de desarrollo (como `mypy`). No es obligatorio para que el programa funcione.
 
+
+---
+
+## Análisis estático con Mypy
+
+Dado que Python delega la validación de tipos al análisis estático fuera del tiempo de ejecución (resolviendo el Javismo #7), es necesario el uso de `mypy` para comprobar la solidez del diseño.
+
+De acuerdo a las consignas, el análisis debe ejecutarse sobre:
+
+* **`figuras.py`**: El núcleo del dominio. Mypy valida que las implementaciones de herencia (ABC) y duck typing (`Protocol` en `Exportable`) concuerden perfectamente con los tipos declarados, y que las listas heterogéneas se manejen sin errores.
+* **`fix_parte1_diagnostico.py`**: El archivo original corregido, para validar que los type hints "engañosos" originales de la Parte 1 fueron exitosamente neutralizados.
+
+Comando unificado para validar el proyecto:
+```bash
+poetry run mypy figuras.py fix_parte1_diagnostico.py
+```
 

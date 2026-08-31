@@ -25,3 +25,5 @@ Thumbs.db
 # ===== NO ignorar a propósito =====
 # pyproject.toml y poetry.lock se mantienen TRACKED: el lockfile
 # garantiza reproducibilidad (poetry lock), que es uno de los objetivos del proyecto.
+
+assets/__pycache__/

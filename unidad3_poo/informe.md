@@ -1,5 +1,7 @@
 # Informe — Trabajo Práctico Integrador (Unidad 3)
 
+**ACLARACIÓN:** Se intentó mantener la extensión del `.md` lo más corta posible, aunque priorizando la resolución de las consignas. Pasa ligeramente "1 carilla" si lo pasaramos a otro formato, pero se considera que acordarlo más sería no resolver correctamente las consignas.
+
 ## Parte 1 — Diagnóstico de java-ismos
 
 La consigna de la Parte 1 indica que "los siete del checklist están todos acá, más un octavo". Sin embargo, al auditar el archivo `assets/parte1_diagnostico.py`, se evidencia que esto no es estrictamente cierto. A continuación se presentan dos tablas: la **Tabla 1** evalúa los 8 ítems basándose en la checklist teórica y la **Tabla 2** agrupa los errores encontrados que quedaron fuera de esa checklist.
