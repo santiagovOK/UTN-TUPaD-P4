@@ -4,6 +4,14 @@ Estructura de pasos a seguir para la implementación del módulo `proveedor`, ba
 
 ---
 
+### Nota metodologica sobre el orden de implementacion: Enfoque Bottom-Up vs. Top-Down
+Al analizar las consignas originales (Paso 3, incisos a, b y c), se identifica una propuesta de diseño Top-Down (de afuera hacia adentro): primero definir los modelos (schemas), luego exponer los endpoints HTTP (routers) y finalmente desarrollar la persistencia y logica de negocio (services). Se comprende que dicho orden pedagógico busca fijar primero el contrato publico visible en Swagger UI.
+
+Tras investigar conceptualmente las implicancias de ambas metodologias en arquitecturas modulares, se optó conscientemente priorizar un enfoque Bottom-Up (de adentro hacia afuera: schemas -> services -> routers) por las siguientes razones tecnicas:
+1. Direccion de dependencias: `services.py` depende exclusivamente de `schemas.py`. En cambio, `routers.py` depende de ambos (`schemas` y `services`). Desarrollar primero los servicios evita escribir controladores que invoquen funciones inexistentes.
+2. Verificabilidad unitaria: Permite testear y asegurar las reglas de negocio (RN-01 a RN-05) de forma aislada mediante scripts en Python antes de involucrar el framework de transporte HTTP.
+3. Construccion incremental segura: Al llegar a la capa de `routers.py`, cada endpoint se enlaza de inmediato con una funcion operativa y verificada, reduciendo la superficie de errores.
+
 ## Paso 1: Estructura base del módulo `proveedor`
 - **Estado**: Completado
 - **Objetivo**: Crear el paquete y los módulos base respetando la arquitectura modular del proyecto (`categoria/`, `producto/`).
@@ -39,22 +47,35 @@ Estructura de pasos a seguir para la implementación del módulo `proveedor`, ba
   - **HU-04 (Actualizar un proveedor)**: Validacion del cuerpo de actualizacion con `ProveedorUpdate` y respuesta con `ProveedorRead`.
   - **HU-05 (Desactivar un proveedor)**: Esquema de respuesta `ProveedorRead` tras la desactivacion.
 - **Fundamentacion teorica (Guia Maestra Unidad 4)**:
-  - **Principio Fail Fast**: Los datos malformados se interceptan y rechazan en la frontera de la aplicacion generando respuestas HTTP 422 estandarizadas.
+  - **Principio "Fail Fast"**: Los datos malformados se interceptan y rechazan en la frontera de la aplicacion generando respuestas HTTP 422 estandarizadas.
   - **Segregacion de modelos**: Se separa el esquema de entrada del de salida para evitar fugas de datos y asegurar contratos explicitos.
 - **Verificacion**: Se ejecuto suite de aserciones en Python validando aceptacion de datos correctos y rechazo con `ValidationError` ante violaciones de longitud minima.
 ---
 
-## Paso 3: Implementación de la Capa de Lógica de Negocio y Almacenamiento en Memoria (`services.py`)
+## Paso 3: Implementacion de la Capa de Logica de Negocio y Almacenamiento en Memoria (`services.py`)
+- **Estado**: En progreso
 - **Objetivo**: Implementar la lista en memoria `proveedores_db` y las funciones de negocio que aplican las validaciones y lanzan `HTTPException`.
 
-### 3.1 Función `crear_proveedor`
+### 3.1 Funcion `crear_proveedor`
+- **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-01 (Registrar un proveedor)**
-- **Reglas de negocio**: Generación de ID incremental y validación de unicidad de código (RN-02 -> 409 Conflict).
-
-### 3.2 Función `listar_proveedores`
+- **Reglas de negocio y comportamiento**:
+  - Generacion automatica de identificador autoincremental mediante `id_counter`.
+  - **RN-02**: Validacion de unicidad de codigo recorriendo la lista en memoria. Si el codigo ya existe, interrumpe el flujo lanzando `HTTPException(status_code=status.HTTP_409_CONFLICT, detail="...")`.
+  - Desempaquetado del modelo de entrada (`data.model_dump()`) combinandolo con el `id` generado para retornar una instancia valida de `ProveedorRead`.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Manejo de excepciones de negocio con `raise HTTPException` (Seccion 8) usando constantes semanticas de `fastapi.status` (Seccion 7), garantizando una respuesta JSON estandarizada con `detail`.
+- **Verificacion**: Se ejecuto script de pruebas validando creacion exitosa con incremento de ID y captura de error 409 ante intento de duplicacion de codigo.
+### 3.2 Funcion `listar_proveedores`
+- **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-02 (Listar proveedores)**
-- **Reglas de negocio**: Paginación mediante slicing (`skip`, `limit`) y filtrado opcional por estado (`activo`).
-
+- **Reglas de negocio y comportamiento**:
+  - Filtrado opcional: Si `activo` es provisto (`True` o `False`), se filtran los elementos correspondientes; si es `None`, se consideran todos los registros.
+  - Paginacion por slicing: Se aplican los parametros de desplazamiento (`skip`) y cantidad maxima (`limit`) mediante la expresion `resultado[skip : skip + limit]`.
+  - Se provee el alias `obtener_todos = listar_proveedores` para estandarizacion interna.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Filtrado y paginacion con slicing (Seccion 3): Patron estandar en APIs REST para gestionar colecciones de datos en memoria sin sobrecargar la respuesta.
+- **Verificacion**: Se ejecuto script de pruebas validando retorno total, paginacion con combinaciones de skip y limit, y filtrado selectivo por estado activo e inactivo.
 ### 3.3 Función `obtener_proveedor_por_id`
 - **HU que ataca/resuelve**: **HU-03 (Consultar un proveedor)**
 - **Reglas de negocio**: Búsqueda por ID y validación de existencia (RN-04 -> 404 Not Found).
