@@ -61,7 +61,7 @@ Tras investigar conceptualmente las implicancias de ambas metodologias en arquit
 - **HU que ataca/resuelve**: **HU-01 (Registrar un proveedor)**
 - **Reglas de negocio y comportamiento**:
   - Generacion automatica de identificador autoincremental mediante `id_counter`.
-  - **RN-02**: Validacion de unicidad de codigo recorriendo la lista en memoria. Si el codigo ya existe, interrumpe el flujo lanzando `HTTPException(status_code=status.HTTP_409_CONFLICT, detail="...")`.
+  - **RN-02**: Validacion de unicidad de codigo recorriendo la lista en memoria. Si el codigo ya existe, interrumpe el flujo lanzando `HTTPException(status_code=status.HTTP_409_CONFLICT, detail="mensaje explicativo")`.
   - Desempaquetado del modelo de entrada (`data.model_dump()`) combinandolo con el `id` generado para retornar una instancia valida de `ProveedorRead`.
 - **Fundamentacion teorica (Guia Maestra Unidad 4)**:
   - Manejo de excepciones de negocio con `raise HTTPException` (Seccion 8) usando constantes semanticas de `fastapi.status` (Seccion 7), garantizando una respuesta JSON estandarizada con `detail`.
@@ -84,14 +84,14 @@ Tras investigar conceptualmente las implicancias de ambas metodologias en arquit
   - **RN-04**: Si ningun registro coincide con el `id` solicitado, se interrumpe inmediatamente el flujo lanzando `HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Proveedor con id {id} no encontrado")`.
   - Se declara el alias `obtener_por_id = obtener_proveedor_por_id`.
 - **Fundamentacion teorica (Guia Maestra Unidad 4)**:
-  - Manejo de excepciones 404 (Seccion 8): Uso de `raise HTTPException` para comunicar al cliente que el recurso solicitado no existe, produciendo una respuesta JSON con estructura `{"detail": "..."}`.
+  - Manejo de excepciones 404 (Seccion 8): Uso de `raise HTTPException` para comunicar al cliente que el recurso solicitado no existe, produciendo una respuesta JSON con estructura de detalle explicativo.
 - **Verificacion**: Se ejecuto script de pruebas validando retorno de datos para IDs existentes y generacion de error 404 ante identificadores inexistentes.
 ### 3.4 Funcion `actualizar_proveedor`
 - **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-04 (Actualizar un proveedor)**
 - **Reglas de negocio y comportamiento**:
   - **RN-04**: Verifica la existencia del proveedor delegando en `obtener_proveedor_por_id(id)`. Si el ID no existe, se dispara automaticamente la excepcion HTTP 404 Not Found.
-  - **RN-02**: En caso de enviarse un nuevo `codigo` diferente al actual, valida que no pertenezca a ningun otro proveedor registrado (`p.id != id`). Si hay colision, interrumpe el flujo con `HTTPException(status_code=status.HTTP_409_CONFLICT, detail="...")`.
+  - **RN-02**: En caso de enviarse un nuevo `codigo` diferente al actual, valida que no pertenezca a ningun otro proveedor registrado (`p.id != id`). Si hay colision, interrumpe el flujo con `HTTPException(status_code=status.HTTP_409_CONFLICT, detail="mensaje explicativo")`.
   - Fusiona los datos existentes con los campos explícitamente enviados usando `data.model_dump(exclude_unset=True)`.
   - Reemplaza la instancia en la lista en memoria y retorna el `ProveedorRead` actualizado.
   - Se declara el alias `actualizar_total = actualizar_proveedor`.
@@ -113,29 +113,86 @@ Tras investigar conceptualmente las implicancias de ambas metodologias en arquit
 - **Verificacion**: Se ejecuto script de pruebas validando desactivacion correcta, rechazo 404 ante ID inexistente y rechazo 409 Conflict ante intento de desactivar un proveedor inactivo.
 ---
 
-## Paso 4: Implementación de Controladores y Endpoints (`routers.py`)
+## Paso 4: Implementacion de Controladores y Endpoints (`routers.py`)
+- **Estado**: Completado
 - **Objetivo**: Configurar el enrutador con `prefix="/proveedores"` y definir los endpoints REST con códigos de estado semánticos (`status_code`).
+- **Estandar de tipado con `typing.Annotated` (Guia Maestra Unidad 4, Seccion 5)**: Se adopto el patron moderno `Annotated[Tipo, ReglaDeValidacion()] = ValorPorDefecto` para la declaracion de Path y Query Parameters. Esta practica desacopla el tipo base (`int`, `bool`) de los metadatos de transporte y validacion (`Path(gt=0)`, `Query(ge=0, le=50)`), eliminando la necesidad de recurrir al objeto `Ellipsis` como marcador de obligatoriedad y garantizando compatibilidad total con herramientas de analisis estatico.
 
 ### 4.1 Endpoint `POST /proveedores/`
+- **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-01 (Registrar un proveedor)**
-- **Detalle**: Recibe `ProveedorCreate`, responde `201 Created` con `ProveedorRead`, valida cuerpo (422, RN-01 y RN-03) y conflicto de código (409, RN-02).
-
+- **Detalle e implementacion**:
+  - Decorador `@router.post("/", response_model=schemas.ProveedorRead, status_code=status.HTTP_201_CREATED)`.
+  - Recibe el cuerpo de la peticion validado por Pydantic mediante `proveedor: schemas.ProveedorCreate`.
+  - Conecta directamente con la capa de servicios invocando `services.crear_proveedor(proveedor)`.
+  - Rechaza cuerpos con datos incompletos o invalidos con HTTP 422 Unprocessable Entity (**RN-01, RN-03**).
+  - Si el servicio detecta colision de codigo, responde con HTTP 409 Conflict (**RN-02**).
+  - Ante exito, responde HTTP 201 Created serializando los datos bajo el contrato `ProveedorRead` (incluyendo su `id`).
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Metodos HTTP con Body y Pydantic (Seccion 4): Deserializacion automatica del payload JSON.
+  - Response Model (Seccion 6): Filtro activo de serializacion que garantiza la estructura de salida.
+  - Codigos de estado semanticos (Seccion 7): Declaracion explicita de `status.HTTP_201_CREATED` para creacion de recursos.
+- **Verificacion**: Se valido la respuesta HTTP 201 Created y estructura del schema, la captura de codigo repetido con 409 Conflict y el rechazo 422 ante violaciones de longitud minima.
+ 
 ### 4.2 Endpoint `GET /proveedores/`
+- **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-02 (Listar proveedores)**
-- **Detalle**: Recibe parámetros de consulta con validación numérica y opcionales (`skip: ge=0`, `limit: ge=1, le=50`, `activo: bool | None`), responde `200 OK` con `list[ProveedorRead]`.
+- **Detalle e implementacion**:
+  - Decorador `@router.get("/", response_model=List[schemas.ProveedorRead], status_code=status.HTTP_200_OK)`.
+  - Declara parametros de consulta fuertemente tipados utilizando `Annotated`: `skip: Annotated[int, Query(ge=0)] = 0`, `limit: Annotated[int, Query(ge=1, le=50)] = 10` y `activo: Annotated[Optional[bool], Query()] = None`.
+  - Valida restricciones numericas en la entrada: cualquier valor de `skip < 0` o `limit` fuera del rango [1, 50] es rechazado automaticamente con HTTP 422 Unprocessable Entity.
+  - Conecta con la capa de servicios delegando la ejecucion en `services.listar_proveedores(skip, limit, activo)`.
+  - Responde HTTP 200 OK serializando la coleccion bajo el modelo `List[ProveedorRead]`.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Parametros de consulta (Seccion 3): Manejo estandar de filtros y paginacion.
+  - Validaciones declarativas y metadatos (Seccion 5): Aplicacion de operadores relacionales `ge` y `le` en `Query` para blindar la entrada.
+  - Respuestas que retornan listas de modelos (Seccion 6): Tipado estricto con `response_model=List[ProveedorRead]`.
+- **Verificacion**: Se valido la respuesta HTTP 200 OK general, la paginacion mediante skip/limit, el filtrado selectivo por estado activo e inactivo, y el rechazo 422 ante limit=0, limit=51 y skip=-1.
 
 ### 4.3 Endpoint `GET /proveedores/{id}`
+- **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-03 (Consultar un proveedor)**
-- **Detalle**: Recibe path parameter `id: int`, responde `200 OK` con `ProveedorRead`, maneja error de recurso inexistente (404 Not Found, RN-04).
+- **Detalle e implementacion**:
+  - Decorador `@router.get("/{id}", response_model=schemas.ProveedorRead, status_code=status.HTTP_200_OK)`.
+  - Declara el parametro de ruta validado `id: Annotated[int, Path(gt=0, description="Identificador unico del proveedor")]`.
+  - Si el cliente envia un valor no entero o un numero menor o igual a cero (`id <= 0`), FastAPI responde de inmediato con HTTP 422 Unprocessable Entity.
+  - Invoca `services.obtener_proveedor_por_id(id)`. Si el ID no existe en memoria, el servicio lanza HTTP 404 Not Found (**RN-04**).
+  - Ante coincidencia, responde HTTP 200 OK serializando los datos bajo `ProveedorRead`.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Parametros de ruta (Seccion 2): Extraccion automatica del segmento URL, coercion de tipos a entero nativo y validacion de tipos.
+  - Validacion numerica en Path (Seccion 5): Restriccion de dominio con `gt=0`.
+  - Manejo de recursos inexistentes (Seccion 8): Retorno consistente de 404 Not Found ante entidades que no existen en el catalogo.
+- **Verificacion**: Se valido la respuesta HTTP 200 OK para ID valido, el error 404 Not Found ante ID inexistente, y el rechazo 422 ante identificadores no numericos o menores o iguales a cero.
 
 ### 4.4 Endpoint `PUT /proveedores/{id}`
+- **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-04 (Actualizar un proveedor)**
-- **Detalle**: Recibe `id: int` y cuerpo `ProveedorUpdate`, responde `200 OK` con `ProveedorRead`, controla existencia (404 Not Found, RN-04) y unicidad de código (409 Conflict, RN-02).
+- **Detalle e implementacion**:
+  - Decorador `@router.put("/{id}", response_model=schemas.ProveedorRead, status_code=status.HTTP_200_OK)`.
+  - Combina parametros de ruta y cuerpo: recibe `id: Annotated[int, Path(gt=0)]` y el payload validado `proveedor: schemas.ProveedorUpdate`.
+  - Conecta con la capa de servicios invocando `services.actualizar_proveedor(id, proveedor)`.
+  - Si el ID no existe, se devuelve HTTP 404 Not Found (**RN-04**).
+  - Si el nuevo codigo colisiona con otro registro, se devuelve HTTP 409 Conflict (**RN-02**).
+  - Ante exito, responde HTTP 200 OK serializando el resultado bajo el modelo `ProveedorRead`.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Combinacion simultanea de Body y Path (Seccion 4): Identificacion del recurso via URL y envio del payload de modificacion en el cuerpo JSON.
+  - Codigos de estado (Seccion 7): Retorno de `status.HTTP_200_OK` para actualizaciones procesadas con contenido.
+- **Verificacion**: Se valido la respuesta HTTP 200 OK con los datos actualizados, la respuesta 404 Not Found ante ID inexistente, el conflicto 409 Conflict ante duplicidad de codigo y el error 422 ante identificador menor o igual a cero.
 
 ### 4.5 Endpoint `PUT /proveedores/{id}/desactivar`
+- **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-05 (Desactivar un proveedor)**
-- **Detalle**: Endpoint de acción para borrado lógico, responde `200 OK` con `ProveedorRead`, controla existencia (404 Not Found, RN-04) y estado previo (409 Conflict, RN-05).
-
+- **Detalle e implementacion**:
+  - Decorador `@router.put("/{id}/desactivar", response_model=schemas.ProveedorRead, status_code=status.HTTP_200_OK)`.
+  - Endpoint de accion para borrado logico: recibe `id: Annotated[int, Path(gt=0)]`.
+  - Delega en `services.desactivar_proveedor(id)` para cambiar el estado `activo` a `False`.
+  - Si el ID no existe, responde HTTP 404 Not Found (**RN-04**).
+  - Si el proveedor ya se encuentra inactivo, responde HTTP 409 Conflict (**RN-05**).
+  - Ante exito, responde HTTP 200 OK serializando el registro actualizado bajo `ProveedorRead`.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Operaciones de accion especifica (Seccion 2): Uso de sub-rutas semanticas (`/desactivar`) para operaciones transaccionales puntuales sobre un recurso.
+  - Manejo de conflictos de estado (Seccion 7 y 8): Notificacion transparente con codigo 409 cuando la accion solicitada es incompatible con el estado actual de la entidad.
+- **Verificacion**: Se valido la respuesta HTTP 200 OK con `activo=False`, la respuesta 404 Not Found ante ID inexistente, el conflicto 409 Conflict ante re-desactivacion y el error 422 ante identificador invalido.
 ---
 
 ## Paso 5: Registro del Router en la Aplicación (`app/main.py`)

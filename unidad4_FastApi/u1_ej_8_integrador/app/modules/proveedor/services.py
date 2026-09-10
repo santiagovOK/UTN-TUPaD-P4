@@ -92,12 +92,9 @@ def desactivar_proveedor(id: int) -> schemas.ProveedorRead:
     return proveedor_desactivado
 
 
-# Alias para mantener consistencia con el patron de categoria y producto
-desactivar = desactivar_proveedor
-
-
 # Aliases para mantener consistencia con el patron de categoria y producto
 obtener_por_id = obtener_proveedor_por_id
 obtener_todos = listar_proveedores
 crear = crear_proveedor
 actualizar_total = actualizar_proveedor
+desactivar = desactivar_proveedor
