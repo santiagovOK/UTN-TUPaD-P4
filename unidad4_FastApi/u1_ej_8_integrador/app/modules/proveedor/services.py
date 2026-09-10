@@ -36,9 +36,68 @@ def listar_proveedores(
         resultado = [p for p in resultado if p.activo == activo]
     return resultado[skip : skip + limit]
 
+def obtener_proveedor_por_id(id: int) -> schemas.ProveedorRead:
+    for p in proveedores_db:
+        if p.id == id:
+            return p
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Proveedor con id {id} no encontrado"
+    )
+
+def actualizar_proveedor(id: int, data: schemas.ProveedorUpdate) -> schemas.ProveedorRead:
+    # RN-04: Validacion de existencia (lanza 404 si no existe)
+    proveedor_actual = obtener_proveedor_por_id(id)
+
+    # RN-02: Validacion de codigo unico si se desea actualizar
+    if data.codigo is not None and data.codigo != proveedor_actual.codigo:
+        for p in proveedores_db:
+            if p.id != id and p.codigo == data.codigo:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Ya existe otro proveedor con el codigo '{data.codigo}'"
+                )
+
+    datos_actualizados = proveedor_actual.model_dump()
+    datos_actualizados.update(data.model_dump(exclude_unset=True))
+    proveedor_nuevo = schemas.ProveedorRead(**datos_actualizados)
+
+    for index, p in enumerate(proveedores_db):
+        if p.id == id:
+            proveedores_db[index] = proveedor_nuevo
+            break
+
+    return proveedor_nuevo
+
+def desactivar_proveedor(id: int) -> schemas.ProveedorRead:
+    # RN-04: Validacion de existencia (lanza 404 si no existe)
+    proveedor_actual = obtener_proveedor_por_id(id)
+
+    # RN-05: Validacion de no desactivar ya desactivado
+    if not proveedor_actual.activo:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"El proveedor con id {id} ya se encuentra desactivado"
+        )
+
+    datos = proveedor_actual.model_dump()
+    datos["activo"] = False
+    proveedor_desactivado = schemas.ProveedorRead(**datos)
+
+    for index, p in enumerate(proveedores_db):
+        if p.id == id:
+            proveedores_db[index] = proveedor_desactivado
+            break
+
+    return proveedor_desactivado
+
 
 # Alias para mantener consistencia con el patron de categoria y producto
+desactivar = desactivar_proveedor
+
+
+# Aliases para mantener consistencia con el patron de categoria y producto
+obtener_por_id = obtener_proveedor_por_id
 obtener_todos = listar_proveedores
-
-# Alias para mantener consistencia con el patron de categoria y producto
 crear = crear_proveedor
+actualizar_total = actualizar_proveedor

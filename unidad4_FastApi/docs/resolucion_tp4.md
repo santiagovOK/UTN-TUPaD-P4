@@ -53,7 +53,7 @@ Tras investigar conceptualmente las implicancias de ambas metodologias en arquit
 ---
 
 ## Paso 3: Implementacion de la Capa de Logica de Negocio y Almacenamiento en Memoria (`services.py`)
-- **Estado**: En progreso
+- **Estado**: Completado
 - **Objetivo**: Implementar la lista en memoria `proveedores_db` y las funciones de negocio que aplican las validaciones y lanzan `HTTPException`.
 
 ### 3.1 Funcion `crear_proveedor`
@@ -76,18 +76,41 @@ Tras investigar conceptualmente las implicancias de ambas metodologias en arquit
 - **Fundamentacion teorica (Guia Maestra Unidad 4)**:
   - Filtrado y paginacion con slicing (Seccion 3): Patron estandar en APIs REST para gestionar colecciones de datos en memoria sin sobrecargar la respuesta.
 - **Verificacion**: Se ejecuto script de pruebas validando retorno total, paginacion con combinaciones de skip y limit, y filtrado selectivo por estado activo e inactivo.
-### 3.3 Función `obtener_proveedor_por_id`
+### 3.3 Funcion `obtener_proveedor_por_id`
+- **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-03 (Consultar un proveedor)**
-- **Reglas de negocio**: Búsqueda por ID y validación de existencia (RN-04 -> 404 Not Found).
-
-### 3.4 Función `actualizar_proveedor`
+- **Reglas de negocio y comportamiento**:
+  - Busqueda lineal por identificador unico (`id`).
+  - **RN-04**: Si ningun registro coincide con el `id` solicitado, se interrumpe inmediatamente el flujo lanzando `HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Proveedor con id {id} no encontrado")`.
+  - Se declara el alias `obtener_por_id = obtener_proveedor_por_id`.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Manejo de excepciones 404 (Seccion 8): Uso de `raise HTTPException` para comunicar al cliente que el recurso solicitado no existe, produciendo una respuesta JSON con estructura `{"detail": "..."}`.
+- **Verificacion**: Se ejecuto script de pruebas validando retorno de datos para IDs existentes y generacion de error 404 ante identificadores inexistentes.
+### 3.4 Funcion `actualizar_proveedor`
+- **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-04 (Actualizar un proveedor)**
-- **Reglas de negocio**: Validación de existencia del recurso (RN-04 -> 404 Not Found) y verificación de que el nuevo código no colisione con otro proveedor (RN-02 -> 409 Conflict).
-
-### 3.5 Función `desactivar_proveedor`
+- **Reglas de negocio y comportamiento**:
+  - **RN-04**: Verifica la existencia del proveedor delegando en `obtener_proveedor_por_id(id)`. Si el ID no existe, se dispara automaticamente la excepcion HTTP 404 Not Found.
+  - **RN-02**: En caso de enviarse un nuevo `codigo` diferente al actual, valida que no pertenezca a ningun otro proveedor registrado (`p.id != id`). Si hay colision, interrumpe el flujo con `HTTPException(status_code=status.HTTP_409_CONFLICT, detail="...")`.
+  - Fusiona los datos existentes con los campos explícitamente enviados usando `data.model_dump(exclude_unset=True)`.
+  - Reemplaza la instancia en la lista en memoria y retorna el `ProveedorRead` actualizado.
+  - Se declara el alias `actualizar_total = actualizar_proveedor`.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Serializacion y exportacion con `.model_dump(exclude_unset=True)` (Seccion 4): Permite aplicar selectivamente los campos enviados sin sobrescribir con valores nulos los atributos no especificados.
+  - Manejo de excepciones 404 y 409 (Seccion 8): Control de integridad referencial y de unicidad antes de modificar el estado.
+- **Verificacion**: Se ejecuto script de pruebas validando actualizacion exitosa, preservacion de codigo existente, rechazo 404 ante ID inexistente y rechazo 409 por colisión de codigo.
+### 3.5 Funcion `desactivar_proveedor`
+- **Estado**: Completado
 - **HU que ataca/resuelve**: **HU-05 (Desactivar un proveedor)**
-- **Reglas de negocio**: Validación de existencia (RN-04 -> 404 Not Found) y verificación de que no esté previamente desactivado (RN-05 -> 409 Conflict).
-
+- **Reglas de negocio y comportamiento**:
+  - **RN-04**: Valida la existencia del proveedor invocando `obtener_proveedor_por_id(id)`. Si el ID no existe en memoria, se aborta la operacion con error HTTP 404 Not Found.
+  - **RN-05**: Evalua el estado actual del registro. Si `proveedor_actual.activo` ya es `False`, lanza `HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"El proveedor con id {id} ya se encuentra desactivado")`.
+  - Borrado logico: Actualiza el atributo `activo = False` preservando la totalidad del historial de datos del proveedor.
+  - Reemplaza el elemento en `proveedores_db` y retorna la instancia actualizada.
+  - Se declara el alias `desactivar = desactivar_proveedor`.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Borrado logico vs. fisico: Se mantiene el registro historico sin destruir la entidad, comunicando el estado de conflicto (409 Conflict, Seccion 7 y 8) cuando una operacion contradice el estado previo del recurso.
+- **Verificacion**: Se ejecuto script de pruebas validando desactivacion correcta, rechazo 404 ante ID inexistente y rechazo 409 Conflict ante intento de desactivar un proveedor inactivo.
 ---
 
 ## Paso 4: Implementación de Controladores y Endpoints (`routers.py`)
