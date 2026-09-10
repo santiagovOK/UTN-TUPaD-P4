@@ -19,16 +19,29 @@ Estructura de pasos a seguir para la implementación del módulo `proveedor`, ba
 - **Verificación**: Se verificó la importación exitosa del paquete y submódulos vía Python runtime.
 ---
 
-## Paso 2: Definición de Schemas y Validación de Datos (`schemas.py`)
-- **Objetivo**: Definir los modelos Pydantic con segregación de responsabilidades (`ProveedorBase`, `ProveedorCreate`, `ProveedorRead`, `ProveedorUpdate`).
-- **Validaciones**: Tipos de datos, longitudes mínimas/máximas y valores por defecto.
+## Paso 2: Definicion de Schemas y Validacion de Datos (`schemas.py`)
+- **Estado**: Completado
+- **Objetivo**: Definir los modelos Pydantic con segregacion de responsabilidades (`ProveedorBase`, `ProveedorCreate`, `ProveedorRead`, `ProveedorUpdate`).
+- **Modelos implementados**:
+  - `ProveedorBase`: Esquema base con los atributos comunes (`codigo`, `razon_social`, `cuit`, `email`, `telefono`, `activo`).
+  - `ProveedorCreate`: Hereda de `ProveedorBase` sin campos adicionales para el payload de creacion.
+  - `ProveedorRead`: Hereda de `ProveedorBase` e incorpora el campo `id: int` como contrato de salida.
+  - `ProveedorUpdate`: Modelo con todos los campos como `Optional` con valor por defecto `None` para permitir actualizaciones parciales o totales.
+- **Validaciones y Reglas aplicadas**:
+  - **RN-01**: `codigo` obligatorio con `min_length=1`.
+  - **RN-03**: `razon_social` obligatoria con `min_length=3`.
+  - `cuit`: Validacion de longitud con `min_length=11` y `max_length=15`.
+  - Valores por defecto: `email=""`, `telefono=""`, `activo=True`.
 - **HUs que ataca/resuelve**:
-  - **HU-01 (Registrar un proveedor)**: Validación estricta del cuerpo de entrada con `ProveedorCreate` (`min_length` para RN-01 y RN-03) y esquema de salida `ProveedorRead`.
-  - **HU-02 (Listar proveedores)**: Esquema de salida en colección (`list[ProveedorRead]`).
+  - **HU-01 (Registrar un proveedor)**: Validacion estricta de entrada con `ProveedorCreate` y contrato de salida con `ProveedorRead`.
+  - **HU-02 (Listar proveedores)**: Esquema de salida en coleccion (`list[ProveedorRead]`).
   - **HU-03 (Consultar un proveedor)**: Esquema de respuesta `ProveedorRead`.
-  - **HU-04 (Actualizar un proveedor)**: Validación del cuerpo de actualización con `ProveedorUpdate` y respuesta con `ProveedorRead`.
-  - **HU-05 (Desactivar un proveedor)**: Esquema de respuesta `ProveedorRead` tras la desactivación.
-
+  - **HU-04 (Actualizar un proveedor)**: Validacion del cuerpo de actualizacion con `ProveedorUpdate` y respuesta con `ProveedorRead`.
+  - **HU-05 (Desactivar un proveedor)**: Esquema de respuesta `ProveedorRead` tras la desactivacion.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - **Principio Fail Fast**: Los datos malformados se interceptan y rechazan en la frontera de la aplicacion generando respuestas HTTP 422 estandarizadas.
+  - **Segregacion de modelos**: Se separa el esquema de entrada del de salida para evitar fugas de datos y asegurar contratos explicitos.
+- **Verificacion**: Se ejecuto suite de aserciones en Python validando aceptacion de datos correctos y rechazo con `ValidationError` ante violaciones de longitud minima.
 ---
 
 ## Paso 3: Implementación de la Capa de Lógica de Negocio y Almacenamiento en Memoria (`services.py`)

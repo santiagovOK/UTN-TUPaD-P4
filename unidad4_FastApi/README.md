@@ -13,7 +13,9 @@ Repositorio donde podrán encontrar mis trabajos de Programación IV: https://gi
 
 ---
 
-## Crear entorno virtual (.venv)
+## Inicialización
+
+### Crear entorno virtual (.venv)
 
 En directorio raíz del proyecto:
 
@@ -21,7 +23,7 @@ En directorio raíz del proyecto:
 python -m venv .venv
 ```
 
-## Activar entorno
+### Activar entorno
 
 Con el entorno virtual ya creado, activarlo:
 
@@ -29,7 +31,7 @@ Con el entorno virtual ya creado, activarlo:
 source .venv/bin/activate
 ```
 
-## Instalar dependencias
+### Instalar dependencias
 
 Con el entorno virtual activado, instalar los paquetes declarados en `requirements.txt`:
 
@@ -37,7 +39,7 @@ Con el entorno virtual activado, instalar los paquetes declarados en `requiremen
 pip install -r requirements.txt
 ```
 
-## Ejecutar servidor de desarrollo con Endpoints
+### Ejecutar servidor de desarrollo con Endpoints
 
 Entrar al directorio del ejercicio y levantar el servidor:
 
