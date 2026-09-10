@@ -1,3 +1,18 @@
+# Trabajo Práctico - Unidad 4 (FastAPI - Pydantic)
+
+Resolución paso a paso de este trabajo en: [resolucion_tp4.md.md](/docs/resolucion_tp4.md).
+
+---
+
+## ✨ Estudiante
+
+- Nombre: Varela, Santiago Octavio
+- Email institucional: santiago.varela@tupad.utn.edu.ar
+
+Repositorio donde podrán encontrar mis trabajos de Programación IV: https://github.com/santiagovOK/UTN-TUPaD-P4
+
+---
+
 ## Crear entorno virtual (.venv)
 
 En directorio raíz del proyecto:
