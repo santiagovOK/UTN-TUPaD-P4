@@ -196,12 +196,20 @@ Tras investigar conceptualmente las implicancias de ambas metodologias en arquit
 ---
 
 ## Paso 5: Registro del Router en la Aplicación (`app/main.py`)
+- **Estado**: Completado
 - **Objetivo**: Integrar `proveedor_router` en la instancia central de `FastAPI`.
 - **HUs que ataca/resuelve**: Habilita la exposición pública en la API y en Swagger UI para **HU-01, HU-02, HU-03, HU-04 y HU-05**.
+- **Detalle e implementacion**:
+  - Se importó `router as proveedor_router` desde `app.modules.proveedor.routers`.
+  - Se registró el router en la instancia principal usando `app.include_router(proveedor_router)`.
+- **Fundamentacion teorica (Guia Maestra Unidad 4)**:
+  - Enrutamiento (Seccion 1): FastAPI permite dividir la aplicación en múltiples enrutadores (routers) para mantener la modularidad y luego conectarlos todos al árbol principal de la app.
+- **Verificacion**: Se comprobó que al iniciar el servidor de desarrollo, todos los endpoints del módulo de proveedores se cargan y están disponibles en la documentación `/docs`.
 
 ---
 
 ## Paso 6: Verificación y Pruebas con REST Client (`tests/proveedores.http`)
+- **Estado**: Completado
 - **Objetivo**: Diseñar la batería de pruebas HTTP que certifiquen el correcto funcionamiento y los códigos de respuesta exigidos.
 - **HUs que ataca/resuelve**:
   - **HU-01**: Pruebas de alta exitosa (201), validación de campos obligatorios/longitud (422) y código duplicado (409).
@@ -209,3 +217,7 @@ Tras investigar conceptualmente las implicancias de ambas metodologias en arquit
   - **HU-03**: Pruebas de consulta por ID existente (200) e inexistente (404).
   - **HU-04**: Pruebas de actualización completa (200), ID inexistente (404) y colisión de código (409).
   - **HU-05**: Pruebas de borrado lógico (200), ID inexistente (404) y rechazo por intento de desactivar proveedor ya inactivo (409).
+- **Detalle e implementacion**: 
+  - Se creó el archivo `u1_ej_8_integrador/tests/proveedores.http` implementando 16 pruebas formales.
+  - Se incluyeron llamadas HTTP diseñadas explícitamente para desencadenar errores 422 (violaciones de validaciones con Pydantic), 404 (ID no encontrado) y 409 (conflictos de regla de negocio RN-02 y RN-05).
+- **Verificacion**: Se lanzaron todas las peticiones con el servidor encendido, confirmando que cada una devuelve estrictamente el código HTTP especificado en la consigna.
