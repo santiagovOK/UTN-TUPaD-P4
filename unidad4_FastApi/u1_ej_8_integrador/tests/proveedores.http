@@ -1,0 +1,103 @@
+### HU-01: Alta Exitosa (201 Created) - Camino feliz
+POST http://localhost:8000/proveedores/
+Content-Type: application/json
+
+{
+  "codigo": "PRV001",
+  "razon_social": "Proveedor Uno SRL",
+  "cuit": "30123456789",
+  "email": "contacto@proveedor1.com",
+  "telefono": "123456789",
+  "activo": true
+}
+
+### HU-01 (RN-02): Conflicto por Código Duplicado (409 Conflict) - Camino de error
+POST http://localhost:8000/proveedores/
+Content-Type: application/json
+
+{
+  "codigo": "PRV001",
+  "razon_social": "Otro Proveedor SRL",
+  "cuit": "30111111111"
+}
+
+### HU-01 (RN-01): Validación de Código Vacío (422 Unprocessable Entity) - Camino de error
+POST http://localhost:8000/proveedores/
+Content-Type: application/json
+
+{
+  "codigo": "",
+  "razon_social": "Proveedor Dos SRL",
+  "cuit": "30222222222"
+}
+
+### HU-01 (RN-03): Validación de Razón Social Corta (422 Unprocessable Entity) - Camino de error
+POST http://localhost:8000/proveedores/
+Content-Type: application/json
+
+{
+  "codigo": "PRV002",
+  "razon_social": "AB",
+  "cuit": "30222222222"
+}
+
+### Creación de un Segundo Proveedor para Pruebas (201 Created) - Camino feliz
+POST http://localhost:8000/proveedores/
+Content-Type: application/json
+
+{
+  "codigo": "PRV002",
+  "razon_social": "Proveedor Dos SA",
+  "cuit": "30987654321",
+  "activo": false
+}
+
+### HU-02: Listado General Paginado (200 OK) - Camino feliz (aparecen ambos proveedores creados anteriormente)
+GET http://localhost:8000/proveedores/?skip=0&limit=10
+
+### HU-02: Filtrado por Estado Activo (200 OK) - Camino feliz (aparece solo PRV001)
+GET http://localhost:8000/proveedores/?activo=true
+
+### HU-02: Filtrado por Estado Inactivo (200 OK) - Camino feliz (aparece solo PRV002)
+GET http://localhost:8000/proveedores/?activo=false
+
+### HU-03: Consulta por ID Existente (200 OK) - Camino feliz (aparece solo PRV001)
+GET http://localhost:8000/proveedores/1 
+
+### HU-03 (RN-04): Consulta por ID Inexistente (404 Not Found) - Camino de error
+GET http://localhost:8000/proveedores/999
+
+### HU-04: Actualización Completa (200 OK) - Camino feliz (un GET por id posterior valida que el cambio se hace correctamente)
+PUT http://localhost:8000/proveedores/1
+Content-Type: application/json
+
+{
+  "razon_social": "Proveedor Uno Modificado SRL"
+}
+
+### HU-04 (RN-02): Conflicto de Código en Actualización (409 Conflict) - Camino de error
+# Intentamos actualizar el ID 2 poniéndole el código del ID 1
+PUT http://localhost:8000/proveedores/2
+Content-Type: application/json
+
+{
+  "codigo": "PRV001"
+}
+
+### HU-04 (RN-04): Actualización de ID Inexistente (404 Not Found) - Camino de error
+PUT http://localhost:8000/proveedores/999
+Content-Type: application/json
+
+{
+  "codigo": "INVENTADO"
+}
+
+### HU-05: Borrado Lógico / Desactivación (200 OK) - Camino feliz
+PUT http://localhost:8000/proveedores/1/desactivar
+
+### HU-05 (RN-05): Conflicto al Desactivar Proveedor Ya Inactivo (409 Conflict) - Camino de error
+# Como en el paso anterior desactivamos el 1, si lo repetimos da error
+PUT http://localhost:8000/proveedores/1/desactivar
+
+### HU-05 (RN-04): Desactivar ID Inexistente (404 Not Found) - Camino de error
+PUT http://localhost:8000/proveedores/999/desactivar
