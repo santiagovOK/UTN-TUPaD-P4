@@ -46,7 +46,7 @@ pip install -r requirements.txt
 Entrar al directorio del ejercicio y levantar el servidor:
 
 ```bash
-cd u1_ej_8_integrador
+cd src
 fastapi dev app/main.py
 # o uvicorn app.main:app --reload)
 ```

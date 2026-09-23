@@ -54,5 +54,8 @@ logs/
 # Jupyter / notebooks
 .ipynb_checkpoints/
 
+sync_kanban.js
+
+
 # Alembic (si usás migraciones, NO ignores alembic/ ni versions/)
 # alembic.ini (puede versionarse; no contiene secretos por defecto)
