@@ -49,8 +49,20 @@
 ### FASE 1: Infraestructura Backend, Modelado de Datos y Persistencia Base
 > **Criterio de Dependencia:** Nivel 0 (Base). No depende de ningún endpoint ni interfaz; define la base de datos relacional y las entidades.
 
+> **Nota de Diseño Técnico y Alcance (Alembic vs. DDL de SQLModel):**  
+> Si bien la tabla introductoria de conceptos en las consignas menciona a *Alembic* a título informativo, se optó por una **rúbrica estricta** alineada a los requerimientos evaluables (`HU-01`, `RN-13`, `Modalidad de Entrega`), prescindiendo de Alembic por las siguientes razones:
+> 1. **Contradicción en las consignas:** La regla de dependencias explícita **`RN-13`** exige taxativamente: *"El proyecto backend debe incluir requirements.txt con fastapi, uvicorn, sqlmodel y sqlalchemy"*, excluyendo a Alembic de la lista requerida. A su vez, la sección de entrega no solicita artefactos de migración (`alembic.ini` / `alembic/versions/`).
+> 2. **Ausencia en el desarrollo pedagógico:** En el marco teórico y las clases de la cátedra no se enseñó la configuración ni el flujo de uso de Alembic (inicialización de entorno, mapeo de metadatos de SQLModel, generación ni aplicación de revisiones DDL).
+> 3. **Estrategia idiomática de SQLModel:** Se utiliza `SQLModel.metadata.create_all(engine)` invocado en la función `create_db_and_tables()` durante el arranque de la aplicación. Esta alternativa nativa cumple cabalmente con la persistencia en PostgreSQL (`HU-01`, `RN-05`), permitiendo al evaluador clonar el proyecto, indicar su `DATABASE_URL` y levantarlo de forma inmediata sin comandos manuales de migración previos.
+
 #### Tarea 1.1: Entorno y dependencias del Backend
-- **Acción:** Configurar el entorno virtual y el archivo `requirements.txt` con las librerías necesarias: `fastapi`, `uvicorn`, `sqlmodel`, `sqlalchemy`, y driver PostgreSQL (`psycopg` / `psycopg2-binary`).
+- **Acción:** Configurar el entorno virtual (`python -m venv .venv`) y el archivo `requirements.txt` con las librerías necesarias: `fastapi`, `uvicorn`, `sqlmodel`, `sqlalchemy`, y driver PostgreSQL (`psycopg2-binary`). Luego instalar desde dentro del venv con `pip install -r requirements.txt`.
+- **Estado:** Completada — `.venv` creado y dependencias instaladas exitosamente (Python 3.13, verificación `pip list`; `pip check` sin errores).
+
+> **Verificación realizada (dentro de `.venv`, después `pip install -r requirements.txt`):**
+> - Todas las dependencias de `requirements.txt` instaladas correctamente: fastapi, uvicorn, sqlmodel, sqlalchemy, psycopg2-binary, pydantic, python-dotenv, pytest, httpx.
+> - **Compatibilidad:** `pip check` sin errores (conflictos resueltos).
+
 - **Historias de Usuario asociadas:** `HU-01`
 - **Reglas de Negocio asociadas:** `RN-13`
 - **Criterio de Aceptación / Verificación:** El entorno virtual se instala limpiamente sin conflictos de dependencias.
@@ -129,7 +141,7 @@
 - **Criterio de Aceptación / Verificación:** `pnpm dev` levanta el servidor local en `localhost:5173` y `pnpm build` compila sin errores.
 
 #### Tarea 3.2: Configuración de Tailwind CSS
-- **Acción:** Instalar y configurar Tailwind CSS según la guía oficial para Vite (`@tailwindcss/vite` e importación `@import "tailwindcss";` en `src/index.css`).
+- **Acción:** Instalar y configurar Tailwind CSS según la guía para Vite (`@tailwindcss/vite` e importación `@import "tailwindcss";` en `src/index.css`).
 - **Historias de Usuario asociadas:** `HU-05`
 - **Reglas de Negocio asociadas:** `RN-12`
 - **Criterio de Aceptación / Verificación:** Las clases utilitarias de Tailwind aplican estilos correctamente en el navegador y el bundle no genera errores de CSS.
