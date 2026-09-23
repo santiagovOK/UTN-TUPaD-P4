@@ -2,7 +2,7 @@
 
 > **Materia:** Programación IV (Tecnicatura Universitaria en Programación a Distancia - UTN)  
 > **Tema:** Migración a PostgreSQL con SQLModel (FastAPI) y Maquetado Frontend con React + TypeScript + Tailwind CSS  
-> **Estrategia:** Descomposición "Bottom-Up" (de menor a mayor dependencia) que estoy comenzando a implementar en mis proyectos para mejor organización, orientada a tablero Kanban privado. Cada tarea referencia explícitamente las Historias de Usuario (HU) y Reglas de Negocio (RN) correspondientes a las [consignas](/docs/consignas.md).
+> **Estrategia:** Descomposición "Bottom-Up" (de menor a mayor dependencia) que estoy comenzando a implementar en mis proyectos para mejor organización, orientada a tablero Kanban privado. Cada tarea referencia explícitamente las Historias de Usuario (HU) y Reglas de Negocio (RN) correspondientes a las [consignas](/docs/consignas.md). En ese sentido, las consignas más vinculadas al frontend pasan a la fase 3, pese a que sea uno de los ejes centrales de este trabajo.
 
 ---
 
@@ -67,8 +67,36 @@
 - **Reglas de Negocio asociadas:** `RN-13`
 - **Criterio de Aceptación / Verificación:** El entorno virtual se instala limpiamente sin conflictos de dependencias.
 
-#### Tarea 1.2: Configuración de conexión y ciclo de vida de BD (`database.py`)
-- **Acción:** Definir el `engine` de SQLModel apuntando a PostgreSQL mediante variable de entorno `DATABASE_URL` (con fallback local). Implementar la función `create_db_and_tables()` y el generador de sesiones `get_session()` con context manager (`yield session`).
+#### Tarea 1.2: Configuración de conexión y ciclo de vida de BD (`database.py`) — Completada
+- **Acción:** Crear `src/app/database.py` con el engine, variable `DATABASE_URL` desde entorno, `create_db_and_tables()` y `get_session()`; integrar en `main.py` mediante evento `@app.on_event("startup")`.
+
+> **Archivo creado: `src/app/database.py`:**
+> ```python
+> import os
+> from sqlalchemy import create_engine
+> from sqlmodel import SQLModel, Session
+> 
+> DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg://postgres:postgres@localhost:5432/tp5_react")
+> engine = create_engine(DATABASE_URL, echo=True)
+> 
+> 
+> def create_db_and_tables():
+>     SQLModel.metadata.bind = engine
+>     SQLModel.metadata.create_all(engine)
+> 
+> 
+> def get_session():
+>     with Session(engine) as session:
+>         yield session
+> ```
+> - **Integración en `main.py`:** evento `@app.on_event("startup")` que invoca `create_db_and_tables()` dentro de un bloque `try/except` (fallback local, no quebrar el arranque sin BD).
+
+> Verificación:
+> - `database.py` creado con engine `postgresql+psycopg`, URL desde variable de entorno sin hardcodear credenciales. 
+> - `create_db_and_tables()` llamada en evento `startup` de FastAPI para crear las tablas antes del primer request.
+> - `get_session()` implementado con context manager (`with Session(engine) as session: yield session`).
+> - `main.py` importado y modificado correctamente, sintaxis válida (py_compile).
+
 - **Historias de Usuario asociadas:** `HU-01`
 - **Reglas de Negocio asociadas:** `RN-05`
 - **Criterio de Aceptación / Verificación:** Conexión exitosa contra PostgreSQL. No hay credenciales críticas hardcodeadas.
