@@ -1,35 +1,65 @@
-from pydantic import BaseModel, Field
 from typing import Optional
+from sqlmodel import SQLModel, Field
+from app.models.producto import ProductoBase
 
 
-class ProductoBase(BaseModel):
-    nombre: str = Field(..., example="Silla de Oficina")
-    categoria: str = Field(..., pattern=r"^[A-Z]{3}-\d{2}$", example="MUE-01")
-    precio: float = Field(gt=0, example=150.50)
-    stock: int = Field(ge=0, example=20)
-    stock_minimo: int = Field(ge=0, example=5)
-    activo: bool = True
-
-
+# ============================
+# DTO de Entrada - Creación
+# ============================
 class ProductoCreate(ProductoBase):
-    pass  # Exige todos los campos obligatorios de Base
+    """Schema de entrada para creación de producto (sin ID).
+
+    Hereda todos los campos y restricciones declarativas de ProductoBase:
+    nombre obligatorio (min_length=1), precio >= 0, etc.
+    """
+    pass
 
 
-class ProductoUpdate(BaseModel):
-    # Opcional: Se usa si en el futuro se implementa PATCH (actualización parcial)
+# ============================
+# DTO de Salida - Response
+# ============================
+class ProductoResponse(ProductoBase):
+    """Schema de salida garantizando que el ID esté presente.
+
+    Contrato de respuesta para todos los endpoints de lectura.
+    Refleja fielmente la entidad SQLModel Producto del backend.
+    """
+    id: int
+
+
+# ============================
+# DTO de Actualización (ahora con SQLModel - Unidad 5)
+# ============================
+class ProductoUpdate(SQLModel):
+    """Schema para actualización con campos opcionales.
+
+    Permite actualizar parcial o totalmente los atributos del producto.
+    Los validadores de negocio (nombre no vacío, precio >= 0) se aplican
+    solo cuando se proporcionan valores explícitos.
+    """
     nombre: Optional[str] = None
-    categoria: Optional[str] = Field(None, pattern=r"^[A-Z]{3}-\d{2}$")
-    precio: Optional[float] = Field(None, gt=0)
-    stock: Optional[int] = Field(None, ge=0)
-    stock_minimo: Optional[int] = Field(None, ge=0)
+    descripcion: Optional[str] = None
+    precio: Optional[float] = Field(default=None, ge=0)
+    categoria: Optional[str] = None
+    stock: Optional[int] = Field(default=None, ge=0)
+    stock_minimo: Optional[int] = Field(default=None, ge=0)
     activo: Optional[bool] = None
 
 
-class ProductoRead(ProductoBase):
-    id: int  # Contrato de salida: siempre incluye el ID generado
+# ============================
+# Respuesta de Consulta Stock
+# ============================
+class ProductoStockResponse(SQLModel):
+    """Schema para respuesta de consulta de stock.
 
-
-class ProductoStockResponse(BaseModel):
+    Entrega el estado actual del inventario junto con la bandera de alerta.
+    """
     stock: int
     bajo_stock_minimo: bool
     activo: bool
+
+
+# ============================
+# Compatibilidad con routers/services existentes (Fase 2)
+# ============================
+ProductoRead = ProductoResponse

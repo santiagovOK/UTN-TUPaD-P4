@@ -101,17 +101,25 @@
 - **Reglas de Negocio asociadas:** `RN-05`
 - **Criterio de Aceptación / Verificación:** Conexión exitosa contra PostgreSQL. No hay credenciales críticas hardcodeadas.
 
-#### Tarea 1.3: Definición del Modelo de Tabla y Schemas Base (`models/producto.py`, `schemas/producto.py`)
+#### Tarea 1.3: Definición del Modelo de Tabla y Schemas Base (`models/producto.py`, `schemas/producto.py`) — Completada
 - **Acción:** Definir la jerarquía SQLModel/Pydantic separando entidad persistible de esquemas DTO:
-  - `ProductoBase(SQLModel)`: Campos comunes (nombre, descripcion, precio).
+  - `ProductoBase(SQLModel)`: Campos comunes (nombre, descripcion, precio, categoria, stock, stock_minimo, activo).
   - `Producto(ProductoBase, table=True)`: Modelo de tabla con `id: Optional[int] = Field(default=None, primary_key=True)`.
-  - `ProductoCreate(ProductoBase)`: Schema de entrada para creación (sin ID).
-  - `ProductoResponse(ProductoBase)`: Schema de salida garantizando que el ID esté presente.
+  - `ProductoCreate(ProductoBase)`: Schema de entrada para creación (sin ID), hereda directamente de `ProductoBase` sin duplicar campos.
+  - `ProductoResponse(ProductoBase)`: Schema de salida garantizando que el ID esté presente (`id: int`).
   - `ProductoUpdate(SQLModel)`: Schema para actualización con campos opcionales.
+  - `ProductoStockResponse(SQLModel)`: Schema para respuesta de consulta de inventario.
+- **Estado:** Completada — Modelos SQLModel y Schemas DTO refactorizados e implementados siguiendo el patrón de herencia estricto (DRY) de la Guía Maestra de la Unidad 5.
+
+> **Implementación y Verificación realizada:**
+> - **Herencia DRY:** `ProductoCreate` y `ProductoResponse` heredan de `ProductoBase(SQLModel)`; `Producto` hereda de `ProductoBase` con `table=True` (sintaxis corregida sin `primary_key` como kwarg de clase).
+> - **Validaciones declarativas:** `ProductoCreate` rechaza nombres vacíos (`min_length=1`) y precios negativos (`ge=0`), lanzando `ValidationError` (HTTP 422).
+> - **Registro DDL en `database.py`:** Se aseguró la importación de `Producto` dentro de `create_db_and_tables()` garantizando que `SQLModel.metadata.create_all(engine)` genere la tabla `producto` en PostgreSQL.
+> - **Sintaxis DDL generada y verificada:** Tabla `producto` con columnas y `PRIMARY KEY (id)` validada exitosamente.
+
 - **Historias de Usuario asociadas:** `HU-01`
 - **Reglas de Negocio asociadas:** `RN-01`, `RN-06`
-- **Criterio de Aceptación / Verificación:** Las tablas se crean correctamente en PostgreSQL mediante `SQLModel.metadata.create_all(engine)` respetando la estructura heredada del gestor en memoria original.
-
+- **Criterio de Aceptación / Verificación:** Las tablas se crean correctamente en PostgreSQL mediante `SQLModel.metadata.create_all(engine)` respetando la estructura heredada del gestor en memoria original. ✅ Cumplido.
 ---
 
 ### FASE 2: Lógica de Negocio, Endpoints REST y Pruebas Backend

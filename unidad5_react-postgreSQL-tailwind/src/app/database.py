@@ -23,10 +23,13 @@ engine = create_engine(
 
 
 def create_db_and_tables():
-    """Crea las tablas desde los metadatos SQLModel existentes."""
-    SQLModel.metadata.bind = engine
-    SQLModel.metadata.create_all(engine)
+    """Crea las tablas desde los metadatos SQLModel existentes.
 
+    Importa los modelos para que queden registrados en SQLModel.metadata antes de create_all.
+    """
+    from app.models.producto import Producto  # noqa: F401
+
+    SQLModel.metadata.create_all(engine)
 
 def get_session():
     """Generador de sesiones con context manager — una sesión por request."""
