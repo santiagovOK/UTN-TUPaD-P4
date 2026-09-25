@@ -55,6 +55,7 @@ logs/
 .ipynb_checkpoints/
 
 sync_kanban.js
+clean_code.md
 
 
 # Alembic (si usás migraciones, NO ignores alembic/ ni versions/)

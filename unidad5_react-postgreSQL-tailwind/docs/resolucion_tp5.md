@@ -119,19 +119,29 @@
 
 - **Historias de Usuario asociadas:** `HU-01`
 - **Reglas de Negocio asociadas:** `RN-01`, `RN-06`
-- **Criterio de Aceptación / Verificación:** Las tablas se crean correctamente en PostgreSQL mediante `SQLModel.metadata.create_all(engine)` respetando la estructura heredada del gestor en memoria original. ✅ Cumplido.
+- **Criterio de Aceptación / Verificación:** Las tablas se crean correctamente en PostgreSQL mediante `SQLModel.metadata.create_all(engine)` respetando la estructura heredada del gestor en memoria original. Cumplido.
 ---
 
 ### FASE 2: Lógica de Negocio, Endpoints REST y Pruebas Backend
 > **Criterio de Dependencia:** Depende de Fase 1. Implementa las validaciones de negocio en la capa Service y expone las rutas HTTP en el Router.
 
-#### Tarea 2.1: Validaciones de Schema con Pydantic
-- **Acción:** Añadir restricciones declarativas con `Field` en `ProductoBase` y `ProductoCreate`:
-  - `nombre`: obligatorio, `min_length=1`, sin cadenas vacías o solo espacios en blanco.
-  - `precio`: `ge=0` (mayor o igual a cero).
+#### Tarea 2.1: Validaciones de Schema con Pydantic — Restricciones declarativas, validador dedicado y sanitización
+- **Acción:** Implementar validación temprana de reglas de negocio en la capa de esquemas Pydantic / SQLModel:
+  - Crear módulo dedicado `src/app/modules/producto/validators.py` con `validate_producto_nombres(value: str) -> str`, asegurando que el nombre no esté vacío, rechazando secuencias de espacios en blanco (`RN-02`) y retornando el texto sanitizado (`value.strip()`).
+  - Integrar `@field_validator('nombre')` (Pydantic V2) en `ProductoCreate` y de forma condicional en `ProductoUpdate`.
+  - Excluir validadores de entrada en `ProductoResponse` para evitar riesgos en la serialización de salida.
+  - Mantener las restricciones declarativas `Field(..., min_length=1)` y `Field(..., ge=0)` para precios mayores o iguales a cero (`RN-03`).
+- **Estado:** Completada — Validador y esquemas DTO implementados, sanitizados y verificados.
+
+> **Implementación y Verificación realizada:**
+> - **Validador dedicado (`validators.py`):** `validate_producto_nombres` valida que la cadena no esté vacía tras aplicar `.strip()` (lanza `ValueError` -> HTTP 422) y retorna el valor normalizado.
+> - **Robustez en tipos (Pydantic V2):** Al usar `@field_validator('nombre')` en modo estándar (`mode='after'`), Pydantic valida primero el tipo `str`, evitando que payloads con `null` o enteros provoquen errores 500 por `AttributeError`.
+> - **Cobertura en DTOs (`schemas.py`):** Aplicado en `ProductoCreate` y condicionalmente en `ProductoUpdate` (`if value is not None`). `ProductoResponse` queda limpio de validaciones de entrada.
+> - **Suite de pruebas automatizadas (`tests/test_fase2_tarea2_1_validators.py`):** 19 casos de prueba con `pytest` y `TestClient` verificando rechazo de vacíos/espacios (422), rechazo de nulls (422 sin 500), precios negativos (422), aceptación de precio 0.0 y sanitización de nombres en altas (201).
+
 - **Historias de Usuario asociadas:** `HU-02`
 - **Reglas de Negocio asociadas:** `RN-02`, `RN-03`
-- **Criterio de Aceptación / Verificación:** Envíos con nombre vacío o precio negativo devuelven HTTP 422 con el detalle estructurado.
+- **Criterio de Aceptación / Verificación:** Peticiones con nombres vacíos, solo espacios o tipos incorrectos retornan HTTP 422 estructurado. Nombres válidos se persisten sanitizados. Todos los tests pasan en verde. Cumplido.
 
 #### Tarea 2.2: Implementación de la Capa Service (`services/producto_service.py`)
 - **Acción:** Implementar operaciones CRUD transaccionales controladas por la sesión de SQLModel:

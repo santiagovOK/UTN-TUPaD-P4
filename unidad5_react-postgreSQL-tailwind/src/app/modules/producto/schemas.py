@@ -1,6 +1,8 @@
 from typing import Optional
 from sqlmodel import SQLModel, Field
 from app.models.producto import ProductoBase
+from pydantic import field_validator
+from .validators import validate_producto_nombres
 
 
 # ============================
@@ -11,9 +13,21 @@ class ProductoCreate(ProductoBase):
 
     Hereda todos los campos y restricciones declarativas de ProductoBase:
     nombre obligatorio (min_length=1), precio >= 0, etc.
-    """
-    pass
 
+    El validador validate_producto_nombres se aplica a nivel de Pydantic
+    (capa de DTO, no el service) para cumplir la validación temprana.
+    """
+
+    @field_validator('nombre')
+    @classmethod
+    def validar_nombre(cls, value: str) -> str:
+        """Aplica validate_producto_nombres desde el módulo dedicado.
+
+        por default Pydantic garantiza
+        que value es un string, delegando el chequeo de tipos a la librería
+        y evitando excepciones no controladas.
+        """
+        return validate_producto_nombres(value)
 
 # ============================
 # DTO de Salida - Response
@@ -23,9 +37,9 @@ class ProductoResponse(ProductoBase):
 
     Contrato de respuesta para todos los endpoints de lectura.
     Refleja fielmente la entidad SQLModel Producto del backend.
+
     """
     id: int
-
 
 # ============================
 # DTO de Actualización (ahora con SQLModel - Unidad 5)
@@ -45,6 +59,13 @@ class ProductoUpdate(SQLModel):
     stock_minimo: Optional[int] = Field(default=None, ge=0)
     activo: Optional[bool] = None
 
+    @field_validator('nombre')
+    @classmethod
+    def validar_nombre_opcional(cls, value: Optional[str]) -> Optional[str]:
+        """Aplica validación de nombre cuando se provee explícitamente."""
+        if value is not None:
+            return validate_producto_nombres(value)
+        return value
 
 # ============================
 # Respuesta de Consulta Stock
