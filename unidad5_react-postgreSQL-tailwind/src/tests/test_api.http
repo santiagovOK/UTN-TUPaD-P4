@@ -75,9 +75,20 @@ Content-Type: application/json
 # Debería retornar "bajo_stock_minimo": true debido al PUT anterior
 GET {{baseUrl}}/productos/1/stock
 
-### 11. Desactivar Producto (Borrado Lógico)
-PUT {{baseUrl}}/productos/1/desactivar
+### 11. Eliminar Producto (Borrado Lógico - HTTP 204 No Content)
+DELETE {{baseUrl}}/productos/1
 
+### 11b. Verificar Borrado Lógico (GET retorna activo: false)
+GET {{baseUrl}}/productos/1
+
+### 11c. Crear Producto Duplicado (Prueba: Error 409 Conflict)
+POST {{baseUrl}}/productos/
+Content-Type: application/json
+
+{
+  "nombre": "Silla Ergonómica Premium",
+  "precio": 350.00
+}
 ### 12. Detalle Producto Inexistente (Prueba: Manejo de Errores 404)
 GET {{baseUrl}}/productos/99
 

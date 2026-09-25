@@ -572,7 +572,102 @@ def endpoint_crear_producto(producto: ProductoCreate, db: Session = Depends(get_
 
 ---
 
-## 6. Frontend: Configuración con Vite y PNPM
+## 6. Extensiones del CRUD — Reglas de Negocio Avanzadas
+
+Más allá del CRUD básico, el proyecto implementa cinco reglas de negocio adicionales que garantizan integridad, rendimiento y trazabilidad. Todas están en `services.py`; los errores se mapean en el router mediante `_handle_domain_error`.
+
+### 6.1. Control de duplicados (unicidad por nombre)
+
+La regla *"el nombre es único en la tabla"* (RN-04, HU-02) se valida contra PostgreSQL antes de cualquier escritura. El check ocurre dentro de la transacción actual del servicio — mismo `session`, mismo commit — sin riesgo de que el registro sea inserto inmediatamente:
+
+```python
+# creación — validar contra todo el conjunto existente
+existente = session.exec(
+    select(Producto).where(Producto.nombre == data.nombre)
+).first()
+if existente:
+    raise ValueError("Producto duplicado")
+```
+
+En la actualización parcial, solo se permite cambiar el nombre por uno registrado como único (no bloquea cambiar `Nombre A` por `Nombre B`):
+
+```python
+nuevo_nombre = update_dict.get("nombre")
+if nuevo_nombre and nuevo_nombre != producto.nombre:
+    duplicado = session.exec(
+        select(Producto).where(
+            Producto.nombre == nuevo_nombre, Producto.id != id
+        )
+    ).first()
+    if duplicado:
+        raise ValueError("Producto duplicado")
+```
+
+- La consulta usa `select(...).where(...)` sin `LIMIT`; PostgreSQL decide cuántas filas leer (el primer resultado es suficiente; ejecución eficiente gracias al índice de nombre en la tabla).
+- En el router, cada endpoint (`POST /`, `GET /{id}`, `PUT /{id}`) captura `ValueError` y delega a `_handle_domain_error`, que traduce *"duplicado"* al código HTTP **409 Conflict** (HU-02).
+
+### 6.2. Paginación del listado
+
+El listado se entrega en fragmentos controlados para evitar cargar todo el catálogo en memoria y reducir tiempo de respuesta por request:
+
+```python
+def listar_productos(session: Session, skip: int = 0, limit: int = 10) -> List[Producto]:
+    statement = select(Producto).offset(skip).limit(limit)
+    return list(session.exec(statement).all())
+```
+
+El router acota los parámetros con `Query(..., ge=0, le=50)` → máximo 50 registros por página. El endpoint: `GET /productos/?skip=0&limit=10`.
+
+### 6.3. Cálculo de stock con resguardo contra nulos
+
+El atributo `stock` y `stock_minimo` pueden ser `None` en la base de datos. La función `obtener_estado_stock` primero los expande a valores seguros (cero si es nulo), luego compara sin riesgo de excepción:
+
+```python
+stock = producto.stock if producto.stock is not None else 0
+stock_minimo = producto.stock_minimo if producto.stock_minimo is not None else 0
+alerta_stock = stock < stock_minimo
+```
+
+Retorna un diccionario con tres campos (`stock`, `bajo_stock_minimo`, `activo`) — sin errores de tipo. Sin este resguardo, una llamada directa como `producto.stock < producto.stock_minimo` lanzaría `AttributeError`.
+
+### 6.4. Borrado lógico (desactivación)
+
+En lugar del borrado físico (`DELETE FROM ...`), la operación marca el registro como inactivo (`activo = False`). La fila queda intacta en la base de datos para trazabilidad histórica y auditoría, devolviendo el mismo objeto persistente:
+
+```python
+def eliminar_producto(session: Session, id: int) -> Producto:
+    producto = obtener_producto_por_id(session, id)
+    producto.activo = False
+    session.add(producto)
+    session.commit()
+    session.refresh(producto)
+    return producto  # se retorna el objeto desactivado (no None)
+```
+
+Ventajas sobre borrado físico:
+- Los registros quedan visibles en consultas sin filtro de `activo` (historial, auditoría).
+- Las vistas/lots que filtran por `WHERE activo = True` dejan de mostrarlos automáticamente.
+- Sin riesgo de pérdida accidental: la fila sigue en la BD, solo "borrada" lógicamente.
+
+### 6.5. Mapeo centralizado de errores
+
+En lugar de traducir `ValueError` a código HTTP en cada endpoint individualmente, se usa un helper central `_handle_domain_error`:
+
+```python
+def _handle_domain_error(e: ValueError) -> None:
+    msg = str(e)
+    if "no encontrado" in msg.lower():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)
+    if "duplicado" en msg.lower():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=msg)
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=msg)
+```
+
+Todos los endpoints que pueden lanzar `ValueError` capturan la excepción y delegan al mapeador: `GET /{id}`, `PUT /{id}`, `DELETE /{id}`. Este patrón unifica tres códigos de estado HTTP en un solo lugar y es explícitamente requerido por HU-02 ("Conflictos de negocio como nombre duplicado devuelven 409") y RN-04 (existencia del producto).
+
+---
+
+## 7. Frontend: Configuración con Vite y PNPM
 
 ### Herramientas del stack frontend
 

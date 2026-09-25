@@ -150,9 +150,17 @@
   - `listar_productos`: `session.exec(select(Producto)).all()`.
   - `actualizar_producto`: Actualiza atributos dinámicamente con `exclude_unset=True`, `session.commit`. Lanza excepción si el ID no existe.
   - `eliminar_producto`: Borrado físico (`session.delete`) o lógico según corresponda, con validación de existencia previa.
+
+> **Implementación y Verificación realizada:**
+> - **Funciones puras y transaccionalidad (`services.py`):** Se eliminó el mock en memoria `db_productos`. Todas las funciones son puras y reciben `session: Session` como primer argumento. El ciclo de vida transaccional (`session.add`, `session.commit`, `session.refresh`) ocurre de forma exclusiva en la capa de servicios.
+> - **Control de unicidad de nombre (RN-04):** `crear_producto` busca por nombre antes de persistir (`session.exec(select(Producto).where(Producto.nombre == data.nombre)).first()`), lanzando `ValueError("Producto duplicado")` ante colisiones. `actualizar_producto` previene colisiones al renombrar productos.
+> - **Validación de existencia y borrado lógico (RN-05):** `obtener_producto_por_id` lanza `ValueError("Producto no encontrado")` si el registro no existe en base de datos. `eliminar_producto` aplica borrado lógico (`producto.activo = False`), persiste la actualización y preserva el registro para integridad histórica.
+> - **Cálculo de inventario (`obtener_estado_stock`):** Evalúa la alerta de reposición (`stock < stock_minimo`) con resguardos para atributos opcionales nulos, retornando el estado alineado a `ProductoStockResponse`.
+> - **Aislamiento y Pruebas Automatizadas (`tests/test_fase2_tarea2_2_services.py`):** Se implementaron 18 casos de prueba que cubren unitariamente cada función del servicio y la integración con el Router HTTP. Se incorporó `tests/conftest.py` con `StaticPool` para aislamiento total entre tests, sumando 43 pruebas en verde en la suite global y validación smoke exitosa contra PostgreSQL en vivo.
+
 - **Historias de Usuario asociadas:** `HU-01`, `HU-02`
 - **Reglas de Negocio asociadas:** `RN-04`, `RN-05`
-- **Criterio de Aceptación / Verificación:** Ningún `commit` se ejecuta fuera de la capa Service. Transacciones atómicas comprobadas.
+- **Criterio de Aceptación / Verificación:** Ningún `commit` se ejecuta fuera de la capa Service. Transacciones atómicas comprobadas. Cumplido.
 
 #### Tarea 2.3: Enrutador HTTP y Manejo de Errores (`routers/producto_router.py` y `main.py`)
 - **Acción:** Crear endpoints con `APIRouter` inyectando la sesión con `Depends(get_session)`:
