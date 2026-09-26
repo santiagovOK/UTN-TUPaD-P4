@@ -289,15 +289,52 @@
   3. `ProductoList.tsx`: Recibe `productos: Producto[]` y renderiza la grilla/lista mapeando con `.map()` y `key={producto.id}`.
   4. `ProductoForm.tsx`: Maquetado del formulario de alta con labels, inputs y botón de submit (solo estructura/estilos, sin lógica de estado).
   5. `Footer.tsx`: Pie de página informativo con año dinámico y estilos consistentes.
+- **Estado:** Completada — 5 componentes funcionales puros desarrollados sin hooks y con tipado estricto.
+
+> **Implementación y Verificación realizada:**
+> - **`Navbar.tsx`:** Componente funcional puro estructural sin estado ni props, con barra superior responsive, branding (`Gestor de Productos TP5`), contenedor `<nav aria-label="Navegación principal">` y menú semántico estructurado en lista `<ul>` con elementos `<li><a href="#">...</a></li>`, foco visible (`focus:ring-2 focus:ring-white`) y áreas táctiles confortables (≥ 44px).
+> - **`ProductoCard.tsx`:** Componente fuertemente tipado mediante la interface `ProductoCardProps { producto: Producto }` (sin `any`, cumplimiento estricto de `RN-08`). Renderiza un `<article>` estructurado con `<header>` (categoría y estado activo/inactivo), título `<h3>`, descripción `<p>` y `<footer>` con metadatos comerciales. Utiliza la etiqueta HTML5 `<data value={precio}>` con formateo de moneda (`Intl.NumberFormat`) y contraste accesible para lectura clara.
+> - **`ProductoList.tsx`:** Recibe `ProductoListProps { productos: Producto[] }`. Estructurado con un contenedor `<section aria-label="Catálogo de productos">` y una lista desordenada `<ul>` con clases de grilla responsiva de Tailwind (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6`), mapeando cada elemento en un `<li>` con `key={producto.id}`. En caso de lista vacía, presenta un mensaje descriptivo con `role="status"` y `aria-live="polite"`.
+> - **`ProductoForm.tsx`:** Maquetado estático del formulario de registro de productos organizado mediante `<fieldset>` y `<legend className="sr-only">`. Cuenta con inputs vinculados a labels mediante `htmlFor`, atributos `required` y `aria-required="true"`, aislamiento de indicadores visuales (`<span aria-hidden="true">*</span>`), prevención de auto-zoom en iOS (`text-base md:text-sm`), botón de acción responsivo (`w-full sm:w-auto`) y uso de `defaultValue` para evitar advertencias de React sobre componentes controlados.
+> - **`Footer.tsx`:** Pie de página funcional puro con inyección dinámica del año actual (`new Date().getFullYear()`), contraste tipográfico elevado (`text-gray-300` sobre `bg-gray-800`) y diseño coherente con el sistema visual.
+> - **Decisiones de Diseño: Accesibilidad (a11y), Semántica HTML5 y Mobile First:**
+>   - **Accesibilidad:**
+>     - **Contraste de color:** Etiquetas secundarias de precio y stock en `text-gray-600` sobre fondo blanco para garantizar ratio superior a 4.5:1. En `Footer`, contraste con `text-gray-300` sobre `bg-gray-800`.
+>     - **Navegación semántica por teclado:** Enlaces de `Navbar` implementados con `<a>` accesibles y foco visible (`focus:ring-2 focus:ring-white`), más `aria-label="Navegación principal"` en `<nav>`.
+>     - **Formularios accesibles:** Atributos nativos `required` y `aria-required="true"` en campos obligatorios de `ProductoForm`, con aislamiento accesible de indicadores visuales (`<span aria-hidden="true">*</span><span className="sr-only"> (obligatorio)</span>`).
+>     - **Regiones vivas:** `role="status"` y `aria-live="polite"` en el estado vacío de `ProductoList`.
+>   - **Semántica HTML5 y Reducción de Divitis:**
+>     - **`ProductoList.tsx`:** Marcado semántico mediante `<section aria-label="Catálogo de productos">` con lista desordenada `<ul>` y elementos `<li>`, permitiendo a tecnologías de asistencia identificar la colección ("lista con N elementos") y navegar entre ítems con comandos de lista (`L` / `I`).
+>     - **`ProductoCard.tsx`:** Estructuración interna del `<article>` mediante `<header>` (categoría y badge de activo) y `<footer>` (precio y stock), incorporando la etiqueta HTML5 `<data value={precio}>` para exponer el valor de datos estructurados de forma legible tanto por motores como por usuarios.
+>     - **`Navbar.tsx`:** Menú de navegación estructurado con `<ul>` y `<li>` dentro del `<nav>`, garantizando semántica estándar de menú para lectores de pantalla.
+>     - **`ProductoForm.tsx`:** Agrupación semántica de campos mediante `<fieldset>` y `<legend className="sr-only">`.
+>   - **Enfoque Mobile First:**
+>     - **Prevención de auto-zoom en iOS:** Inputs en `text-base md:text-sm` (16px base en mobile).
+>     - **Ergonomía táctil:** Botón de submit en `ProductoForm` con `w-full sm:w-auto` y touch targets de navegación adaptados (≥ 44px).
+>     - **Espaciado fluido:** Padding progresivo `p-4 sm:p-6` y grilla responsiva con `gap-4 sm:gap-6`.
+> - **Cumplimiento de Reglas de Negocio:**
+>   - **`RN-08`:** Todos los componentes cuentan con tipado estricto TypeScript para sus props, con ausencia total del tipo `any`.
+>   - **`RN-09`:** Ausencia total de hooks de React (`useState`, `useEffect`, etc.). Los componentes se limitan a la presentación visual a partir de sus entradas.
+
 - **Historias de Usuario asociadas:** `HU-04`, `HU-05`, `HU-06`
 - **Reglas de Negocio asociadas:** `RN-08`, `RN-09`
-- **Criterio de Aceptación / Verificación:** Cero hooks en el código. Todas las props validadas por el compilador de TypeScript.
-
+- **Criterio de Aceptación / Verificación:** Cero hooks en el código. Todas las props validadas por el compilador de TypeScript. Cumplido.
 #### Tarea 4.3: Ensamblado y Maquetado en `App.tsx`
 - **Acción:** Integrar los componentes en `App.tsx` suministrando un array de al menos 3 productos hardcodeados que cumplan con la interface `Producto`. Diseñar el layout responsivo (`grid`, `flex`, espaciados coherentes).
-- **Historias de Usuario asociadas:** `HU-04`, `HU-05`
+- **Estado:** Completada — Componentes integrados en App.tsx con mock tipado de 4 productos, layout responsivo dashboard y soporte integral de Mobile First y Accesibilidad.
+
+> **Implementación y Verificación realizada:**
+> - **Mock de Datos Fuertemente Tipado (`PRODUCTOS_MOCK: Producto[]`):** Definición inmutable en `App.tsx` con 4 productos realistas que cubren categorías variadas (Computación, Monitores, Periféricos), diferentes niveles de stock (incluyendo caso de stock 0) y estados activo/inactivo, cumpliendo fielmente la interfaz `Producto` (`RN-07`, `RN-08`).
+> - **Ensamblado y Arquitectura Declarativa:** Integración jerárquica de los componentes puros (`Navbar`, `ProductoForm`, `ProductoList`, `Footer`), pasando los datos hacia `ProductoList` mediante props (`HU-04`, `HU-06`, `RN-09`).
+> - **Diseño Mobile First y Grid Asimétrico:** Layout estructurado con `grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start`. En dispositivos móviles los elementos fluyen verticalmente ocupando el ancho completo de forma ergonómica; en pantallas de escritorio (`lg`), el formulario se ubica en una barra lateral (1 columna) y la grilla del catálogo toma el espacio principal (2 columnas), logrando una composición de tipo dashboard profesional.
+> - **Accesibilidad (a11y) y Semántica HTML5:**
+>   - **Skip Link:** Enlace oculto `<a href="#main-content">` al inicio del DOM, visible solo al recibir foco por teclado (`focus:not-sr-only`), permitiendo a usuarios de tecnologías de asistencia saltar la barra de navegación (`WCAG 2.4.1`).
+>   - **Landmark y Jerarquía de Encabezados:** Etiqueta `<main id="main-content">` vinculada al skip link e inclusión de `<h1 className="sr-only">Gestor de Productos - Panel Principal</h1>` para proveer el título raíz de nivel 1 requerido por el árbol de accesibilidad sin saltos abruptos hacia los encabezados hijos (`h2` y `h3`).
+>   - **Sticky Footer con Flexbox:** Contenedor raíz `flex flex-col min-h-screen` con `flex-grow` en `<main>` para garantizar que el pie de página permanezca al fondo aún con contenido reducido.
+
+- **Historias de Usuario asociadas:** `HU-04`, `HU-05`, `HU-06`
 - **Reglas de Negocio asociadas:** `RN-08`, `RN-09`, `RN-12`
-- **Criterio de Aceptación / Verificación:** La pantalla visualiza el navbar, el formulario maquetado, la grilla con al menos 3 productos y el footer. `pnpm dev` corre sin warnings ni errores de TS.
+- **Criterio de Aceptación / Verificación:** La pantalla visualiza el navbar, el formulario maquetado, la grilla con 4 productos y el footer. `pnpm dev` y `pnpm build` ejecutan sin warnings ni errores de TS. Cumplido.
 
 #### Tarea 4.4: Pruebas Unitarias del Frontend (Vitest + Testing Library)
 - **Acción:** Configurar pruebas unitarias con Vitest y React Testing Library para validar el contrato de los componentes:

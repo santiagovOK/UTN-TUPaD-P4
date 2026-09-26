@@ -72,27 +72,35 @@ Cree un archivo `.env` en la raíz del proyecto (basado en `.env.example`):
 > **Nota sobre pruebas automatizadas (`pytest`):**  
 > La suite de tests automatizados (`tests/conftest.py`) ya utiliza por defecto un motor **SQLite en memoria (`sqlite:///:memory:`)** con `StaticPool` de manera aislada por prueba. Por lo tanto, `pytest` siempre ejecuta y valida los 43 tests  sin necesidad de tener PostgreSQL u otro servicio externo en ejecución.
 
-### Ejecutar servidor de desarrollo con Endpoints
+### Inicialización y Scripts del Frontend (Vite + React + TypeScript)
 
-Entrar al directorio `src/` y levantar el servidor:
+En la raíz del proyecto, instalar las dependencias de Node:
 
 ```bash
-cd src
-uvicorn app.main:app --reload
+pnpm install
 ```
 
-*(Alternativamente, si se desea ejecutar directamente desde la raíz del proyecto: `PYTHONPATH=src uvicorn app.main:app --reload`).*
+#### Scripts de Ejecución Disponibles (`package.json`)
 
-Acceder a la API en `http://127.0.0.1:8000/docs`.
+| Comando | Descripción | Entorno / URL |
+| :--- | :--- | :--- |
+| **`pnpm dev`** | **Frontend único (`RN-12`):** Levanta el servidor Vite para maquetado estático con componentes funcionales puros. | `http://localhost:5173` |
+| **`pnpm dev:back`** | **Backend único:** Levanta la API FastAPI con Uvicorn en modo `--reload` utilizando el entorno virtual. | `http://localhost:8000` (`/docs`) |
+| **`pnpm dev:all`** | **Fullstack unificado:** Levanta **Frontend y Backend simultáneamente** en una única terminal mediante `concurrently`. | Ambos servidores |
+| **`pnpm build`** | Verificación de tipos (`tsc -b`) y empaquetado de producción con Vite. | Directorio `dist/` |
+| **`pnpm preview`** | Servidor local para previsualizar el bundle de producción compilado. | Localhost |
 
-### Validación y Pruebas (Swagger UI)
+---
 
-Para validar visualmente el funcionamiento del módulo de proveedores y probar interactivamente los escenarios de éxito y error exigidos (RN-01 a RN-05):
+### Documentación Interactiva y Pruebas Backend
 
-1. Asegúrate de tener el servidor en ejecución (`fastapi dev app/main.py`).
-2. Ingresa a la interfaz interactiva de Swagger UI en tu navegador: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
-3. Busca la etiqueta **"Proveedores"**, donde encontrarás todos los endpoints desarrollados (GET, POST, PUT).
-4. Despliega cada endpoint, haz clic en el botón **"Try it out"**, completa los campos correspondientes (o déjalos deliberadamente inválidos) y presiona **"Execute"** para verificar los códigos de estado HTTP de retorno (200, 201, 404, 409, 422).
-5. Como referencia técnica complementaria, todos estos escenarios se encuentran documentados en formato REST Client en el archivo [`u1_ej_8_integrador/tests/proveedores.http`](u1_ej_8_integrador/tests/proveedores.http)., como era exigido.
-
-Dado que no se exigían capturas de pantalla en las consignas, no fueron añadidas.
+1. **Swagger UI:** Con el backend en ejecución, acceder a [http://localhost:8000/docs](http://localhost:8000/docs) para probar interactivamente las operaciones CRUD completas del catálogo de productos y verificar los esquemas OpenAPI y respuestas (200, 201, 204, 404, 409, 422).
+2. **ReDoc:** Disponible en [http://localhost:8000/redoc](http://localhost:8000/redoc).
+3. **Pruebas Automatizadas (`pytest`):**  
+   Ejecutar en la terminal con el entorno virtual activo:
+   ```bash
+   pytest -v
+   ```
+   (Ejecuta los 43 casos de prueba con SQLite en memoria aislado).
+4. **Pruebas Manuales (REST Client / VS Code):**  
+   Documentadas y listas para disparar en [`src/tests/test_api.http`](src/tests/test_api.http).
