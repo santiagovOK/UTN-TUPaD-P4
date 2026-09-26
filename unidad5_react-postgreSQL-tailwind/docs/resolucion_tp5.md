@@ -169,9 +169,18 @@
   - `GET /productos/{id}` (200 OK, captura `ValueError` y lanza `HTTPException(404)`).
   - `PUT /productos/{id}` o `PATCH /productos/{id}` (200 OK, maneja 404 y 422).
   - `DELETE /productos/{id}` (204 No Content, maneja 404).
+- **Estado:** Completada — Endpoints configurados con `APIRouter`, inyección de dependencia de sesión, manejo robusto de excepciones de dominio y contratos OpenAPI/Swagger verificados.
+
+> **Implementación y Verificación realizada:**
+> - **Enrutador modular e inyección de dependencias (`routers.py`):** Se implementaron los endpoints para el ciclo CRUD completo bajo el prefijo `/productos` utilizando `APIRouter` e inyectando la sesión transaccional con `Depends(get_session)`.
+> - **Mapeo de errores de dominio (`_handle_domain_error`):** Las excepciones de dominio lanzadas por la capa Service (`ValueError`) se interceptan en cada endpoint y se mapean a los códigos HTTP correspondientes: `404 Not Found` cuando el registro no existe, `409 Conflict` en colisiones por nombre duplicado, y `400 Bad Request` para otros errores de dominio.
+> - **Validaciones declarativas y errores 422:** Las validaciones de esquema Pydantic y parámetros de ruta (`Path(..., gt=0)`, `Query(..., ge=0)`) retornan automáticamente respuestas `422 Unprocessable Entity` estructuradas ante datos inválidos.
+> - **Compatibilidad con OpenAPI / Swagger UI:** Verificación mediante inspección del esquema OpenAPI (`/openapi.json`) y `/docs`, confirmando la generación adecuada de rutas, modelos de respuesta (`ProductoResponse`, `ProductoStockResponse`), parámetros y códigos de estado (201, 200, 204, 422).
+> - **Integración en `main.py`:** El router se encuentra registrado vía `app.include_router(producto_router)` junto con el evento de ciclo de vida para inicialización de base de datos.
+
 - **Historias de Usuario asociadas:** `HU-01`, `HU-02`, `HU-03`
 - **Reglas de Negocio asociadas:** `RN-04`, `RN-05`
-- **Criterio de Aceptación / Verificación:** En `/docs` (Swagger UI) se muestran los endpoints, esquemas correctos y es posible probarlos interactivamente.
+- **Criterio de Aceptación / Verificación:** En `/docs` (Swagger UI) se muestran los endpoints, esquemas correctos y es posible probarlos interactivamente. Cumplido.
 
 #### Tarea 2.4: Pruebas Unitarias del Backend (Pytest + TestClient)
 - **Acción:** Configurar suite de pruebas unitarias y de integración con `pytest` y `TestClient`:
@@ -179,9 +188,18 @@
   - Pruebas de CRUD completo con base de datos de test / SQLite en memoria o PostgreSQL de test.
   - Pruebas de errores esperados (404 al consultar/modificar ID inexistente).
   - Exportar/actualizar archivo de pruebas manuales (`.json` de Postman o `.http` de REST Client).
+- **Estado:** Completada — Suite automatizada de 43 casos unitarios y de integración con pytest y TestClient pasando en verde con aislamiento total. Archivo de pruebas manuales REST Client (`src/tests/test_api.http`) actualizado.
+
+> **Implementación y Verificación realizada:**
+> - **Aislamiento en pruebas (`tests/conftest.py`):** Configuración de `override_get_session` y fixture `client` con SQLite en memoria (`sqlite:///:memory:`) y `StaticPool`, garantizando un motor de base de datos limpio y transacciones aisladas por cada caso de prueba.
+> - **Validaciones Pydantic (`tests/test_fase2_tarea2_1_validators.py`):** 19 tests automatizados que cubren el rechazo de nombres vacíos, solo espacios y tipos nulos/enteros (HTTP 422), precios negativos (HTTP 422), aceptación de precios en 0.0 y sanitización `strip()` en persistencia.
+> - **Capa Service y Endpoints CRUD (`tests/test_fase2_tarea2_2_services.py`):** 18 tests que validan transaccionalidad, prevención de duplicados (409 Conflict), borrado lógico (`activo = False`), actualización parcial con `exclude_unset=True`, cálculo dinámico de reposición de stock, y respuestas 404 ante IDs inexistentes.
+> - **Base de datos y modelos (`tests/test_fase1_database_and_models.py`):** 6 tests que aseguran la correcta generación de tablas, metadatos y llaves primarias.
+> - **Archivo de pruebas manuales (`src/tests/test_api.http`):** Actualización y verificación de los 13 escenarios HTTP del módulo Categorías y Productos, incluyendo casos de éxito (201, 200, 204) y casos de borde/error (404, 409, 422).
+
 - **Historias de Usuario asociadas:** `HU-01`, `HU-02`, `HU-03`
 - **Reglas de Negocio asociadas:** `RN-02`, `RN-03`, `RN-04`, `RN-11`
-- **Criterio de Aceptación / Verificación:** Todos los tests de `pytest` pasan en verde. Los archivos de prueba HTTP cubren todos los métodos CRUD.
+- **Criterio de Aceptación / Verificación:** Todos los tests de `pytest` pasan en verde. Los archivos de prueba HTTP cubren todos los métodos CRUD. Cumplido.
 
 ---
 

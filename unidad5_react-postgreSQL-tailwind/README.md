@@ -41,15 +41,47 @@ Con el entorno virtual activado, instalar los paquetes declarados en `requiremen
 pip install -r requirements.txt
 ```
 
+### Configuración de Base de Datos (PostgreSQL / SQLite como Fallback)
+
+El backend utiliza **SQLModel / SQLAlchemy**, lo que permite interactuar indistintamente con PostgreSQL o SQLite mediante la variable de entorno `DATABASE_URL`.
+
+Cree un archivo `.env` en la raíz del proyecto (basado en `.env.example`):
+
+1. **PostgreSQL (Entorno de producción / entrega):**
+   ```env
+   DATABASE_URL=postgresql+psycopg2://usuario:password@localhost:5432/tp5_react
+   ```
+
+2. **SQLite como Fallback Local (Pruebas y desarrollo sin PostgreSQL):**
+   Si no se dispone de una instancia de PostgreSQL activa, se puede utilizar SQLite sin alterar el código de la aplicación:
+   ```env
+   # Base de datos en archivo local (persistente, inspeccionable con DBeaver):
+   DATABASE_URL=sqlite:///./dev.db
+
+   # Base de datos en memoria (volátil, reinicia con el servidor):
+   DATABASE_URL=sqlite:///:memory:
+   ```
+
+   **Inspección visual en DBeaver:**
+   Para abrir la base de datos local en DBeaver, crear una conexión de tipo **SQLite** e ingresar en el campo de conexión/URL JDBC:
+   ```text
+   jdbc:sqlite:/path/proyecto/dev.db
+   ```
+   *(O adaptar con la ruta absoluta correspondiente a la ubicación del proyecto).*
+
+> **Nota sobre pruebas automatizadas (`pytest`):**  
+> La suite de tests automatizados (`tests/conftest.py`) ya utiliza por defecto un motor **SQLite en memoria (`sqlite:///:memory:`)** con `StaticPool` de manera aislada por prueba. Por lo tanto, `pytest` siempre ejecuta y valida los 43 tests  sin necesidad de tener PostgreSQL u otro servicio externo en ejecución.
+
 ### Ejecutar servidor de desarrollo con Endpoints
 
-Entrar al directorio del ejercicio y levantar el servidor:
+Entrar al directorio `src/` y levantar el servidor:
 
 ```bash
 cd src
-fastapi dev app/main.py
-# o uvicorn app.main:app --reload)
+uvicorn app.main:app --reload
 ```
+
+*(Alternativamente, si se desea ejecutar directamente desde la raíz del proyecto: `PYTHONPATH=src uvicorn app.main:app --reload`).*
 
 Acceder a la API en `http://127.0.0.1:8000/docs`.
 

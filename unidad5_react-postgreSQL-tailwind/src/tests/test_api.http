@@ -94,13 +94,13 @@ GET {{baseUrl}}/productos/99
 
 ### 13. Producto Inválido (Prueba: Error 422 automático)
 # Falla porque: 
-# - La categoría no cumple el Regex.
-# - El precio es negativo.
+# - El precio es negativo (RN-03: ge=0).
+# - El nombre contiene solo espacios en blanco (RN-02: min_length=1 y sin espacios vacíos).
 POST {{baseUrl}}/productos/
 Content-Type: application/json
 
 {
-  "nombre": "Escritorio Roto",
+  "nombre": "   ",
   "categoria": "MUEBLES",
   "precio": -50.00,
   "stock": 5,

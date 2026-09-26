@@ -15,10 +15,14 @@ if not DATABASE_URL:
     raise RuntimeError(
         "Error crítico: La variable de entorno DATABASE_URL no está configurada.\n"
     )
+# Configurar argumentos de conexión según motor (SQLite requiere desactivar el chequeo de hilos en FastAPI)
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+
 # Engine que traduce Python - SQL y gestiona el pool de conexiones
 engine = create_engine(
     DATABASE_URL,
     echo=True,  # registra cada query SQL en consola (solo desarrollo)
+    connect_args=connect_args,
 )
 
 
