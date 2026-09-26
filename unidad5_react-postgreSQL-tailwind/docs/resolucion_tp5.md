@@ -208,10 +208,18 @@
 
 #### Tarea 3.1: Inicialización del Proyecto Frontend con Vite y TypeScript
 - **Acción:** Inicializar la aplicación utilizando Vite con template `react-ts` y gestor de paquetes `pnpm`. Configurar `package.json`, `tsconfig.json` y scripts de desarrollo/construcción.
+- **Estado:** Completada — Tooling de Vite + React 19 + TypeScript configurado, dependencias instaladas y servidor operativo en localhost:5173.
+
+> **Implementación y Verificación realizada:**
+> - **Estructura base de compilación:** Configuración de `package.json` con scripts estándar (`dev`, `build`, `preview`), `vite.config.ts` vinculado al plugin `@vitejs/plugin-react` en el puerto 5173, y `index.html` con `<div id="root">`.
+> - **Tipado estricto (`tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`):** Configurado con soporte TSX y restricción de inclusión a `["src/**/*.ts", "src/**/*.tsx"]`, permitiendo la coexistencia limpia del frontend con el backend en Python dentro de `src/app/` sin advertencias cruzadas.
+> - **Puntos de entrada React (`src/main.tsx`, `src/App.tsx`, `src/index.css`):** Renderizado de componente raíz montado con `createRoot` y `StrictMode`.
+> - **Instalación y build:** `pnpm install` resolvió dependencias sin conflictos. `pnpm build` ejecutó la verificación de tipos (`tsc -b`) y empaquetó el bundle de producción sin errores.
+> - **Servidor de desarrollo:** `pnpm dev` levantó correctamente en `http://localhost:5173`.
+
 - **Historias de Usuario asociadas:** `HU-04`
 - **Reglas de Negocio asociadas:** `RN-10`, `RN-12`
-- **Criterio de Aceptación / Verificación:** `pnpm dev` levanta el servidor local en `localhost:5173` y `pnpm build` compila sin errores.
-
+- **Criterio de Aceptación / Verificación:** `pnpm dev` levanta el servidor local en `localhost:5173` y `pnpm build` compila sin errores. Cumplido.
 #### Tarea 3.2: Configuración de Tailwind CSS
 - **Acción:** Instalar y configurar Tailwind CSS según la guía para Vite (`@tailwindcss/vite` e importación `@import "tailwindcss";` en `src/index.css`).
 - **Historias de Usuario asociadas:** `HU-05`
