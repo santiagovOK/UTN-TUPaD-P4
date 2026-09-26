@@ -261,11 +261,26 @@
     nombre: string;
     descripcion?: string;
     precio: number;
+    categoria?: string;
+    stock?: number;
+    stock_minimo?: number;
+    activo?: boolean;
   }
   ```
+- **Estado:** Completada — Interface declarada con compatibilidad estricta y sincronizada con el backend.
+
+> **Nota de Diseño Técnico (Compatibilidad de Esquema Backend vs. Snippet de Consigna):**  
+> Si bien el ejemplo didáctico de la consigna (`HU-04`, punto 7) ilustra una interfaz simplificada con 4 propiedades (`id`, `nombre`, `descripcion`, `precio`), la regla **`RN-07`** exige taxativamente que la interfaz *"refleje el modelo del backend"*, el cual preserva la estructura completa de la Unidad 4 (**`RN-06`**).  
+> Por ello, se definieron como obligatorios los campos indispensables del modelo (`id`, `nombre`, `precio`) y se incorporaron como **opcionales** los atributos persistidos en PostgreSQL (`descripcion?`, `categoria?`, `stock?`, `stock_minimo?`, `activo?`). Esto garantiza compatibilidad estricta con `ProductoResponse` del backend sin invalidar el maquetado estático de productos mínimos propuesto en el caso práctico.
+
+> **Implementación y Verificación realizada:**
+> - **Definición de modelo (`src/types/producto.ts`):** Declaración de la interface `Producto` exportada para su consumo en componentes React.
+> - **Compatibilidad estricta con Backend (`ProductoResponse` / `ProductoBase`):** Se mapearon con fidelidad los campos requeridos (`id`, `nombre`, `precio`) y los campos opcionales (`descripcion`, `categoria`, `stock`, `stock_minimo`, `activo`), garantizando interoperabilidad inmediata con la API REST de FastAPI y SQLModel sin uso de `any`.
+> - **Verificación de tipado estricto:** Compilación exitosa verificada con `pnpm tsc --noEmit` y empaquetado de producción validado con `pnpm build` sin errores ni advertencias de tipos.
+
 - **Historias de Usuario asociadas:** `HU-04`
 - **Reglas de Negocio asociadas:** `RN-07`, `RN-08`
-- **Criterio de Aceptación / Verificación:** Tipos estrictos sin uso de `any`. Compatibilidad exacta con el schema `ProductoResponse` del backend.
+- **Criterio de Aceptación / Verificación:** Tipos estrictos sin uso de `any`. Compatibilidad exacta con el schema `ProductoResponse` del backend. Cumplido.
 
 #### Tarea 4.2: Creación de Componentes Funcionales Puros (`src/components/`)
 - **Acción:** Desarrollar los 5 componentes requeridos como funciones puras (sin `useState`, sin `useEffect`, props estrictamente tipadas):
