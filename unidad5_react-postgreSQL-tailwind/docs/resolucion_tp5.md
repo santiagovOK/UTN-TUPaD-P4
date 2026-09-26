@@ -222,19 +222,32 @@
 - **Criterio de Aceptación / Verificación:** `pnpm dev` levanta el servidor local en `localhost:5173` y `pnpm build` compila sin errores. Cumplido.
 #### Tarea 3.2: Configuración de Tailwind CSS
 - **Acción:** Instalar y configurar Tailwind CSS según la guía para Vite (`@tailwindcss/vite` e importación `@import "tailwindcss";` en `src/index.css`).
+- **Estado:** Completada — Tailwind CSS v4 integrado mediante plugin de Vite y directiva global.
+
+> **Implementación y Verificación realizada:**
+> - **Dependencias agregadas (`package.json`):** Incorporación de `tailwindcss` (^4.0.0) y `@tailwindcss/vite` (^4.0.0) en `devDependencies`.
+> - **Integración del plugin en Vite (`vite.config.ts`):** Importación y registro del plugin oficial `tailwindcss()` junto con `react()` en el arreglo de plugins de Vite.
+> - **Inyección de estilos globales (`src/index.css`):** Directiva `@import "tailwindcss";` añadida en la cabecera del archivo de estilos globales para activar el motor de Tailwind CSS v4 sin necesidad de archivos de configuración legados (`tailwind.config.js`).
+
 - **Historias de Usuario asociadas:** `HU-05`
 - **Reglas de Negocio asociadas:** `RN-12`
-- **Criterio de Aceptación / Verificación:** Las clases utilitarias de Tailwind aplican estilos correctamente en el navegador y el bundle no genera errores de CSS.
+- **Criterio de Aceptación / Verificación:** Las clases utilitarias de Tailwind aplican estilos correctamente en el navegador y el bundle no genera errores de CSS. Cumplido.
 
 #### Tarea 3.3: Estructura de Directorios del Frontend
 - **Acción:** Crear la estructura de carpetas estándar requerida:
   - `src/types/`
   - `src/components/`
   - `src/tests/` (para pruebas unitarias de frontend)
+- **Estado:** Completada — Directorios base creados y versionados.
+
+> **Implementación y Verificación realizada:**
+> - **Directorio de tipos (`src/types/`):** Creado con archivo `.keep` para versionado en Git, preparado para alojar las interfaces TypeScript del dominio (`producto.ts`).
+> - **Directorio de componentes (`src/components/`):** Creado con archivo `.keep` para versionado en Git, preparado para alojar los componentes puros (`Navbar`, `ProductoCard`, `ProductoList`, `ProductoForm`, `Footer`).
+> - **Directorio de pruebas (`src/tests/`):** Validada la existencia del directorio base del proyecto que centraliza las pruebas y albergará las suites unitarias del frontend.
+
 - **Historias de Usuario asociadas:** `HU-06`
 - **Reglas de Negocio asociadas:** `RN-10`
-- **Criterio de Aceptación / Verificación:** Árbol de carpetas limpio y alineado a las consignas y la guía maestra.
-
+- **Criterio de Aceptación / Verificación:** Árbol de carpetas limpio y alineado a las consignas y la guía maestra. Cumplido.
 ---
 
 ### FASE 4: Modelado de Tipos, Componentes Puros y Pruebas Frontend
