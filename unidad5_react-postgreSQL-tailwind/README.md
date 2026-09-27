@@ -89,18 +89,26 @@ pnpm install
 | **`pnpm dev:all`** | **Fullstack unificado:** Levanta **Frontend y Backend simultáneamente** en una única terminal mediante `concurrently`. | Ambos servidores |
 | **`pnpm build`** | Verificación de tipos (`tsc -b`) y empaquetado de producción con Vite. | Directorio `dist/` |
 | **`pnpm preview`** | Servidor local para previsualizar el bundle de producción compilado. | Localhost |
+| **`pnpm test`** | Ejecución de la suite de pruebas unitarias del frontend con Vitest y React Testing Library. | Consola |
+| **`pnpm test:watch`** | Modo observador interactivo (watch) para pruebas unitarias con Vitest. | Consola interactiva |
 
 ---
 
-### Documentación Interactiva y Pruebas Backend
+### Documentación Interactiva, Validación y Pruebas (Backend y Frontend)
 
 1. **Swagger UI:** Con el backend en ejecución, acceder a [http://localhost:8000/docs](http://localhost:8000/docs) para probar interactivamente las operaciones CRUD completas del catálogo de productos y verificar los esquemas OpenAPI y respuestas (200, 201, 204, 404, 409, 422).
 2. **ReDoc:** Disponible en [http://localhost:8000/redoc](http://localhost:8000/redoc).
-3. **Pruebas Automatizadas (`pytest`):**  
+3. **Pruebas Automatizadas del Backend (`pytest`):**  
    Ejecutar en la terminal con el entorno virtual activo:
    ```bash
    pytest -v
    ```
    (Ejecuta los 43 casos de prueba con SQLite en memoria aislado).
-4. **Pruebas Manuales (REST Client / VS Code):**  
+4. **Pruebas Unitarias del Frontend (`vitest` + `React Testing Library`):**  
+   Ejecutar en la raíz del proyecto con Node:
+   ```bash
+   pnpm test
+   ```
+   (Ejecuta los 9 casos de prueba unitarios validando los componentes funcionales puros `ProductoCard` y `ProductoList`, verificando renderizado condicional, formateo de moneda con `Intl`, badges de estado y stock, estados vacíos con `role="status"` y estructura semántica de listas sin hooks ni efectos colaterales).
+5. **Pruebas Manuales del Backend (REST Client / VS Code):**  
    Documentadas y listas para disparar en [`src/tests/test_api.http`](src/tests/test_api.http).

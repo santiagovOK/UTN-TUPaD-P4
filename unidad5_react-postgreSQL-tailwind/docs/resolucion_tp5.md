@@ -341,10 +341,32 @@
   - Prueba de renderizado de `ProductoCard` con datos correctos.
   - Prueba de renderizado de lista en `ProductoList` (verificar cantidad de tarjetas según el array provisto).
   - Verificación de ausencia de hooks y cumplimiento de componentes puros.
+- **Estado:** Completada — Suite unitaria configurada con Vitest y React Testing Library; pruebas unitarias cubriendo ProductoCard y ProductoList con 100% de tests exitosos (9/9) y validación de tipos estricta.
+
+> **Implementación y Verificación realizada:**
+> - **Entorno de Pruebas Unitarias:**
+>   - Instalación de dependencias de desarrollo (`vitest`, `jsdom`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/dom`).
+>   - Configuración en `vite.config.ts` especificando `environment: 'jsdom'`, `globals: true` y archivo de configuración inicial `./src/tests/setup.ts`.
+>   - Declaración de scripts en `package.json`: `"test": "vitest run"` y `"test:watch": "vitest"`.
+>   - Configuración de `src/tests/setup.ts` con extensión de matchers de Jest-DOM (`@testing-library/jest-dom/vitest`) y rutina de limpieza automática de componentes montados tras cada prueba (`afterEach(() => cleanup())`).
+> - **Suite `ProductoCard.test.tsx` (5 pruebas unitarias):**
+>   - **Renderizado exhaustivo del contrato `Producto`:** Valida que el nombre se proyecte en un encabezado `<h3>`, la descripción en un `<p>`, la categoría en su badge correspondiente, el estado `Activo` en su indicador visual, el stock con su formato de unidades y el precio formateado según la moneda local (ARS) mediante `Intl.NumberFormat`.
+>   - **Badge condicional de inactividad:** Verifica la visualización del badge 'Inactivo' y la ausencia de 'Activo' cuando `activo: false`.
+>   - **Fallback de categoría:** Verifica que ante la ausencia de `categoria` se asigne automáticamente la etiqueta 'General'.
+>   - **Manejo de campos opcionales:** Comprueba que la omisión de la propiedad `descripcion` no genere elementos de texto residuales ni errores de renderizado.
+>   - **Alerta visual por quiebre de stock:** Valida que ante `stock: 0` el componente aplique la clase de advertencia `text-red-500`.
+> - **Suite `ProductoList.test.tsx` (4 pruebas unitarias):**
+>   - **Estado vacío:** Renderizado con `productos={[]}`, comprobando la presencia del mensaje accesible con `role="status"` y `aria-live="polite"` ("No hay productos disponibles para mostrar") y la ausencia de elementos `<article>`.
+>   - **Iteración y correspondencia $N$ a $N$:** Renderizado con una lista de $N$ productos tipados, verificando la instanciación de exactamente $N$ tarjetas `getAllByRole('article')`, la presencia individual de todos los títulos de producto y la ausencia del mensaje de estado vacío.
+>   - **Estructura semántica de lista:** Validación de la presencia de lista desordenada `<ul>` (`role="list"`) con exactamente $N$ ítems `<li>` (`getAllByRole('listitem')`), garantizando navegabilidad para lectores de pantalla.
+>   - **Landmark y accesibilidad de sección:** Validación de la etiqueta `<section aria-label="Catálogo de productos">` con rol semántico `region`.
+> - **Cumplimiento de Reglas de Negocio:**
+>   - **`RN-08`:** Tipado estricto en todas las suites sin uso de `any`, validado por el compilador con `pnpm tsc --noEmit`.
+>   - **`RN-09`:** Los componentes testeados operan como funciones puras y determinísticas sin efectos colaterales ni hooks de estado (`useState`, `useEffect`).
+
 - **Historias de Usuario asociadas:** `HU-04`, `HU-06`
 - **Reglas de Negocio asociadas:** `RN-08`, `RN-09`
-- **Criterio de Aceptación / Verificación:** Suite `pnpm test` ejecuta y pasa todos los tests unitarios de componentes.
-
+- **Criterio de Aceptación / Verificación:** Suite `pnpm test` ejecuta y pasa todos los tests unitarios de componentes (9 pruebas en 2 archivos). `tsc -b && vite build` compila con éxito. Cumplido.
 ---
 
 ## 3. Checklist de Entrega y Empaquetado Final
