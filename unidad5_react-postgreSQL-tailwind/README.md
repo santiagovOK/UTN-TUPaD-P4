@@ -87,6 +87,7 @@ pnpm install
 | **`pnpm dev`** | **Frontend único (`RN-12`):** Levanta el servidor Vite para maquetado estático con componentes funcionales puros. | `http://localhost:5173` |
 | **`pnpm dev:back`** | **Backend único:** Levanta la API FastAPI con Uvicorn en modo `--reload` utilizando el entorno virtual. | `http://localhost:8000` (`/docs`) |
 | **`pnpm dev:all`** | **Fullstack unificado:** Levanta **Frontend y Backend simultáneamente** en una única terminal mediante `concurrently`. | Ambos servidores |
+| **`pnpm dev:stop`** (o `pnpm stop`) | **Detención unificada:** Mata los procesos activos en los puertos `5173` y `8000`, liberando Frontend y Backend. | Consola |
 | **`pnpm build`** | Verificación de tipos (`tsc -b`) y empaquetado de producción con Vite. | Directorio `dist/` |
 | **`pnpm preview`** | Servidor local para previsualizar el bundle de producción compilado. | Localhost |
 | **`pnpm test`** | Ejecución de la suite de pruebas unitarias del frontend con Vitest y React Testing Library. | Consola |
