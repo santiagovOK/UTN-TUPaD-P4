@@ -110,5 +110,59 @@ pnpm install
    pnpm test
    ```
    (Ejecuta los 9 casos de prueba unitarios validando los componentes funcionales puros `ProductoCard` y `ProductoList`, verificando renderizado condicional, formateo de moneda con `Intl`, badges de estado y stock, estados vacíos con `role="status"` y estructura semántica de listas sin hooks ni efectos colaterales).
-5. **Pruebas Manuales del Backend (REST Client / VS Code):**  
-   Documentadas y listas para disparar en [`src/tests/test_api.http`](src/tests/test_api.http).
+5. **Pruebas Manuales del Backend (REST Client y Postman):**  
+   - **REST Client (VS Code):** Peticiones listas en [`src/tests/test_api.http`](src/tests/test_api.http) y [`src/tests/proveedores.http`](src/tests/proveedores.http).
+   - **Colección Postman v2.1:** Exportada y lista para importar en [`src/tests/postman_collection.json`](src/tests/postman_collection.json).
+
+---
+
+## 📁 Estructura del Proyecto
+
+```text
+unidad5_react-postgreSQL-tailwind/
+├── docs/                         # Documentación de consignas, resolución y sync
+│   ├── consignas.md              # Requerimientos oficiales del trabajo práctico
+│   ├── resolucion_tp5.md         # Registro paso a paso y justificación técnica
+│   └── sync_kanban.js            # Script de sincronización con tablero Kanban
+├── src/
+│   ├── app/                      # Backend: FastAPI + SQLModel + PostgreSQL
+│   │   ├── main.py               # Instancia de aplicación FastAPI y evento de startup
+│   │   ├── database.py           # Engine de BD, create_db_and_tables() y sesiones
+│   │   ├── models/               # Modelos de base de datos persistibles (SQLModel)
+│   │   │   ├── producto.py
+│   │   │   ├── categoria.py
+│   │   │   └── proveedor.py
+│   │   └── modules/              # Arquitectura modular por dominio (Router, Service, Schemas)
+│   │       ├── producto/         # Endpoints, reglas de negocio y DTOs de Producto
+│   │       ├── categoria/        # Endpoints, reglas de negocio y DTOs de Categoría
+│   │       └── proveedor/        # Endpoints, reglas de negocio y DTOs de Proveedor
+│   ├── components/               # Frontend: Componentes funcionales puros (RN-09, RN-10)
+│   │   ├── Navbar.tsx            # Barra de navegación accesible con branding
+│   │   ├── ProductoCard.tsx      # Tarjeta atómica de producto con badges y formateo Intl
+│   │   ├── ProductoList.tsx      # Grilla y contenedor de lista accesible de productos
+│   │   ├── ProductoForm.tsx      # Maquetado accesible de formulario de alta (sin hooks)
+│   │   └── Footer.tsx            # Pie de página institucional con año dinámico
+│   ├── types/                    # Frontend: Definición de interfaces TypeScript (RN-07, RN-10)
+│   │   └── producto.ts           # Interface Producto alineada al schema del backend
+│   ├── tests/                    # Pruebas del frontend y requests HTTP
+│   │   ├── setup.ts              # Configuración global de Vitest y Jest-DOM
+│   │   ├── ProductoCard.test.tsx # Pruebas unitarias de tarjeta de producto
+│   │   ├── ProductoList.test.tsx # Pruebas unitarias de listado y estado vacío
+│   │   ├── test_api.http         # Peticiones REST Client para Productos y Categorías
+│   │   ├── proveedores.http      # Peticiones REST Client para Proveedores
+│   │   └── postman_collection.json # Colección Postman para importar y probar
+│   ├── App.tsx                   # Ensamblado principal de la aplicación y mock tipado
+│   ├── main.tsx                  # Punto de entrada de React 19
+│   └── index.css                 # Estilos globales con Tailwind CSS v4
+├── tests/                        # Backend: Suite automatizada de pruebas (pytest)
+│   ├── conftest.py               # Fixture con SQLite en memoria y StaticPool aislado
+│   ├── test_fase1_database_and_models.py
+│   ├── test_fase2_tarea2_1_validators.py
+│   └── test_fase2_tarea2_2_services.py
+├── .env.example                  # Plantilla de configuración de base de datos
+├── package.json                  # Dependencias y scripts de Node / React
+├── requirements.txt              # Dependencias del backend Python (RN-13)
+├── tsconfig.json                 # Configuración raíz de TypeScript
+├── vite.config.ts                # Configuración de Vite, Tailwind y Vitest
+└── README.md                     # Guía de inicialización, ejecución y arquitectura
+```
