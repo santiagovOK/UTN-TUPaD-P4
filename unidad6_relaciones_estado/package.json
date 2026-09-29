@@ -1,0 +1,20 @@
+{
+  "name": "unidad6-relaciones-estado",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm run dev:all",
+    "dev:front": "pnpm --dir unidad6_frontend dev",
+    "dev:back": "cd unidad6_backend && (fastapi dev app/main.py || python -m fastapi dev app/main.py || uvicorn app.main:app --reload --port 8000)",
+    "dev:all": "concurrently -k -n \"front,back\" -c \"cyan,green\" \"pnpm --dir unidad6_frontend dev\" \"pnpm run dev:back\"",
+    "dev:stop": "npx kill-port 5173 8000",
+    "stop": "pnpm run dev:stop",
+    "build:front": "pnpm --dir unidad6_frontend build",
+    "test:back": "cd unidad6_backend && pytest"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "kill-port": "^2.0.1"
+  }
+}
