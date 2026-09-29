@@ -1,6 +1,6 @@
 # Trabajo Práctico - Unidad 6 (FastAPI - React - Relaciones y Gestión de Estado)
 
-Siguiendo las [consignas del Trabajo Práctico](/docs/consignas.md) y la [Guía Maestra de la Unidad 6](/docs/unidad6_guia.md), el presente trabajo aborda el desarrollo de una solución Full Stack integrando un frontend reactivo en **React 19 + TypeScript** con un backend modular en **FastAPI + SQLModel / PostgreSQL**.
+Siguiendo las [consignas del Trabajo Práctico](/docs/consignas.md) y la [Guía Maestra de la Unidad 6](/docs/guidelines/unidad6_guia_maestra.md), el presente trabajo aborda el desarrollo de una solución Full Stack integrando un frontend reactivo en **React 19 + TypeScript** con un backend modular en **FastAPI + SQLModel / PostgreSQL**.
 
 El sistema implementa:
 1. **Frontend (React + Hooks):** CRUD interactivo de **Categorías** consumiendo la API REST mediante `fetch` nativo, centralización de estado en `App.tsx` (`useState`, `useEffect`) y componentes funcionales puros estilizados con **Tailwind CSS v4**.
@@ -18,7 +18,7 @@ Resolución paso a paso y seguimiento Kanban de este trabajo en: [docs/resolucio
 
 ---
 
-## 🚀 Inicialización Rápida
+## Inicialización Rápida
 
 ### 1. Backend (Python + FastAPI)
 
@@ -57,7 +57,7 @@ cd unidad6_frontend && pnpm install && cd ..
 
 ---
 
-## 🏃 Modos de Ejecución
+## Modos de Ejecución
 
 El proyecto puede ejecutarse de manera unificada en una sola terminal (mediante `concurrently`) o en terminales independientes por cada capa:
 
@@ -112,7 +112,7 @@ fastapi dev app/main.py
 
 ---
 
-## 📜 Tabla de Scripts Disponibles (`package.json` raíz)
+## Tabla de Scripts Disponibles (`package.json` raíz)
 
 | Comando | Descripción | Entorno / Destino |
 | :--- | :--- | :--- |
@@ -125,7 +125,7 @@ fastapi dev app/main.py
 
 ---
 
-## 🗄️ Configuración de Base de Datos (PostgreSQL / SQLite Fallback)
+## Configuración de Base de Datos (PostgreSQL / SQLite Fallback)
 
 El backend utiliza **SQLModel / SQLAlchemy**, lo que permite alternar transparentemente entre PostgreSQL y SQLite según el contenido de `DATABASE_URL` en `unidad6_backend/.env`:
 
@@ -148,7 +148,7 @@ El backend utiliza **SQLModel / SQLAlchemy**, lo que permite alternar transparen
 
 ---
 
-## 🧪 Pruebas y Validación
+## Pruebas y Validación
 
 1. **Swagger UI:** Con el backend en ejecución, acceder a [http://localhost:8000/docs](http://localhost:8000/docs) para probar interactivamente las operaciones CRUD completas de Categorías y Productos.
 2. **Pruebas Automatizadas de Backend (`pytest`):**

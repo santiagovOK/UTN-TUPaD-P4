@@ -6,7 +6,7 @@ Expone una API REST con arquitectura modular por dominio (`categoria`, `producto
 
 ---
 
-## 🛠️ Tecnologías y Librerías
+## Tecnologías y Librerías
 
 - **FastAPI:** Framework web moderno y asíncrono de alto rendimiento para APIs REST en Python.
 - **SQLModel / SQLAlchemy:** ORM que unifica modelos de base de datos relacionales y esquemas de validación de datos.
@@ -17,7 +17,7 @@ Expone una API REST con arquitectura modular por dominio (`categoria`, `producto
 
 ---
 
-## 📋 Requisitos Previos
+## Requisitos Previos
 
 - **Python:** Versión 3.10, 3.11, 3.12 o 3.13+.
 - **pip:** Gestor de paquetes de Python.
@@ -25,7 +25,7 @@ Expone una API REST con arquitectura modular por dominio (`categoria`, `producto
 
 ---
 
-## 🚀 Inicialización y Ejecución Individual
+## Inicialización y Ejecución Individual
 
 ### 1. Crear y activar el entorno virtual
 
@@ -76,7 +76,7 @@ El backend permite operar indistintamente con PostgreSQL o SQLite mediante la va
 
 ---
 
-## 🏃 Servidor de Desarrollo
+## Servidor de Desarrollo
 
 Para iniciar el backend en modo desarrollo:
 
@@ -98,7 +98,7 @@ El servidor quedará disponible en:
 
 ---
 
-## 📖 Documentación Interactiva de la API
+## Documentación Interactiva de la API
 
 FastAPI genera automáticamente documentación interactiva basada en OpenAPI:
 

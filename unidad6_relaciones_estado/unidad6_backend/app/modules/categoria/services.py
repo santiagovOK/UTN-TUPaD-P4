@@ -1,5 +1,5 @@
 from typing import List, Optional
-from .schemas import CategoriaCreate, CategoriaRead, CategoriaUpdate
+from .schemas import CategoriaCreate, CategoriaRead
 
 # Simulamos algunos registros iniciales
 db_categorias: List[CategoriaRead] = [
@@ -22,11 +22,7 @@ def obtener_todas(skip: int = 0, limit: int = 10) -> List[CategoriaRead]:
 
 
 def obtener_por_id(id: int) -> Optional[CategoriaRead]:
-    for c in db_categorias:
-        if c.id == id:
-            return c
-    return None
-
+    return next((c for c in db_categorias if c.id == id), None)
 
 def actualizar_total(id: int, data: CategoriaCreate) -> Optional[CategoriaRead]:
     for index, c in enumerate(db_categorias):
@@ -40,17 +36,14 @@ def actualizar_total(id: int, data: CategoriaCreate) -> Optional[CategoriaRead]:
 def desactivar(id: int) -> Optional[CategoriaRead]:
     for index, c in enumerate(db_categorias):
         if c.id == id:
-            c_dict = c.model_dump()
-            c_dict["activo"] = False
-            actualizada = CategoriaRead(**c_dict)
+            actualizada = c.model_copy(update={"activo": False})
             db_categorias[index] = actualizada
             return actualizada
     return None
 
-
 def eliminar(id: int) -> bool:
     for index, c in enumerate(db_categorias):
         if c.id == id:
-            db_categorias.pop(index)
+            del db_categorias[index]
             return True
     return False

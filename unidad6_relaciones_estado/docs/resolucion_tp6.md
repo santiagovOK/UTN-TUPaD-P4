@@ -26,12 +26,32 @@
 ```text
 [ Fase 1: Infraestructura Base, UI Estática, Endpoints de Categoría & Documentación ] (COMPLETADA)
                                         ↓
-[ Fase 2: Integración Frontend — Estado Reactivo & Fetch API ] (PENDIENTE)
+[ Fase 2: Integración Frontend — Estado Reactivo & Fetch API ] (EN PROGRESO: 2/3 completadas)
                                         ↓
 [ Fase 3: Backend — Modelos y Endpoints de Producto & Relaciones ] (PENDIENTE)
                                         ↓
 [ Fase 4: Pruebas Integradas, Empaquetado y Entrega Final ] (PENDIENTE)
 ```
+
+### 2.1. Tablero Kanban de Estado de Tareas
+
+| ID Tarea | Tarea | Fase | Estado | Componentes / Módulos Afectados |
+| :---: | :--- | :---: | :---: | :--- |
+| **1.1** | Configuración de monorepo y scripts concurrentes | Fase 1 | ✅ **Done** | `package.json`, `pnpm-workspace.yaml` |
+| **1.2** | Endpoints base y schemas de Categoría (FastAPI + CORS) | Fase 1 | ✅ **Done** | `app/modules/categoria/`, `app/main.py` |
+| **1.3** | Tipado TypeScript y maquetado de componentes estáticos | Fase 1 | ✅ **Done** | `src/types/`, `src/components/` |
+| **1.4** | Documentación integral y guías de ejecución | Fase 1 | ✅ **Done** | `README.md`, `unidad6_*/README.md` |
+| **2.1** | Implementación de estado centralizado (`useState`) | Fase 2 | ✅ **Done** | `src/App.tsx` |
+| **2.2** | Sincronización inicial con `useEffect` y `fetch` (`AbortController`) | Fase 2 | ✅ **Done** | `src/App.tsx` |
+| **2.3** | Funciones CRUD de mutación con `fetch` (`POST`, `PUT`, `DELETE`) | Fase 2 | ⏳ **To Do / Siguiente** | `src/App.tsx`, `CategoriaModal`, `CategoriaCard` |
+| **2.4** | Manejo de feedback de usuario, estados de carga y errores de red | Fase 2 | 📋 **To Do** | `src/App.tsx` |
+| **3.1** | Modelado SQLModel de `Producto` y tabla intermedia `Producto_Categoria` | Fase 3 | 📋 **Backlog** | `app/models/`, `app/database.py` |
+| **3.2** | Schemas DTO y validadores de negocio de Producto | Fase 3 | 📋 **Backlog** | `app/modules/producto/schemas.py` |
+| **3.3** | Endpoints y servicios CRUD de Producto y asignación de Categorías | Fase 3 | 📋 **Backlog** | `app/modules/producto/` |
+| **3.4** | Archivo de pruebas REST Client (`productos.http`, `categorias.http`) | Fase 3 | 📋 **Backlog** | `productos.http`, `categorias.http` |
+| **4.1** | Validación E2E Smoke Test integral | Fase 4 | 📋 **Backlog** | Fullstack (`:5173` y `:8000`) |
+| **4.2** | Verificación estática TypeScript y suite pytest | Fase 4 | 📋 **Backlog** | CI / Quality checks |
+| **4.3** | Purgado y empaquetado final `.zip` | Fase 4 | 📋 **Backlog** | Artefactos de entrega |
 
 ---
 
@@ -98,7 +118,7 @@
 ---
 
 ### FASE 2: Integración Frontend — Estado Reactivo & Fetch API
-> **Estado:** **PENDIENTE**  
+> **Estado:** **EN PROGRESO** (Tareas 2.1 y 2.2 completadas; Tarea 2.3 pendiente)  
 > **Criterio de Dependencia:** Nivel 1. Depende de la UI estática y los endpoints de Categoría de la Fase 1. Conecta la capa visual con la API REST utilizando hooks estándar (`useState`, `useEffect`) y `fetch` nativo exclusivamente en `App.tsx`.
 
 #### Tarea 2.1: Implementación de estado centralizado en `App.tsx` (`useState`)
@@ -108,18 +128,28 @@
   - `categoriaEnEdicion: Categoria | null` (almacena la categoría seleccionada para edición o `null` para alta).
   - `loading: boolean` (estado de carga para retroalimentación visual).
   - `error: string | null` (registro de errores de red o servidor).
-- **Estado:** Pendiente
+- **Estado:** **Completada**
+
+> **Implementación y Verificación realizada:**
+> - **Estado Reactivo Centralizado:** Se declararon los 5 estados en `App.tsx` sin propagar hooks a componentes hijos.
+> - **Control de Modales:** Handlers `handleOpenCreateModal`, `handleOpenEditModal` y `handleCloseModal` implementados para alternar `isModalOpen` y `categoriaEnEdicion`.
+
 - **Historias de Usuario asociadas:** HU-01, HU-02.
 - **Reglas de Negocio asociadas:** RN-02.
 - **Criterio de Aceptación / Verificación:** El estado se gestiona de forma inmutable en el componente contenedor raíz y se distribuye a los componentes hijos mediante props. Los componentes hijos permanecen como funciones puras sin hooks propios.
 
 #### Tarea 2.2: Sincronización de datos iniciales con `useEffect` y `fetch` nativo (`GET /categorias`)
-- **Acción:** Implementar un efecto secundario en `App.tsx` mediante `useEffect` con array de dependencias vacío `[]` para realizar una petición asíncrona mediante `fetch` nativo hacia `http://localhost:8000/categorias/` al montar el componente, actualizando el estado `categorias`.
-- **Estado:** Pendiente
+- **Acción:** Implementar un efecto secundario en `App.tsx` mediante `useEffect` para realizar una petición asíncrona mediante `fetch` nativo hacia `http://localhost:8000/categorias/` al montar el componente, actualizando el estado `categorias`.
+- **Estado:** **Completada**
+
+> **Implementación y Verificación realizada:**
+> - **Fetching Desacoplado:** Función `fetchCategorias` envuelta en `useCallback` consumiendo `http://localhost:8000/categorias/`.
+> - **Limpieza y Cancelación (`AbortController`):** Integración de `AbortController` y `signal` para cancelar peticiones pendientes ante desmontaje o doble invocación de React StrictMode, previniendo memory leaks y race conditions según las directivas de `docs/guidelines/unidad6_guia.md`.
+> - **Retroalimentación Visual:** Soporte de estados de carga (`loading` con `[role="status"]`) y error (`error` con `[role="alert"]`).
+
 - **Historias de Usuario asociadas:** HU-01.
 - **Reglas de Negocio asociadas:** RN-02.
 - **Criterio de Aceptación / Verificación:** Al acceder a la aplicación en el navegador, se realiza la llamada HTTP GET y las categorías devueltas por el backend se pintan automáticamente en la grilla de `CategoriaList`.
-
 #### Tarea 2.3: Implementación de funciones CRUD de mutación con `fetch` nativo (`POST`, `PUT`, `DELETE`)
 - **Acción:** Desarrollar en `App.tsx` los controladores de eventos asíncronos y transferirlos como callbacks a los componentes hijos:
   - `handleCreate(categoriaData)`: Petición `POST http://localhost:8000/categorias/` con payload JSON. Agrega el nuevo elemento al estado inmutable `categorias` y cierra el modal.
