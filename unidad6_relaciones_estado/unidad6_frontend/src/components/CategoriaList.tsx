@@ -1,6 +1,7 @@
 import type { Categoria } from '../types/categoria';
 import { CategoriaCard } from './CategoriaCard';
 
+// [Consigna TP6 - Parte B, inciso d]: CategoriaList.tsx — recibe Categoria[] por props y renderiza las tarjetas.
 export interface CategoriaListProps {
   categorias: Categoria[];
   onEdit?: (categoria: Categoria) => void;

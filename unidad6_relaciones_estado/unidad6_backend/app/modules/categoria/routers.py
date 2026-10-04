@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Path, Query, status
 from typing import List
 from . import schemas, services
 
+# [Consigna TP6 - Parte A, inciso c]: Implementar los endpoints de Categorías (GET, POST, PUT, DELETE)
 router = APIRouter(prefix="/categorias", tags=["Categorías"])
 
 

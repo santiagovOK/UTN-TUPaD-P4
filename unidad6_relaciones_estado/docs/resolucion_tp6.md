@@ -26,7 +26,7 @@
 ```text
 [ Fase 1: Infraestructura Base, UI Estática, Endpoints de Categoría & Documentación ] (COMPLETADA)
                                         ↓
-[ Fase 2: Integración Frontend — Estado Reactivo & Fetch API ] (EN PROGRESO: 2/3 completadas)
+[ Fase 2: Integración Frontend — Estado Reactivo & Fetch API ] (COMPLETADA)
                                         ↓
 [ Fase 3: Backend — Modelos y Endpoints de Producto & Relaciones ] (PENDIENTE)
                                         ↓
@@ -43,12 +43,13 @@
 | **1.4** | Documentación integral y guías de ejecución | Fase 1 | ✅ **Done** | `README.md`, `unidad6_*/README.md` |
 | **2.1** | Implementación de estado centralizado (`useState`) | Fase 2 | ✅ **Done** | `src/App.tsx` |
 | **2.2** | Sincronización inicial con `useEffect` y `fetch` (`AbortController`) | Fase 2 | ✅ **Done** | `src/App.tsx` |
-| **2.3** | Funciones CRUD de mutación con `fetch` (`POST`, `PUT`, `DELETE`) | Fase 2 | ⏳ **To Do / Siguiente** | `src/App.tsx`, `CategoriaModal`, `CategoriaCard` |
-| **2.4** | Manejo de feedback de usuario, estados de carga y errores de red | Fase 2 | 📋 **To Do** | `src/App.tsx` |
-| **3.1** | Modelado SQLModel de `Producto` y tabla intermedia `Producto_Categoria` | Fase 3 | 📋 **Backlog** | `app/models/`, `app/database.py` |
-| **3.2** | Schemas DTO y validadores de negocio de Producto | Fase 3 | 📋 **Backlog** | `app/modules/producto/schemas.py` |
-| **3.3** | Endpoints y servicios CRUD de Producto y asignación de Categorías | Fase 3 | 📋 **Backlog** | `app/modules/producto/` |
-| **3.4** | Archivo de pruebas REST Client (`productos.http`, `categorias.http`) | Fase 3 | 📋 **Backlog** | `productos.http`, `categorias.http` |
+| **2.3** | Funciones CRUD de mutación con `fetch` (`POST`, `PUT`, `DELETE`) | Fase 2 | ✅ **Done** | `src/App.tsx`, `CategoriaModal`, `CategoriaList` |
+| **2.4** | Manejo de feedback de usuario, estados de carga y errores de red | Fase 2 | ✅ **Done** | `src/App.tsx`, `CategoriaModal` |
+| **3.1** | Migración de persistencia de Categoría a SQLModel y Base de Datos | Fase 3 | 📋 **Backlog** | `app/models/categoria.py`, `app/modules/categoria/` |
+| **3.2** | Modelado SQLModel de `Producto` (esquema TP6) y tabla intermedia `Producto_Categoria` | Fase 3 | 📋 **Backlog** | `app/models/producto.py`, `app/database.py` |
+| **3.3** | Schemas DTO, validadores y servicios de Producto y vinculación N:N | Fase 3 | 📋 **Backlog** | `app/modules/producto/schemas.py`, `services.py` |
+| **3.4** | Exposición de endpoints REST en `app/modules/producto/routers.py` | Fase 3 | 📋 **Backlog** | `app/modules/producto/routers.py` |
+| **3.5** | Archivo de pruebas REST Client (`productos.http`, `categorias.http`) | Fase 3 | 📋 **Backlog** | `productos.http`, `categorias.http` |
 | **4.1** | Validación E2E Smoke Test integral | Fase 4 | 📋 **Backlog** | Fullstack (`:5173` y `:8000`) |
 | **4.2** | Verificación estática TypeScript y suite pytest | Fase 4 | 📋 **Backlog** | CI / Quality checks |
 | **4.3** | Purgado y empaquetado final `.zip` | Fase 4 | 📋 **Backlog** | Artefactos de entrega |
@@ -118,7 +119,7 @@
 ---
 
 ### FASE 2: Integración Frontend — Estado Reactivo & Fetch API
-> **Estado:** **EN PROGRESO** (Tareas 2.1 y 2.2 completadas; Tarea 2.3 pendiente)  
+> **Estado:** **COMPLETADA**
 > **Criterio de Dependencia:** Nivel 1. Depende de la UI estática y los endpoints de Categoría de la Fase 1. Conecta la capa visual con la API REST utilizando hooks estándar (`useState`, `useEffect`) y `fetch` nativo exclusivamente en `App.tsx`.
 
 #### Tarea 2.1: Implementación de estado centralizado en `App.tsx` (`useState`)
@@ -151,77 +152,99 @@
 - **Reglas de Negocio asociadas:** RN-02.
 - **Criterio de Aceptación / Verificación:** Al acceder a la aplicación en el navegador, se realiza la llamada HTTP GET y las categorías devueltas por el backend se pintan automáticamente en la grilla de `CategoriaList`.
 #### Tarea 2.3: Implementación de funciones CRUD de mutación con `fetch` nativo (`POST`, `PUT`, `DELETE`)
+- **Alineación con la Consigna:** Resuelve la **Parte B - inciso e** de `docs/consignas.md`: *"Funciones handleCreate, handleUpdate, handleDelete que usen fetch nativo hacia el backend"* y *"Pasar las funciones y el estado como props a los componentes hijos"*.
 - **Acción:** Desarrollar en `App.tsx` los controladores de eventos asíncronos y transferirlos como callbacks a los componentes hijos:
-  - `handleCreate(categoriaData)`: Petición `POST http://localhost:8000/categorias/` con payload JSON. Agrega el nuevo elemento al estado inmutable `categorias` y cierra el modal.
-  - `handleUpdate(id, categoriaData)`: Petición `PUT http://localhost:8000/categorias/{id}`. Actualiza la categoría en el estado inmutable `categorias` y cierra el modal.
-  - `handleDelete(id)`: Confirmación interactiva al usuario y posterior petición `DELETE http://localhost:8000/categorias/{id}`. Filtra y remueve la categoría del estado inmutable.
-  - `handleOpenCreateModal()`: Setea `categoriaEnEdicion` en `null` y abre el modal.
-  - `handleOpenEditModal(categoria)`: Setea la categoría seleccionada en `categoriaEnEdicion` y abre el modal con los campos precargados.
-  - `handleCloseModal()`: Cierra el modal y resetea `categoriaEnEdicion`.
-- **Estado:** Pendiente
+  - `handleSubmit(e)`: Manejador único para creación (`POST http://localhost:8000/categorias/`) y actualización (`PUT http://localhost:8000/categorias/{id}`) mediante `FormData`. Actualiza inmutablemente el estado `categorias` (`.map()` para edición, spread `[...prev, nueva]` para alta) y cierra el modal mediante `handleCloseModal()`.
+  - `handleDelete(id)`: Confirmación interactiva con `window.confirm` y posterior petición `DELETE http://localhost:8000/categorias/{id}`. Filtra y remueve la categoría del estado inmutable mediante `.filter()`.
+  - Inyección de callbacks en el árbol de componentes: `CategoriaModal` recibe `onSubmit={handleSubmit}` y `CategoriaList` recibe `onDelete={handleDelete}` junto a `onEdit={handleOpenEditModal}`.
+- **Estado:** **Completada**
+
+> **Implementación y Verificación realizada:**
+> - **Creación y Edición Unificada:** `handleSubmit` extrae los valores validados del formulario y conmuta la llamada HTTP (`POST` o `PUT`) según la presencia de `categoriaEnEdicion`.
+> - **Eliminación Segura:** `handleDelete` solicita confirmación al usuario antes de emitir la petición `DELETE` con código 204 y purga el elemento del estado local sin recarga de página.
+> - **Inmutabilidad Garantizada:** Ninguna mutación altera directamente el array de categorías; todas usan operadores puros (`map`, `filter`, spread).
+
 - **Historias de Usuario asociadas:** HU-02, HU-03.
 - **Reglas de Negocio asociadas:** RN-02.
 - **Criterio de Aceptación / Verificación:** Operaciones completas de alta, modificación y eliminación ejecutables de extremo a extremo desde el navegador sin recargar la página web, persistiendo los cambios en el backend.
 
 #### Tarea 2.4: Manejo de feedback de usuario, estados de carga y errores de red
+- **Alineación con la Consigna:** Complementa la **Parte B - inciso e** de `docs/consignas.md`: *"Manejo de estado de carga y error en la UI"*.
 - **Acción:** Incorporar en la interfaz indicadores visuales durante las peticiones en curso (spinner de carga, deshabilitación de botones de acción para prevenir dobles submits), mensajes de alerta ante errores de conexión o respuestas HTTP 4xx/5xx, y mensajes informativos cuando no existan categorías cargadas (*empty state*).
-- **Estado:** Pendiente
+- **Estado:** **Completada**
+
+> **Implementación y Verificación realizada:**
+> - **Prevención de Doble Envío:** Se añadió el prop `isSubmitting?: boolean` a `CategoriaModalProps` y el atributo `disabled={isSubmitting}` junto al indicador textual *"Guardando..."* en el botón submit del formulario.
+> - **Feedback de Carga Centralizado:** `setLoading(true)` y `finally { setLoading(false) }` en todas las operaciones asíncronas (`fetchCategorias`, `handleSubmit`, `handleDelete`).
+> - **Gestión de Errores Reactiva:** Bloques `try/catch` que capturan excepciones de red y respuestas HTTP fallidas (`!response.ok`), publicando el detalle en el banner accesible `[role="alert"]` con acción de reintento.
+
 - **Historias de Usuario asociadas:** HU-01, HU-02, HU-03.
 - **Reglas de Negocio asociadas:** RN-02.
-- **Criterio de Aceptación / Verificación:** El usuario recibe retroalimentación visual clara e inmediata sobre el éxito o fracaso de cada operación sin estados inconsistentes.
-
+- **Criterio de Aceptación / Verificación:** El usuario recibe retroalimentación visual clara e inmediata sobre el éxito o fracaso de cada operación sin estados inconsistentes ni bloqueos de interfaz.
 ---
 
 ### FASE 3: Backend — Modelos y Endpoints de Producto & Relaciones
 > **Estado:** **PENDIENTE**  
 > **Criterio de Dependencia:** Nivel 2. Implementa la lógica de backend requerida para el catálogo de productos y su relación N:N con categorías, sin requerir interfaz gráfica de usuario (conforme a RN-01).
 
-#### Tarea 3.1: Modelado y Schemas relacionales para `Producto` y tabla intermedia `Producto_Categoria` (SQLModel / Pydantic)
-- **Acción:** Definir en `unidad6_backend/app/models/` y `unidad6_backend/app/modules/producto/schemas.py`:
-  - Tabla intermedia `ProductoCategoria` (o `Producto_Categoria`) con clave primaria compuesta (`producto_id`, `categoria_id`) y claves foráneas con restricción de eliminación en cascada.
-  - Modelo persistente `Producto` con los campos exigidos por la consigna: `id: int`, `nombre: str`, `descripcion: str`, `precio_base: str`, `imagen_url: list[str]`, `disponible: bool`.
-  - Esquemas DTO de Pydantic: `ProductoBase`, `ProductoCreate`, `ProductoRead`, `ProductoUpdate` y esquemas de asociación.
-- **Estado:** Pendiente
+#### Tarea 3.1: Migración de persistencia de Categoría a SQLModel y Base de Datos Relacional (Prerrequisito N:N)
+- **Acción:** Para posibilitar la integridad referencial y las claves foráneas de la tabla intermedia `Producto_Categoria`, migrar la entidad `Categoria` de la lista en memoria actual (`db_categorias`) a la base de datos relacional:
+  - Crear la entidad persistente `Categoria` en `unidad6_backend/app/models/categoria.py` con `SQLModel, table=True` (`id: Optional[int]`, `nombre: str`, `descripcion: Optional[str]`, `activo: bool = True`) y el vínculo bidireccional `productos: list["Producto"] = Relationship(back_populates="categorias", link_model=ProductoCategoria)`.
+  - Refactorizar `unidad6_backend/app/modules/categoria/services.py` sustituyendo la manipulación en memoria por operaciones contra `Session` (`db.exec(select(Categoria))`, `db.add()`, `db.commit()`, `db.refresh()`).
+  - Inyectar la dependencia de sesión `db: Session = Depends(get_session)` en los endpoints de `app/modules/categoria/routers.py`.
+- **Estado:** Pendiente / Backlog
+- **Historias de Usuario asociadas:** HU-01, HU-02.
+- **Reglas de Negocio asociadas:** RN-01, RN-04.
+- **Criterio de Aceptación / Verificación:** Las categorías se persisten y consultan directamente desde la base de datos (PostgreSQL / SQLite) manteniendo 100% el contrato JSON consumido por el frontend React.
+
+#### Tarea 3.2: Modelado SQLModel para `Producto` y tabla intermedia `Producto_Categoria` (Alineación con TP6)
+- **Acción:** Definir en `unidad6_backend/app/models/producto.py`:
+  - Tabla intermedia `ProductoCategoria` (o `Producto_Categoria`) heredando de `SQLModel, table=True` con clave primaria compuesta (`producto_id: int = Field(foreign_key="producto.id", primary_key=True)`, `categoria_id: int = Field(foreign_key="categoria.id", primary_key=True)`).
+  - Modelo persistente `Producto` adaptado a los campos exactos exigidos por la consigna del TP6: `id: Optional[int] = Field(default=None, primary_key=True)`, `nombre: str`, `descripcion: str`, `precio_base: str`, `imagen_url: list[str] = Field(default_factory=list, sa_column=Column(JSON))`, `disponible: bool = True`.
+  - Configurar `categorias: list["Categoria"] = Relationship(back_populates="productos", link_model=ProductoCategoria)` para navegación directa de relaciones muchos a muchos.
+- **Estado:** Pendiente / Backlog
 - **Historias de Usuario asociadas:** N/A (Backend / REST Client).
 - **Reglas de Negocio asociadas:** RN-01, RN-04.
-- **Criterio de Aceptación / Verificación:** Tablas relacionales creadas y vinculadas con `Relationship` y `link_model` en SQLModel, sin ciclos de importación ni violaciones de integridad referencial.
+- **Criterio de Aceptación / Verificación:** Tablas relacionales creadas y vinculadas correctamente en `create_db_and_tables()` de SQLModel, sin ciclos de importación ni violaciones de claves foráneas.
 
-#### Tarea 3.2: Servicios y validaciones de negocio para Productos y vinculación con Categorías
-- **Acción:** Implementar en `services.py` y `validators.py` del módulo `producto`:
-  - Operaciones CRUD completas para la entidad `Producto`.
-  - Funciones para asociar y desasociar categorías a un producto específico.
-  - Validaciones de existencia previa de producto y categoría antes de persistir vínculos en la tabla intermedia.
-  - Consultas optimizadas con Eager Loading (`selectinload`) para evitar el problema $N+1$.
-- **Estado:** Pendiente
+#### Tarea 3.3: Schemas DTO, validaciones y servicios de negocio para Productos y vinculación N:N
+- **Acción:** Implementar en `unidad6_backend/app/modules/producto/schemas.py`, `services.py` y `validators.py`:
+  - Esquemas DTO de Pydantic: `ProductoBase`, `ProductoCreate`, `ProductoUpdate`, `ProductoRead` y `ProductoReadConCategorias` (incluyendo la lista anidada `categorias: list[CategoriaRead] = []`).
+  - Servicios CRUD completos para la entidad `Producto`.
+  - Funciones de servicio para asociar (`asociar_categoria`) y desasociar (`desasociar_categoria`) categorías a un producto específico.
+  - Validaciones de existencia previa de producto y categoría antes de persistir vínculos en la tabla intermedia, arrojando excepciones HTTP semánticas (404 si no existe, 409 si ya está asociada).
+  - Consultas optimizadas con Eager Loading (`selectinload(Producto.categorias)`) para prevenir el problema $N+1$.
+- **Estado:** Pendiente / Backlog
 - **Historias de Usuario asociadas:** N/A (Backend / REST Client).
 - **Reglas de Negocio asociadas:** RN-01.
-- **Criterio de Aceptación / Verificación:** Cobertura de pruebas unitarias con `pytest` validando la persistencia y recuperación de productos con sus categorías asociadas.
+- **Criterio de Aceptación / Verificación:** Servicios testeables que persisten productos y administran vínculos N:N con integridad referencial garantizada.
 
-#### Tarea 3.3: Exposición de endpoints REST en `unidad6_backend/app/modules/producto/routers.py`
+#### Tarea 3.4: Exposición de endpoints REST en `unidad6_backend/app/modules/producto/routers.py`
 - **Acción:** Registrar las rutas REST en el enrutador de productos:
-  - `POST /productos/`: Creación de producto.
-  - `GET /productos/`: Listado paginado de productos.
-  - `GET /productos/{id}`: Detalle de producto con sus categorías vinculadas.
-  - `PUT /productos/{id}`: Modificación de producto.
-  - `DELETE /productos/{id}`: Eliminación física o lógica de producto.
-  - `POST /productos/{id}/categorias/{categoria_id}`: Asociación de categoría a producto.
-  - `DELETE /productos/{id}/categorias/{categoria_id}`: Desvinculación de categoría de producto.
-- **Estado:** Pendiente
+  - `POST /productos/`: Creación de producto (status 201).
+  - `GET /productos/`: Listado paginado de productos (status 200).
+  - `GET /productos/{id}`: Detalle de producto con sus categorías vinculadas (status 200, schema `ProductoReadConCategorias`).
+  - `PUT /productos/{id}`: Modificación de producto (status 200).
+  - `DELETE /productos/{id}`: Eliminación física o lógica de producto (status 204).
+  - `POST /productos/{id}/categorias/{categoria_id}`: Asociación de categoría a producto (status 200 o 201).
+  - `DELETE /productos/{id}/categorias/{categoria_id}`: Desvinculación de categoría de producto (status 204).
+- **Estado:** Pendiente / Backlog
 - **Historias de Usuario asociadas:** N/A (Backend / REST Client).
 - **Reglas de Negocio asociadas:** RN-01.
 - **Criterio de Aceptación / Verificación:** Endpoints accesibles vía Swagger UI (`/docs`) y testeables con respuestas HTTP semánticas (200, 201, 204, 404, 409).
 
-#### Tarea 3.4: Elaboración de archivo de pruebas REST Client (`productos.http` y `categorias.http`)
-- **Acción:** Crear los archivos de solicitudes HTTP ejecutables para VS Code REST Client / JetBrains HTTP Client que demuestren el funcionamiento integral de la API sin requerir frontend:
+#### Tarea 3.5: Elaboración de archivo de pruebas REST Client (`productos.http` y `categorias.http`)
+- **Acción:** Crear los archivos de solicitudes HTTP ejecutables para VS Code REST Client / JetBrains HTTP Client en `unidad6_backend/` que demuestren el funcionamiento integral de la API sin requerir frontend:
   - Peticiones ordenadas para crear categorías.
-  - Creación de productos con diferentes atributos.
+  - Creación de productos con diferentes atributos (`precio_base: str`, lista `imagen_url`, `disponible: bool`).
   - Asociación de productos a múltiples categorías (relación N:N).
   - Consulta de producto verificando categorías anidadas en la respuesta JSON.
   - Actualización y eliminación de asociaciones y registros.
-- **Estado:** Pendiente
+  - Verificación de casos de error (404 para entidades inexistentes, 409 para duplicados).
+- **Estado:** Pendiente / Backlog
 - **Historias de Usuario asociadas:** N/A (Backend / REST Client).
 - **Reglas de Negocio asociadas:** RN-01.
-- **Criterio de Aceptación / Verificación:** El archivo `.http` se entrega junto al proyecto y ejecuta con 100% de éxito contra el servidor local.
+- **Criterio de Aceptación / Verificación:** El archivo `.http` se entrega junto al proyecto y ejecuta con 100% de éxito contra el servidor local demostrando el CRUD de Productos y la relación muchos a muchos.
 
 ---
 

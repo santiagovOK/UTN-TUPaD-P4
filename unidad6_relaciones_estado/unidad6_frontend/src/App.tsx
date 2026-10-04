@@ -6,12 +6,15 @@ import { CategoriaList } from './components/CategoriaList';
 import { Footer } from './components/Footer';
 
 export function App() {
+  // [Consigna TP6 - Parte B, inciso e]: useState para la lista de categorías, estado del modal y categoría en edición.
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [categoriaEnEdicion, setCategoriaEnEdicion] = useState<Categoria | null>(null);
+  // [Consigna TP6 - Parte B, inciso e]: Manejo de estado de carga (loading) y error en la UI.
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // [Consigna TP6 - Parte B, inciso e]: useEffect para cargar las categorías al montar el componente (GET /categorias) con fetch nativo y AbortController.
   const fetchCategorias = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setError(null);
@@ -58,6 +61,108 @@ export function App() {
     setCategoriaEnEdicion(null);
   };
 
+  // [Consigna TP6 - Parte B, inciso e]: Funciones de mutación CRUD con fetch nativo — handleCreate (POST) y handleUpdate (PUT) con actualización inmutable del estado.
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const nombre = (formData.get('nombre') as string)?.trim();
+    const descripcion = (formData.get('descripcion') as string)?.trim() || null;
+
+    if (!nombre) {
+      setError('El nombre de la categoría es obligatorio');
+      return;
+    }
+
+    const payload = {
+      nombre,
+      descripcion,
+      activo: categoriaEnEdicion ? categoriaEnEdicion.activo : true,
+    };
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (categoriaEnEdicion) {
+        const response = await fetch(
+          `http://localhost:8000/categorias/${categoriaEnEdicion.id}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const updatedCategoria: Categoria = await response.json();
+        setCategorias((prev) =>
+          prev.map((c) => (c.id === updatedCategoria.id ? updatedCategoria : c))
+        );
+        handleCloseModal();
+      } else {
+        const response = await fetch('http://localhost:8000/categorias/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const newCategoria: Categoria = await response.json();
+        setCategorias((prev) => [...prev, newCategoria]);
+        handleCloseModal();
+      }
+    } catch (err) {
+      const detalle = err instanceof Error ? err.message : 'Error de conexión';
+      setError(`No se pudo guardar la categoría: ${detalle}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // [Consigna TP6 - Parte B, inciso e]: Función handleDelete (DELETE) con confirmación previa y eliminación inmutable del estado.
+  const handleDelete = async (id: number) => {
+    const confirmacion = window.confirm(
+      '¿Estás seguro de que deseas eliminar esta categoría?'
+    );
+    if (!confirmacion) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`http://localhost:8000/categorias/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      setCategorias((prev) => prev.filter((c) => c.id !== id));
+      if (categoriaEnEdicion?.id === id) {
+        handleCloseModal();
+      }
+    } catch (err) {
+      const detalle = err instanceof Error ? err.message : 'Error de conexión';
+      setError(`No se pudo eliminar la categoría: ${detalle}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 flex flex-col">
       {/* Skip Link para accesibilidad de teclado */}
@@ -96,10 +201,13 @@ export function App() {
           <div className="lg:col-span-1">
             {isModalOpen ? (
               <CategoriaModal
+                // [Consigna TP6 - Parte B, inciso e]: Pasar las funciones y el estado como props a los componentes hijos.
                 key={categoriaEnEdicion?.id ?? 'new'}
                 isOpen={isModalOpen}
                 categoriaAEditar={categoriaEnEdicion}
                 onClose={handleCloseModal}
+                onSubmit={handleSubmit}
+                isSubmitting={loading}
               />
             ) : (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center gap-3">
@@ -162,8 +270,10 @@ export function App() {
               </div>
             ) : (
               <CategoriaList
+                // [Consigna TP6 - Parte B, inciso e]: Pasar las funciones y el estado como props a los componentes hijos.
                 categorias={categorias}
                 onEdit={handleOpenEditModal}
+                onDelete={handleDelete}
               />
             )}
           </div>

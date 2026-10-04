@@ -1,3 +1,4 @@
+// [Consigna TP6 - Parte B, inciso d]: Navbar.tsx — barra de navegación con el nombre de la app
 export function Navbar() {
   return (
     <header className="bg-indigo-600 text-white shadow-md">

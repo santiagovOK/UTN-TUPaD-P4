@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 
+# [Consigna TP6 - Parte A, inciso b]: Definir schemas Pydantic para Categoria (id, nombre, descripcion)
 class CategoriaBase(BaseModel):
     nombre: str = Field(..., min_length=1, examples=["Electrónica"])
     descripcion: Optional[str] = Field(None, examples=["Dispositivos y accesorios electrónicos"])

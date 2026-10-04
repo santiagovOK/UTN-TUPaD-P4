@@ -1,10 +1,12 @@
 import type { Categoria } from '../types/categoria';
 
+// [Consigna TP6 - Parte B, inciso d]: CategoriaModal.tsx — formulario de alta/edición dentro de un modal accesible.
 export interface CategoriaModalProps {
   isOpen?: boolean;
   categoriaAEditar?: Categoria | null;
   onClose?: () => void;
-  onSubmit?: (e: React.FormEvent) => void;
+  onSubmit?: (e: React.FormEvent<HTMLFormElement>) => void;
+  isSubmitting?: boolean;
 }
 
 export function CategoriaModal({
@@ -12,6 +14,7 @@ export function CategoriaModal({
   categoriaAEditar = null,
   onClose,
   onSubmit,
+  isSubmitting = false,
 }: CategoriaModalProps) {
   if (!isOpen) return null;
 
@@ -89,11 +92,17 @@ export function CategoriaModal({
               Cancelar
             </button>
           )}
+          {/* [Consigna TP6 - Parte B, inciso e]: Prevención de doble envío mediante isSubmitting y estado disabled. */}
           <button
             type="submit"
-            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
+            disabled={isSubmitting}
+            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
           >
-            {isEditing ? 'Guardar Cambios' : 'Guardar Categoría'}
+            {isSubmitting
+              ? 'Guardando...'
+              : isEditing
+                ? 'Guardar Cambios'
+                : 'Guardar Categoría'}
           </button>
         </div>
       </form>

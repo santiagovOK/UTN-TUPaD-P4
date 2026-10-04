@@ -25,7 +25,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # Configuración de CORS para permitir la comunicación con el frontend (React + Vite)
+    # [Consigna TP6 - Parte A, inciso c]: Habilitar CORS para permitir consumo desde el Frontend (localhost:5173)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],

@@ -1,5 +1,6 @@
 import type { Categoria } from '../types/categoria';
 
+// [Consigna TP6 - Parte B, inciso d]: CategoriaCard.tsx — tarjeta que muestra una categoría (nombre + descripción). Recibe props tipados con Categoria e incluye botones Editar y Eliminar.
 export interface CategoriaCardProps {
   categoria: Categoria;
   onEdit?: (categoria: Categoria) => void;
