@@ -1,49 +1,67 @@
+"""
+Servicios de datos para la entidad Categoria.
+
+[Consigna TP6 - Rúbrica Backend]: CRUD Categorías con persistencia en Base de Datos mediante SQLModel Session.
+Reemplaza la persistencia en memoria por transacciones atómicas contra la base de datos relacional.
+"""
 from typing import List, Optional
-from .schemas import CategoriaCreate, CategoriaRead
+from sqlmodel import Session, select
+from app.models.categoria import Categoria
+from .schemas import CategoriaCreate
 
-# Simulamos algunos registros iniciales
-db_categorias: List[CategoriaRead] = [
-    CategoriaRead(id=1, nombre="Muebles de Oficina", descripcion="Muebles y escritorios de trabajo", activo=True),
-    CategoriaRead(id=2, nombre="Electrónica", descripcion="Dispositivos y gadgets electrónicos", activo=True),
-]
-id_counter = 3
-
-
-def crear(data: CategoriaCreate) -> CategoriaRead:
-    global id_counter
-    nueva = CategoriaRead(id=id_counter, **data.model_dump())
-    db_categorias.append(nueva)
-    id_counter += 1
+# [Consigna TP6 - Rúbrica Backend]: Alta de categoría con persistencia en DB (db.add, db.commit, db.refresh)
+def crear(db: Session, data: CategoriaCreate) -> Categoria:
+    nueva = Categoria.model_validate(data)
+    db.add(nueva)
+    db.commit()
+    db.refresh(nueva)
     return nueva
 
 
-def obtener_todas(skip: int = 0, limit: int = 10) -> List[CategoriaRead]:
-    return db_categorias[skip : skip + limit]
+# [Consigna TP6 - Rúbrica Backend]: Listado de categorías persistidas en DB relacional (select(Categoria))
+def obtener_todas(db: Session, skip: int = 0, limit: int = 10) -> List[Categoria]:
+    statement = select(Categoria).offset(skip).limit(limit)
+    return list(db.exec(statement).all())
 
 
-def obtener_por_id(id: int) -> Optional[CategoriaRead]:
-    return next((c for c in db_categorias if c.id == id), None)
-
-def actualizar_total(id: int, data: CategoriaCreate) -> Optional[CategoriaRead]:
-    for index, c in enumerate(db_categorias):
-        if c.id == id:
-            actualizada = CategoriaRead(id=id, **data.model_dump())
-            db_categorias[index] = actualizada
-            return actualizada
-    return None
+# [Consigna TP6 - Rúbrica Backend]: Consulta de categoría por clave primaria en DB (db.get)
+def obtener_por_id(db: Session, id: int) -> Optional[Categoria]:
+    return db.get(Categoria, id)
 
 
-def desactivar(id: int) -> Optional[CategoriaRead]:
-    for index, c in enumerate(db_categorias):
-        if c.id == id:
-            actualizada = c.model_copy(update={"activo": False})
-            db_categorias[index] = actualizada
-            return actualizada
-    return None
+# [Consigna TP6 - Rúbrica Backend]: Modificación total de categoría en DB (db.commit)
+def actualizar_total(
+    db: Session, id: int, data: CategoriaCreate
+) -> Optional[Categoria]:
+    categoria = db.get(Categoria, id)
+    if not categoria:
+        return None
+    categoria.nombre = data.nombre
+    categoria.descripcion = data.descripcion
+    categoria.activo = data.activo
+    db.add(categoria)
+    db.commit()
+    db.refresh(categoria)
+    return categoria
 
-def eliminar(id: int) -> bool:
-    for index, c in enumerate(db_categorias):
-        if c.id == id:
-            del db_categorias[index]
-            return True
-    return False
+
+# [Consigna TP6 - Rúbrica Backend]: Borrado lógico (activo = False) persistido en DB
+def desactivar(db: Session, id: int) -> Optional[Categoria]:
+    categoria = db.get(Categoria, id)
+    if not categoria:
+        return None
+    categoria.activo = False
+    db.add(categoria)
+    db.commit()
+    db.refresh(categoria)
+    return categoria
+
+
+# [Consigna TP6 - Rúbrica Backend]: Eliminación física de categoría en DB (db.delete, db.commit)
+def eliminar(db: Session, id: int) -> bool:
+    categoria = db.get(Categoria, id)
+    if not categoria:
+        return False
+    db.delete(categoria)
+    db.commit()
+    return True

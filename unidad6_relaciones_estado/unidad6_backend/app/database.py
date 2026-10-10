@@ -30,12 +30,15 @@ engine = create_engine(
 )
 
 
+# [Consigna TP6 - Parte A, inciso b & Rúbrica Backend / Tarea 3.1]:
+# Creación automática de tablas persistentes (categoria, producto, productocategoria) en la base de datos relacional.
 def create_db_and_tables():
     """Crea las tablas desde los metadatos SQLModel existentes.
 
     Importa los modelos para que queden registrados en SQLModel.metadata antes de create_all.
     """
-    from app.models.producto import Producto  # noqa: F401
+    from app.models.producto import Producto, ProductoCategoria  # noqa: F401
+    from app.models.categoria import Categoria  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
 

@@ -13,9 +13,9 @@ export function CategoriaList({ categorias, onEdit, onDelete }: CategoriaListPro
     return (
       <section
         aria-label="Catálogo de categorías"
-        className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300"
+        className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300"
       >
-        <p role="status" aria-live="polite" className="text-gray-500 text-base">
+        <p role="status" aria-live="polite" className="text-slate-500 text-base">
           No hay categorías disponibles para mostrar.
         </p>
       </section>
@@ -24,17 +24,48 @@ export function CategoriaList({ categorias, onEdit, onDelete }: CategoriaListPro
 
   return (
     <section aria-label="Catálogo de categorías">
-      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 list-none p-0 m-0">
-        {categorias.map((categoria) => (
-          <li key={categoria.id} className="flex">
-            <CategoriaCard
-              categoria={categoria}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          </li>
-        ))}
-      </ul>
+      <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead className="bg-slate-50">
+            <tr>
+              <th
+                scope="col"
+                className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500"
+              >
+                NÚMERO
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500"
+              >
+                NOMBRE
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500"
+              >
+                DESCRIPCIÓN
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right"
+              >
+                ACCIONES
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {categorias.map((categoria) => (
+              <CategoriaCard
+                key={categoria.id}
+                categoria={categoria}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

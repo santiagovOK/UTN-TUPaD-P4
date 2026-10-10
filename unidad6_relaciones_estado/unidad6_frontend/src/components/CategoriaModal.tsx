@@ -21,91 +21,80 @@ export function CategoriaModal({
   const isEditing = Boolean(categoriaAEditar);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-8"
-    >
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <h2 id="modal-title" className="text-xl font-bold text-gray-900">
-            {isEditing ? 'Editar Categoría' : 'Registrar Nueva Categoría'}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 sm:p-8"
+      >
+        <div className="mb-5">
+          <h2 id="modal-title" className="text-xl font-bold text-slate-900">
+            {isEditing ? 'Editar Categoría' : 'Nueva Categoría'}
           </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Formulario de alta y edición de categorías con maquetado reciclado.
-          </p>
         </div>
-        {onClose && (
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-            aria-label="Cerrar modal"
-          >
-            ✕
-          </button>
-        )}
-      </div>
 
-      <form onSubmit={onSubmit ?? ((e) => e.preventDefault())}>
-        <fieldset className="space-y-4">
-          <legend className="sr-only">Información de la Categoría</legend>
+        <form onSubmit={onSubmit ?? ((e) => e.preventDefault())}>
+          <fieldset className="space-y-4">
+            <legend className="sr-only">Información de la Categoría</legend>
 
-          <div>
-            <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre de la Categoría <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="nombre"
-              name="nombre"
-              required
-              defaultValue={categoriaAEditar?.nombre ?? ''}
-              placeholder="Ej: Muebles de Oficina, Electrónica..."
-              className="w-full px-3.5 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
-            />
-          </div>
+            <div>
+              <label
+                htmlFor="nombre"
+                className="block text-sm font-medium text-slate-700 mb-1.5"
+              >
+                Nombre de la categoría
+              </label>
+              <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                required
+                defaultValue={categoriaAEditar?.nombre ?? ''}
+                placeholder="Ej: Pizzas, Hamburguesas..."
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-1">
-              Descripción
-            </label>
-            <textarea
-              id="descripcion"
-              name="descripcion"
-              rows={3}
-              defaultValue={categoriaAEditar?.descripcion ?? ''}
-              placeholder="Descripción detallada de la categoría..."
-              className="w-full px-3.5 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm resize-none transition-colors"
-            />
-          </div>
-        </fieldset>
+            <div>
+              <label
+                htmlFor="descripcion"
+                className="block text-sm font-medium text-slate-700 mb-1.5"
+              >
+                Descripción
+              </label>
+              <input
+                type="text"
+                id="descripcion"
+                name="descripcion"
+                defaultValue={categoriaAEditar?.descripcion ?? ''}
+                placeholder="Descripción de la categoría..."
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              />
+            </div>
+          </fieldset>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
-          {onClose && (
+          <div className="flex justify-end gap-3 pt-6">
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+            )}
+            {/* [Consigna TP6 - Parte B, inciso e]: Prevención de doble envío mediante isSubmitting y estado disabled. */}
             <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer"
+              type="submit"
+              disabled={isSubmitting}
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
             >
-              Cancelar
+              {isSubmitting ? 'Guardando...' : 'Guardar'}
             </button>
-          )}
-          {/* [Consigna TP6 - Parte B, inciso e]: Prevención de doble envío mediante isSubmitting y estado disabled. */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white font-medium text-sm rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
-          >
-            {isSubmitting
-              ? 'Guardando...'
-              : isEditing
-                ? 'Guardar Cambios'
-                : 'Guardar Categoría'}
-          </button>
-        </div>
-      </form>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

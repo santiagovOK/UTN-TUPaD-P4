@@ -7,8 +7,24 @@ Las tablas se crean mediante SQLModel.metadata.create_all(engine) en database.py
 Campos del modelo: id, nombre, descripcion, precio, categoria, stock, stock_minimo, activo
 """
 
-from sqlmodel import SQLModel, Field
-from typing import Optional
+from typing import List, Optional, TYPE_CHECKING
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from .categoria import Categoria
+
+
+# [Consigna TP6 - Parte A, inciso b]: Tabla intermedia Producto_Categoria (producto_id: int, categoria_id: int)
+# para materializar la relación muchos a muchos (N:N) entre Producto y Categoria con integridad referencial.
+class ProductoCategoria(SQLModel, table=True):
+    """Tabla intermedia para la relación muchos a muchos entre Producto y Categoria."""
+
+    producto_id: Optional[int] = Field(
+        default=None, foreign_key="producto.id", primary_key=True
+    )
+    categoria_id: Optional[int] = Field(
+        default=None, foreign_key="categoria.id", primary_key=True
+    )
 
 
 class ProductoBase(SQLModel):
@@ -35,3 +51,7 @@ class Producto(ProductoBase, table=True):
     """
 
     id: Optional[int] = Field(default=None, primary_key=True)
+    categorias: List["Categoria"] = Relationship(
+        back_populates="productos",
+        link_model=ProductoCategoria,
+    )

@@ -197,88 +197,50 @@ export function App() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
-          <div className="lg:col-span-1">
-            {isModalOpen ? (
-              <CategoriaModal
-                // [Consigna TP6 - Parte B, inciso e]: Pasar las funciones y el estado como props a los componentes hijos.
-                key={categoriaEnEdicion?.id ?? 'new'}
-                isOpen={isModalOpen}
-                categoriaAEditar={categoriaEnEdicion}
-                onClose={handleCloseModal}
-                onSubmit={handleSubmit}
-                isSubmitting={loading}
-              />
-            ) : (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-base font-semibold text-gray-900">
-                    Gestión de Categorías
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Crea una nueva categoría para organizar los productos del catálogo.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleOpenCreateModal}
-                  className="mt-2 w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
-                >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                  Registrar Nueva Categoría
-                </button>
-              </div>
-            )}
-          </div>
-          <div className="lg:col-span-2">
-            {loading ? (
-              <div
-                role="status"
-                aria-live="polite"
-                className="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300"
-              >
-                <p className="text-gray-500 text-base">Cargando categorías...</p>
-              </div>
-            ) : (
-              <CategoriaList
-                // [Consigna TP6 - Parte B, inciso e]: Pasar las funciones y el estado como props a los componentes hijos.
-                categorias={categorias}
-                onEdit={handleOpenEditModal}
-                onDelete={handleDelete}
-              />
-            )}
-          </div>
+        <div className="max-w-5xl mx-auto w-full">
+          <header className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+              Categorías
+            </h2>
+            <button
+              type="button"
+              onClick={handleOpenCreateModal}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
+            >
+              + Añadir Categoría
+            </button>
+          </header>
+
+          {loading && !isModalOpen ? (
+            <div
+              role="status"
+              aria-live="polite"
+              className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300"
+            >
+              <p className="text-slate-500 text-base">Cargando categorías...</p>
+            </div>
+          ) : (
+            <CategoriaList
+              // [Consigna TP6 - Parte B, inciso e]: Pasar las funciones y el estado como props a los componentes hijos.
+              categorias={categorias}
+              onEdit={handleOpenEditModal}
+              onDelete={handleDelete}
+            />
+          )}
         </div>
       </main>
+
+      {isModalOpen && (
+        <CategoriaModal
+          // [Consigna TP6 - Parte B, inciso e]: Pasar las funciones y el estado como props a los componentes hijos.
+          key={categoriaEnEdicion?.id ?? 'new'}
+          isOpen={isModalOpen}
+          categoriaAEditar={categoriaEnEdicion}
+          onClose={handleCloseModal}
+          onSubmit={handleSubmit}
+          isSubmitting={loading}
+        />
+      )}
 
       <Footer />
     </div>
