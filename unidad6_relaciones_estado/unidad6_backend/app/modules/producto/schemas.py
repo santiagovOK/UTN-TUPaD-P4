@@ -1,86 +1,71 @@
-from typing import Optional
+"""
+Schemas DTO Pydantic / SQLModel para la entidad Producto y relación con Categorías.
+
+[Consigna TP6 - Parte A, inciso b]: Definir los models y schemas:
+  - Producto (id: int, nombre: str, descripcion: str, precio_base: str, imagen_url: list[], disponible: bool)
+[Consigna TP6 - Rúbrica Backend]: Esquemas Pydantic para validación y serialización de datos.
+"""
+
+from typing import List, Optional
 from sqlmodel import SQLModel, Field
-from app.models.producto import ProductoBase
 from pydantic import field_validator
+from app.models.producto import ProductoBase
+from app.modules.categoria.schemas import CategoriaRead
 from .validators import validate_producto_nombres
 
 
-# ============================
+# =============================================================================
 # DTO de Entrada - Creación
-# ============================
+# =============================================================================
+# [Consigna TP6 - Parte A, inciso b]: Schema de creación validando nombre, descripcion, precio_base, imagen_url, disponible.
 class ProductoCreate(ProductoBase):
     """Schema de entrada para creación de producto (sin ID).
 
-    Hereda todos los campos y restricciones declarativas de ProductoBase:
-    nombre obligatorio (min_length=1), precio >= 0, etc.
-
-    El validador validate_producto_nombres se aplica a nivel de Pydantic
-    (capa de DTO, no el service) para cumplir la validación temprana.
+    Hereda los campos y restricciones declarativas de ProductoBase (TP6):
+    nombre, descripcion, precio_base, imagen_url, disponible.
     """
 
-    @field_validator('nombre')
+    @field_validator("nombre")
     @classmethod
     def validar_nombre(cls, value: str) -> str:
-        """Aplica validate_producto_nombres desde el módulo dedicado.
-
-        por default Pydantic garantiza
-        que value es un string, delegando el chequeo de tipos a la librería
-        y evitando excepciones no controladas.
-        """
+        """Aplica validate_producto_nombres desde el módulo dedicado."""
         return validate_producto_nombres(value)
 
-# ============================
-# DTO de Salida - Response
-# ============================
-class ProductoResponse(ProductoBase):
-    """Schema de salida garantizando que el ID esté presente.
 
-    Contrato de respuesta para todos los endpoints de lectura.
-    Refleja fielmente la entidad SQLModel Producto del backend.
+# =============================================================================
+# DTOs de Salida - Lectura y Consulta de Relación N:N
+# =============================================================================
+# [Consigna TP6 - Parte A, inciso b & Rúbrica Backend]: Schema de lectura garantizando la presencia de id.
+class ProductoRead(ProductoBase):
+    """Schema de salida garantizando que el ID esté presente."""
 
-    """
     id: int
 
-# ============================
-# DTO de Actualización (ahora con SQLModel - Unidad 5)
-# ============================
-class ProductoUpdate(SQLModel):
-    """Schema para actualización con campos opcionales.
 
-    Permite actualizar parcial o totalmente los atributos del producto.
-    Los validadores de negocio (nombre no vacío, precio >= 0) se aplican
-    solo cuando se proporcionan valores explícitos.
-    """
+# [Consigna TP6 - Parte A, inciso d & Conclusiones Esperadas]:
+# Schema de salida con lista anidada de categorías asociadas (relación muchos a muchos).
+class ProductoReadConCategorias(ProductoRead):
+    """Schema de salida de Producto que incluye la lista anidada de categorías asociadas (relación N:N)."""
+
+    categorias: List[CategoriaRead] = []
+
+
+# =============================================================================
+# DTO de Actualización
+# =============================================================================
+# [Consigna TP6 - Rúbrica Backend]: Schema para actualización parcial o total de campos del producto.
+class ProductoUpdate(SQLModel):
+    """Schema para actualización parcial o total de atributos de Producto."""
     nombre: Optional[str] = None
     descripcion: Optional[str] = None
-    precio: Optional[float] = Field(default=None, ge=0)
-    categoria: Optional[str] = None
-    stock: Optional[int] = Field(default=None, ge=0)
-    stock_minimo: Optional[int] = Field(default=None, ge=0)
-    activo: Optional[bool] = None
+    precio_base: Optional[str] = Field(default=None, min_length=1)
+    imagen_url: Optional[List[str]] = None
+    disponible: Optional[bool] = None
 
-    @field_validator('nombre')
+    @field_validator("nombre")
     @classmethod
     def validar_nombre_opcional(cls, value: Optional[str]) -> Optional[str]:
         """Aplica validación de nombre cuando se provee explícitamente."""
         if value is not None:
             return validate_producto_nombres(value)
         return value
-
-# ============================
-# Respuesta de Consulta Stock
-# ============================
-class ProductoStockResponse(SQLModel):
-    """Schema para respuesta de consulta de stock.
-
-    Entrega el estado actual del inventario junto con la bandera de alerta.
-    """
-    stock: int
-    bajo_stock_minimo: bool
-    activo: bool
-
-
-# ============================
-# Compatibilidad con routers/services existentes
-# ============================
-ProductoRead = ProductoResponse

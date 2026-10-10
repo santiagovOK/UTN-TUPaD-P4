@@ -1,14 +1,14 @@
 """
-Modelo de datos para la entidad Producto.
+Modelo de datos para la entidad Producto y la relación Producto_Categoria.
 
-Este archivo define la jerarquía SQLModel que se persiste en PostgreSQL.
-Las tablas se crean mediante SQLModel.metadata.create_all(engine) en database.py.
-
-Campos del modelo: id, nombre, descripcion, precio, categoria, stock, stock_minimo, activo
+[Consigna TP6 - Parte A, inciso b]: Definir los models y schemas:
+  - Producto (id: int, nombre: str, descripcion: str, precio_base: str, imagen_url: list[], disponible: bool)
+  - Producto_Categoria (producto_id: int, categoria_id: int)
+[Consigna TP6 - Rúbrica Backend]: Persistencia de Producto y relación N:N mediante SQLModel y tablas relacionales.
 """
 
 from typing import List, Optional, TYPE_CHECKING
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Column, Field, JSON, Relationship, SQLModel
 
 if TYPE_CHECKING:
     from .categoria import Categoria
@@ -27,29 +27,24 @@ class ProductoCategoria(SQLModel, table=True):
     )
 
 
+# [Consigna TP6 - Parte A, inciso b]: Modelado base de Producto con campos exactos:
+# nombre, descripcion, precio_base (str), imagen_url (list JSON) y disponible (bool).
 class ProductoBase(SQLModel):
     """Campos comunes para la entidad Producto.
 
-    Base hereditaria para los schemas de DTO (entrada/salida).
-    No crea tabla por sí sola.
+    Base hereditaria para la entidad persistente y los schemas de DTO.
     """
-
     nombre: str = Field(..., min_length=1)
-    descripcion: Optional[str] = None
-    precio: float = Field(..., ge=0)
-    categoria: Optional[str] = None
-    stock: Optional[int] = Field(default=None, ge=0)
-    stock_minimo: Optional[int] = Field(default=None, ge=0)
-    activo: Optional[bool] = True
+    descripcion: Optional[str] = Field(default=None)
+    precio_base: str = Field(..., min_length=1)
+    imagen_url: List[str] = Field(default_factory=list, sa_column=Column(JSON))
+    disponible: bool = Field(default=True)
 
 
+# [Consigna TP6 - Parte A, inciso b & Rúbrica Backend]:
+# Entidad persistente Producto con clave primaria autoincremental y relación N:N hacia Categoria.
 class Producto(ProductoBase, table=True):
-    """Entidad principal que se persiste en PostgreSQL.
-
-    Agrega el campo ID como primary key. La tabla 'producto' se crea
-    al invocar SQLModel.metadata.create_all(engine) en database.py.
-    """
-
+    """Entidad principal persistida en la base de datos relacional."""
     id: Optional[int] = Field(default=None, primary_key=True)
     categorias: List["Categoria"] = Relationship(
         back_populates="productos",

@@ -222,7 +222,7 @@
   - Tabla intermedia `ProductoCategoria` (o `Producto_Categoria`) heredando de `SQLModel, table=True` con clave primaria compuesta (`producto_id: int = Field(foreign_key="producto.id", primary_key=True)`, `categoria_id: int = Field(foreign_key="categoria.id", primary_key=True)`).
   - Modelo persistente `Producto` adaptado a los campos exactos exigidos por la consigna del TP6: `id: Optional[int] = Field(default=None, primary_key=True)`, `nombre: str`, `descripcion: str`, `precio_base: str`, `imagen_url: list[str] = Field(default_factory=list, sa_column=Column(JSON))`, `disponible: bool = True`.
   - Configurar `categorias: list["Categoria"] = Relationship(back_populates="productos", link_model=ProductoCategoria)` para navegación directa de relaciones muchos a muchos.
-- **Estado:** Pendiente / Backlog
+- **Estado:** **Completada**
 - **Historias de Usuario asociadas:** N/A (Backend / REST Client).
 - **Reglas de Negocio asociadas:** RN-01, RN-04.
 - **Criterio de Aceptación / Verificación:** Tablas relacionales creadas y vinculadas correctamente en `create_db_and_tables()` de SQLModel, sin ciclos de importación ni violaciones de claves foráneas.
@@ -235,7 +235,7 @@
   - Funciones de servicio para asociar (`asociar_categoria`) y desasociar (`desasociar_categoria`) categorías a un producto específico.
   - Validaciones de existencia previa de producto y categoría antes de persistir vínculos en la tabla intermedia, arrojando excepciones HTTP semánticas (404 si no existe, 409 si ya está asociada).
   - Consultas optimizadas con Eager Loading (`selectinload(Producto.categorias)`) para prevenir el problema $N+1$.
-- **Estado:** Pendiente / Backlog
+- **Estado:** **Completada**
 - **Historias de Usuario asociadas:** N/A (Backend / REST Client).
 - **Reglas de Negocio asociadas:** RN-01.
 - **Criterio de Aceptación / Verificación:** Servicios testeables que persisten productos y administran vínculos N:N con integridad referencial garantizada.
@@ -250,7 +250,7 @@
   - `DELETE /productos/{id}`: Eliminación física o lógica de producto (status 204).
   - `POST /productos/{id}/categorias/{categoria_id}`: Asociación de categoría a producto (status 200 o 201).
   - `DELETE /productos/{id}/categorias/{categoria_id}`: Desvinculación de categoría de producto (status 204).
-- **Estado:** Pendiente / Backlog
+- **Estado:** **Completada**
 - **Historias de Usuario asociadas:** N/A (Backend / REST Client).
 - **Reglas de Negocio asociadas:** RN-01.
 - **Criterio de Aceptación / Verificación:** Endpoints accesibles vía Swagger UI (`/docs`) y testeables con respuestas HTTP semánticas (200, 201, 204, 404, 409).
@@ -315,7 +315,7 @@
 - [x] **Entorno y dependencias:** Declarados rigurosamente en `unidad6_backend/requirements.txt`, `unidad6_frontend/package.json` y `package.json` raíz.
 - [x] **Frontend reactivo:** CRUD de categorías operativo de extremo a extremo mediante `fetch` nativo y hooks (`useState`, `useEffect`) centralizados en `App.tsx`.
 - [x] **Modal funcional:** Formulario de alta/edición dentro de `CategoriaModal.tsx` controlado por estado booleano de visibilidad y backdrop flotante.
-- [ ] **Backend modular:** Endpoints de Categorías, Productos y relación `Producto_Categoria` implementados con FastAPI y SQLModel.
+- [x] **Backend modular:** Endpoints de Categorías, Productos y relación `Producto_Categoria` implementados con FastAPI y SQLModel.
 - [ ] **Demostración REST Client:** Archivo `.http` disponible en el backend para ejecutar y evidenciar las operaciones de Producto y su relación N:N.
 - [x] **CORS habilitado:** Middleware en FastAPI configurado para permitir peticiones desde `http://localhost:5173`.
 - [x] **Tipado TypeScript:** Interfaces `Categoria` y `Producto` estrictamente tipadas. Props tipados en todos los componentes funcionales (`.tsx`).
