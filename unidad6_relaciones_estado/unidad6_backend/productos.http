@@ -1,0 +1,291 @@
+# ==============================================================================
+# ARCHIVO ÚNICO DE PRUEBAS REST CLIENT — TRABAJO PRÁCTICO 6
+# Demostración Integral de Endpoints: Categorías, Productos y Relación N:N
+# ==============================================================================
+# [Consigna TP6 - Objetivo General]:
+#   "Los CRUDs de Producto y ProductoCategoria serán construidos en el backend
+#    y demostrados mediante un archivo REST Client."
+#
+# [Consigna TP6 - Parte A, inciso d]:
+#   "Implementar también los endpoints de Producto. Estos no necesitan conectarse
+#    al frontend — serán demostrados con REST Client. (El archivo .http debera ser
+#    entregado junto al proyecto)"
+#
+# [Consigna TP6 - Parte A, inciso b]:
+#   Modelos y Schemas evaluados:
+#   - Producto (id: int, nombre: str, descripcion: str, precio_base: str, imagen_url: list[], disponible: bool)
+#   - Producto_Categoria (producto_id: int, categoria_id: int)
+#   - Categoria (id: int, nombre: str, descripcion: str)
+#
+# [Consigna TP6 - Conclusiones Esperadas & Rúbrica de Evaluación (15 pts)]:
+#   "Backend REST documentado: Endpoints de Producto y ProductoCategoria
+#    funcionando y demostrados en el archivo .http. No requiere UI."
+# ==============================================================================
+
+@baseUrl = http://localhost:8000
+@contentType = application/json
+
+
+# ==============================================================================
+# SECCIÓN 1: CRUD Y GESTIÓN DE CATEGORÍAS (Backend FastAPI)
+# [Consigna TP6 - Parte A, incisos b y c & Rúbrica Categorías Backend]:
+# ==============================================================================
+
+### 1.1 Crear Categoría 1: Periféricos (201 Created)
+POST {{baseUrl}}/categorias/
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Periféricos",
+  "descripcion": "Teclados, ratones, auriculares y accesorios de entrada/salida",
+  "activo": true
+}
+
+### 1.2 Crear Categoría 2: Gaming (201 Created)
+POST {{baseUrl}}/categorias/
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Gaming",
+  "descripcion": "Equipamiento de alto rendimiento para videojuegos y eSports",
+  "activo": true
+}
+
+### 1.3 Crear Categoría 3: Oficina y Ergonomía (201 Created)
+POST {{baseUrl}}/categorias/
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Oficina y Ergonomía",
+  "descripcion": "Artículos ergonómicos para puestos de trabajo profesional",
+  "activo": true
+}
+
+### 1.4 Crear Categoría Temporal 4: Para prueba de borrado físico (201 Created)
+POST {{baseUrl}}/categorias/
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Categoría Temporal",
+  "descripcion": "Creada para evidenciar eliminación física",
+  "activo": true
+}
+
+### 1.5 Listar todas las Categorías con paginación (200 OK)
+GET {{baseUrl}}/categorias/?skip=0&limit=10
+Accept: {{contentType}}
+
+### 1.6 Consultar Detalle de Categoría por ID (200 OK)
+GET {{baseUrl}}/categorias/1
+Accept: {{contentType}}
+
+### 1.7 Actualizar Categoría existente (200 OK)
+PUT {{baseUrl}}/categorias/1
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Periféricos y Accesorios",
+  "descripcion": "Teclados mecánicos, ratones ópticos, auriculares y accesorios de PC",
+  "activo": true
+}
+
+### 1.8 Desactivar Categoría — Borrado Lógico (200 OK con "activo": false)
+PUT {{baseUrl}}/categorias/3/desactivar
+Accept: {{contentType}}
+
+### 1.9 Verificar estado tras Borrado Lógico (200 OK)
+GET {{baseUrl}}/categorias/3
+Accept: {{contentType}}
+
+### 1.10 Eliminar físicamente la Categoría Temporal 4 (204 No Content)
+DELETE {{baseUrl}}/categorias/4
+
+### 1.11 Verificar que la Categoría 4 ya no existe tras el borrado físico (404 Not Found)
+GET {{baseUrl}}/categorias/4
+Accept: {{contentType}}
+
+
+# ==============================================================================
+# SECCIÓN 2: CRUD COMPLETO DE PRODUCTOS
+# [Consigna TP6 - Parte A, incisos b y d & Rúbrica Backend]:
+# Demostración de alta, listado paginado, consulta por ID, actualización y baja.
+# ==============================================================================
+
+### 2.1 Alta de Producto 1 con múltiples imágenes (201 Created)
+# [Consigna TP6 - Parte A, inciso b]: Verifica campos nombre (str), descripcion (str),
+# precio_base (str), imagen_url (list[str]) y disponible (bool).
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Teclado Mecánico RGB Pro",
+  "descripcion": "Teclado mecánico switches red con iluminación RGB personalizable y chasis de aluminio",
+  "precio_base": "89990.50",
+  "imagen_url": [
+    "https://ejemplo.com/img/teclado-rgb-frente.jpg",
+    "https://ejemplo.com/img/teclado-rgb-perfil.jpg"
+  ],
+  "disponible": true
+}
+
+### 2.2 Alta de Producto 2 (201 Created)
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Mouse Inalámbrico Ergonómico Vertical",
+  "descripcion": "Mouse óptico inalámbrico 2.4GHz + Bluetooth con diseño vertical de 57 grados",
+  "precio_base": "45500.00",
+  "imagen_url": [
+    "https://ejemplo.com/img/mouse-ergo-1.jpg"
+  ],
+  "disponible": true
+}
+
+### 2.3 Listar todos los Productos con paginación (200 OK)
+# [Consigna TP6 - Parte A, inciso d]: Retorna lista de productos con sus categorías anidadas (Eager Loading)
+GET {{baseUrl}}/productos/?skip=0&limit=10
+Accept: {{contentType}}
+
+### 2.4 Consultar Detalle de Producto por ID (200 OK)
+# [Consigna TP6 - Parte A, inciso d]: Verifica schema ProductoReadConCategorias
+GET {{baseUrl}}/productos/1
+Accept: {{contentType}}
+
+### 2.5 Actualizar Producto existente (200 OK)
+# [Consigna TP6 - Parte A, inciso d & Rúbrica]: Modificación de precio_base, descripcion e imagen_url
+PUT {{baseUrl}}/productos/1
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Teclado Mecánico RGB Pro v2",
+  "descripcion": "Edición actualizada con switches hot-swappable, reposamuñecas magnético y cable USB-C mallado",
+  "precio_base": "95000.00",
+  "imagen_url": [
+    "https://ejemplo.com/img/teclado-rgb-v2-frente.jpg",
+    "https://ejemplo.com/img/teclado-rgb-v2-detalle.jpg",
+    "https://ejemplo.com/img/teclado-rgb-v2-packaging.jpg"
+  ],
+  "disponible": true
+}
+
+
+# ==============================================================================
+# SECCIÓN 3: GESTIÓN DE LA RELACIÓN MUCHOS A MUCHOS (N:N) — Producto_Categoria
+# [Consigna TP6 - Parte A, incisos b y d & Conclusiones Esperadas]:
+# "Endpoints de Producto y ProductoCategoria funcionando y demostrados en el archivo .http"
+# ==============================================================================
+
+### 3.1 Asociar Categoría 1 (Periféricos) al Producto 1 (201 Created)
+# Inserta registro (producto_id=1, categoria_id=1) en tabla intermedia Producto_Categoria
+POST {{baseUrl}}/productos/1/categorias/1
+Accept: {{contentType}}
+
+### 3.2 Asociar Categoría 2 (Gaming) al Producto 1 (201 Created)
+# Demuestra que un mismo Producto puede pertenecer a múltiples Categorías
+POST {{baseUrl}}/productos/1/categorias/2
+Accept: {{contentType}}
+
+### 3.3 Asociar Categoría 1 (Periféricos) y Categoría 3 (Oficina) al Producto 2 (201 Created)
+# Demuestra que una misma Categoría puede agrupar múltiples Productos (N:N completo)
+POST {{baseUrl}}/productos/2/categorias/1
+Accept: {{contentType}}
+
+### 3.4 Asociar Categoría 3 (Oficina y Ergonomía) al Producto 2 (201 Created)
+POST {{baseUrl}}/productos/2/categorias/3
+Accept: {{contentType}}
+
+### 3.5 Verificar Producto 1 con sus múltiples Categorías anidadas (200 OK)
+# [Consigna TP6 - Conclusiones Esperadas]: La respuesta JSON incluye la lista `categorias` con ID 1 e ID 2
+GET {{baseUrl}}/productos/1
+Accept: {{contentType}}
+
+### 3.6 Desasociar Categoría 2 (Gaming) del Producto 1 (204 No Content)
+# Elimina el vínculo específico en la tabla intermedia Producto_Categoria sin borrar las entidades
+DELETE {{baseUrl}}/productos/1/categorias/2
+
+### 3.7 Verificar Producto 1 tras la desvinculación de la Categoría 2 (200 OK)
+# Comprueba que solo permanece vinculada la Categoría 1 (Periféricos)
+GET {{baseUrl}}/productos/1
+Accept: {{contentType}}
+
+
+# ==============================================================================
+# SECCIÓN 4: BORRADO LÓGICO DE PRODUCTO
+# [Consigna TP6 - Parte A, incisos b y d]: Baja lógica cambiando disponible=False
+# ==============================================================================
+
+### 4.1 Eliminar Producto 2 (Borrado Lógico -> 204 No Content)
+DELETE {{baseUrl}}/productos/2
+
+### 4.2 Verificar estado de Producto 2 tras borrado lógico (200 OK con "disponible": false)
+GET {{baseUrl}}/productos/2
+Accept: {{contentType}}
+
+
+# ==============================================================================
+# SECCIÓN 5: CASOS DE ERROR Y VALIDACIÓN DE REGLAS DE NEGOCIO (404, 409, 422)
+# [Consigna TP6 - Marco Teórico (Pydantic) & Rúbrica de Evaluación]:
+# Validación estricta de esquemas, integridad referencial y control de duplicados.
+# ==============================================================================
+
+### 5.1 Error 404 Not Found: Consultar un Producto inexistente
+GET {{baseUrl}}/productos/9999
+Accept: {{contentType}}
+
+### 5.2 Error 404 Not Found: Consultar una Categoría inexistente
+GET {{baseUrl}}/categorias/9999
+Accept: {{contentType}}
+
+### 5.3 Error 404 Not Found: Asociar una Categoría inexistente a un Producto válido
+POST {{baseUrl}}/productos/1/categorias/9999
+Accept: {{contentType}}
+
+### 5.4 Error 404 Not Found: Asociar una Categoría válida a un Producto inexistente
+POST {{baseUrl}}/productos/9999/categorias/1
+Accept: {{contentType}}
+
+### 5.5 Error 404 Not Found: Desasociar una relación que no existe en Producto_Categoria
+DELETE {{baseUrl}}/productos/1/categorias/3
+
+### 5.6 Error 409 Conflict: Asociar nuevamente una Categoría ya vinculada al Producto 1
+# La Categoría 1 ya fue vinculada al Producto 1 en el paso 3.1
+POST {{baseUrl}}/productos/1/categorias/1
+Accept: {{contentType}}
+
+### 5.7 Error 409 Conflict: Crear un Producto con nombre duplicado
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Teclado Mecánico RGB Pro v2",
+  "descripcion": "Intento de alta con nombre repetido",
+  "precio_base": "50000.00",
+  "imagen_url": [],
+  "disponible": true
+}
+
+### 5.8 Error 422 Unprocessable Entity: Crear Producto con nombre en blanco o campos faltantes
+# Pydantic y el validador de dominio rechazan nombres vacíos/espacios y tipos erróneos
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{
+  "nombre": "   ",
+  "descripcion": "Producto inválido para probar validación Pydantic",
+  "precio_base": "",
+  "imagen_url": "no-es-una-lista"
+}
+
+### 5.9 Error 422 Unprocessable Entity: Crear Categoría con nombre vacío (min_length=1)
+POST {{baseUrl}}/categorias/
+Content-Type: {{contentType}}
+
+{
+  "nombre": "",
+  "descripcion": "Categoría inválida sin nombre"
+}
+
+### 5.10 Error 422 Unprocessable Entity: ID de ruta inválido (gt=0)
+GET {{baseUrl}}/categorias/0
+Accept: {{contentType}}

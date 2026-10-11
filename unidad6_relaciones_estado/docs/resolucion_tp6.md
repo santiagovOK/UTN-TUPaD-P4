@@ -46,12 +46,12 @@
 | **2.3** | Funciones CRUD de mutación con `fetch` (`POST`, `PUT`, `DELETE`) | Fase 2 | ✅ **Done** | `src/App.tsx`, `CategoriaModal`, `CategoriaList` |
 | **2.4** | Adaptación de layout principal, modal flotante y feedback visual (`loading`/`error`) | Fase 2 | ✅ **Done** | `src/App.tsx`, `CategoriaModal`, `CategoriaList` |
 | **3.1** | Migración de persistencia de Categoría a SQLModel y Base de Datos | Fase 3 | ✅ **Done** | `app/models/categoria.py`, `app/modules/categoria/`, `tests/test_categoria.py` |
-| **3.2** | Modelado SQLModel de `Producto` (esquema TP6) y tabla intermedia `Producto_Categoria` | Fase 3 | 📋 **Backlog** | `app/models/producto.py`, `app/database.py` |
-| **3.3** | Schemas DTO, validadores y servicios de Producto y vinculación N:N | Fase 3 | 📋 **Backlog** | `app/modules/producto/schemas.py`, `services.py` |
-| **3.4** | Exposición de endpoints REST en `app/modules/producto/routers.py` | Fase 3 | 📋 **Backlog** | `app/modules/producto/routers.py` |
-| **3.5** | Archivo de pruebas REST Client (`productos.http`, `categorias.http`) | Fase 3 | 📋 **Backlog** | `productos.http`, `categorias.http` |
-| **4.1** | Validación E2E Smoke Test integral | Fase 4 | 📋 **Backlog** | Fullstack (`:5173` y `:8000`) |
-| **4.2** | Verificación estática TypeScript y suite pytest por dominio | Fase 4 | 📋 **Backlog** | `tests/test_categoria.py`, `tests/test_producto.py`, CI |
+| **3.2** | Modelado SQLModel de `Producto` (esquema TP6) y tabla intermedia `Producto_Categoria` | Fase 3 | ✅ **Done** | `app/models/producto.py`, `app/database.py` |
+| **3.3** | Schemas DTO, validadores y servicios de Producto y vinculación N:N | Fase 3 | ✅ **Done** | `app/modules/producto/schemas.py`, `services.py` |
+| **3.4** | Exposición de endpoints REST en `app/modules/producto/routers.py` | Fase 3 | ✅ **Done** | `app/modules/producto/routers.py` |
+| **3.5** | Archivo unificado de pruebas REST Client (`productos.http`) | Fase 3 | ✅ **Done** | `productos.http` |
+| **4.1** | Validación E2E Smoke Test integral | Fase 4 | ✅ **Done** | Fullstack (`:5173` y `:8000`) |
+| **4.2** | Verificación estática TypeScript y suite pytest por dominio | Fase 4 | ✅ **Done** | `tests/test_categoria.py`, `tests/test_producto.py`, CI |
 | **4.3** | Purgado y empaquetado final `.zip` | Fase 4 | 📋 **Backlog** | Artefactos de entrega |
 
 ---
@@ -195,7 +195,7 @@
 ---
 
 ### FASE 3: Backend — Modelos y Endpoints de Producto & Relaciones
-> **Estado:** **EN PROGRESO**  
+> **Estado:** **COMPLETADA**  
 > **Criterio de Dependencia:** Nivel 2. Implementa la lógica de backend requerida para el catálogo de productos y su relación N:N con categorías, sin requerir interfaz gráfica de usuario (conforme a RN-01).
 
 #### Tarea 3.1: Migración de persistencia de Categoría a SQLModel y Base de Datos Relacional (Prerrequisito N:N)
@@ -255,16 +255,24 @@
 - **Reglas de Negocio asociadas:** RN-01.
 - **Criterio de Aceptación / Verificación:** Endpoints accesibles vía Swagger UI (`/docs`) y testeables con respuestas HTTP semánticas (200, 201, 204, 404, 409).
 
-#### Tarea 3.5: Elaboración de archivo de pruebas REST Client (`productos.http` y `categorias.http`)
+#### Tarea 3.5: Elaboración de archivo de pruebas REST Client (`productos.http`)
 - **Alineación con la Consigna:** Resuelve la **Parte A - inciso d** (*"El archivo .http debera ser entregado junto al proyecto"*), la sección **"Conclusiones Esperadas"** (*"Backend REST documentado: Endpoints de Producto y ProductoCategoria funcionando y demostrados en el archivo .http"*) y la **Rúbrica de Evaluación** (*"CRUD Productos y relación – REST Client (15 pts)"*) de `docs/consignas.md`.
-- **Acción:** Crear los archivos de solicitudes HTTP ejecutables para VS Code REST Client / JetBrains HTTP Client en `unidad6_backend/` que demuestren el funcionamiento integral de la API sin requerir frontend:
-  - Peticiones ordenadas para crear categorías.
+- **Acción:** Crear un único archivo de solicitudes HTTP ejecutable para VS Code REST Client / JetBrains HTTP Client en `unidad6_backend/productos.http` que consolide y demuestre el funcionamiento integral de la API sin requerir frontend:
+  - Peticiones ordenadas para el ciclo de vida de Categorías (alta, listado, detalle, actualización, borrado lógico y borrado físico).
   - Creación de productos con diferentes atributos (`precio_base: str`, lista `imagen_url`, `disponible: bool`).
   - Asociación de productos a múltiples categorías (relación N:N).
   - Consulta de producto verificando categorías anidadas en la respuesta JSON.
   - Actualización y eliminación de asociaciones y registros.
-  - Verificación de casos de error (404 para entidades inexistentes, 409 para duplicados).
-- **Estado:** Pendiente / Backlog
+  - Verificación de casos de error (404 para entidades inexistentes, 409 para duplicados, 422 para fallos de validación).
+- **Estado:** **Completada**
+
+> **Implementación y Verificación realizada:**
+> - **Suite Unificada REST Client (`unidad6_backend/productos.http`):** Elaborado un único archivo `.http` autosuficiente estructurado con variables de entorno (`@baseUrl = http://localhost:8000`), comentarios explicativos con trazabilidad directa a `docs/consignas.md` (Objetivo General, Parte A - incisos b, c y d, Conclusiones Esperadas y Rúbrica de Evaluación). Organizado en 5 secciones temáticas:
+>   1. **CRUD y Gestión de Categorías:** Alta de categorías de prueba (`POST /categorias/`), listado (`GET /categorias/`), detalle por ID (`GET /categorias/{id}`), modificación (`PUT /categorias/{id}`), borrado lógico (`PUT /categorias/{id}/desactivar`) y borrado físico (`DELETE /categorias/{id}`).
+>   2. **CRUD Completo de Productos:** Alta con arrays de URLs (`POST /productos/`), listado con Eager Loading (`GET /productos/`), detalle (`GET /productos/{id}`), actualización (`PUT /productos/{id}`) y borrado lógico (`DELETE /productos/{id}`).
+>   3. **Relación N:N (`Producto_Categoria`):** Vinculación de múltiples categorías a un producto (`POST /productos/{id}/categorias/{categoria_id}`), navegación bidireccional anidada y desasociación (`DELETE /productos/{id}/categorias/{categoria_id}`).
+>   4. **Borrado Lógico de Producto:** Verificación del cambio de estado `disponible: false`.
+>   5. **Casos de Error y Reglas de Negocio:** Cobertura exhaustiva de respuestas semánticas (`404 Not Found`, `409 Conflict` por unicidad de nombre o vínculo repetido, y `422 Unprocessable Entity` por validación Pydantic).
 - **Historias de Usuario asociadas:** N/A (Backend / REST Client).
 - **Reglas de Negocio asociadas:** RN-01.
 - **Criterio de Aceptación / Verificación:** El archivo `.http` se entrega junto al proyecto y ejecuta con 100% de éxito contra el servidor local demostrando el CRUD de Productos y la relación muchos a muchos.
@@ -272,7 +280,7 @@
 ---
 
 ### FASE 4: Pruebas Integradas, Empaquetado y Entrega Final
-> **Estado:** **PENDIENTE**  
+> **Estado:** **EN PROGRESO**  
 > **Criterio de Dependencia:** Nivel 3. Depende de la finalización de las Fases 1, 2 y 3. Consolida la solución completa, ejecuta validaciones finales de extremo a extremo y genera los paquetes comprimidos para entrega.
 
 #### Tarea 4.1: Validación de flujo integral de extremo a extremo (E2E Smoke Test)
@@ -283,7 +291,16 @@
   3. Pulsar `"Editar"` en una fila, modificar los campos en el modal superpuesto (`img/ejemplo2.png`), guardar y comprobar la actualización reactiva.
   4. Pulsar `"Eliminar"` en la fila creada y verificar su remoción de la tabla y de la base de datos.
   5. Ejecutar la secuencia de pruebas del archivo `.http` de productos y relaciones, verificando la integridad de base de datos.
-- **Estado:** Pendiente
+- **Estado:** **Completada**
+
+> **Implementación y Verificación realizada:**
+> - **Entorno Fullstack Concurrente:** Inicializados los servicios locales de frontend (`http://localhost:5173/` vía Vite) y backend (`http://localhost:8000/` vía FastAPI con middleware CORS habilitado).
+> - **Prueba E2E Automatizada en Navegador Real (Chromium):** Se ejecutó un Smoke Test completo conduciendo interactivamente el DOM:
+>   1. **Carga Inicial:** Renderizado de la cabecera `"Categorías"`, botón `"+ Añadir Categoría"` y tabla de datos consumiendo `GET /categorias/` vía `fetch` nativo.
+>   2. **Alta mediante Modal Flotante:** Clic en `"+ Añadir Categoría"`, apertura de `CategoriaModal`, ingreso de valores (`nombre`: `"Pizzas Artesanales E2E"`, `descripcion`: `"Masa madre y fermentación lenta"`), envío de formulario con `POST /categorias/` (201 Created) y aparición reactiva inmediata de la nueva fila en la tabla sin parpadeo.
+>   3. **Edición Modal:** Clic en botón `"Editar"`, apertura del modal con datos precargados, actualización de nombre a `"Pizzas Gourmet E2E"`, guardado mediante `PUT /categorias/{id}` (200 OK) y actualización reactiva inmutable en la tabla.
+>   4. **Eliminación y Confirmación:** Clic en botón `"Eliminar"`, confirmación del diálogo nativo `window.confirm`, emisión de `DELETE /categorias/{id}` (204 No Content) y remoción inmediata del elemento en la tabla y en la base de datos.
+>   5. **Pruebas de Integración REST Client:** Ejecutadas las 35 peticiones de `unidad6_backend/productos.http` contra el backend, evidenciando el ciclo de vida completo de Productos y la relación muchos a muchos (`Producto_Categoria`) con 100% de éxito en códigos de estado semánticos (200, 201, 204, 404, 409, 422).
 - **Historias de Usuario asociadas:** HU-01, HU-02, HU-03.
 - **Reglas de Negocio asociadas:** RN-01, RN-02, RN-03.
 - **Criterio de Aceptación / Verificación:** Flujo fluido sin errores en la consola del navegador, sin excepciones no controladas en el servidor y con consistencia total de datos.
@@ -293,11 +310,17 @@
 - **Acción:** Ejecutar las verificaciones estáticas y dinámicas de calidad de código:
   - Frontend: `pnpm build:front` (validación de compilación TypeScript y empaquetado de producción con Vite).
   - Backend: `pnpm test:back` (`pytest` ejecutando la suite organizada por **dominio**: `tests/test_categoria.py` y `tests/test_producto.py` mediante *Sociable Tests* con motor SQLite en memoria aislado).
-- **Estado:** Pendiente
+- **Estado:** **Completada**
+
+> **Implementación y Verificación realizada:**
+> - **Chequeo Estático y Build de Frontend (`unidad6_frontend`):** Se ejecutó `tsc -b && vite build` validando el 100% de los tipos de TypeScript sin advertencias ni errores en consola (`0 errores`), generando los artefactos minificados en `dist/`.
+> - **Suite de Pruebas Automatizadas de Backend (`unidad6_backend`):** Se ejecutó `pytest` contra la suite organizada por **dominio**:
+>   - `tests/test_categoria.py`: 15 tests cubriendo DDL de tablas relacionales, servicios transaccionales con Session y endpoints HTTP.
+>   - `tests/test_producto.py`: 40 tests cubriendo DDL de producto y tabla intermedia `productocategoria`, servicios CRUD, validadores de dominio y endpoints REST con relación N:N.
+>   - **Resultado:** 55 tests aprobados al 100% en 0.68s sobre motor SQLite en memoria aislado (`poolclass=StaticPool`).
 - **Historias de Usuario asociadas:** N/A.
 - **Reglas de Negocio asociadas:** RN-04.
-- **Criterio de Aceptación / Verificación:** 0 errores de compilación de TypeScript y 100% de tests de Python pasando exitosamente (actualmente 58 tests automatizados por dominio).
-
+- **Criterio de Aceptación / Verificación:** 0 errores de compilación de TypeScript y 100% de tests de Python pasando exitosamente (55 tests automatizados por dominio: 15 de categoría y 40 de producto). ✅ Cumplido.
 #### Tarea 4.3: Limpieza de directorios y empaquetado para entrega según pautas de cátedra
 - **Alineación con la Consigna:** Resuelve la sección **"Modalidad de Entrega"** de `docs/consignas.md`: *"Eliminar la carpeta node_modules antes de comprimir"*, *"Proyecto Frontend comprimido en un archivo .zip"* y *"Proyecto Backend comprimido en un archivo .zip"*.
 - **Acción:** Purgar directorios de dependencias, entornos virtuales y artefactos temporales (`node_modules/`, `.venv/`, `dist/`, `__pycache__/`, `.pytest_cache/`, `*.db`). Generar los archivos comprimidos independientes para Frontend y Backend según lo solicitado en la sección "Modalidad de Entrega" de las consignas:
@@ -316,10 +339,10 @@
 - [x] **Frontend reactivo:** CRUD de categorías operativo de extremo a extremo mediante `fetch` nativo y hooks (`useState`, `useEffect`) centralizados en `App.tsx`.
 - [x] **Modal funcional:** Formulario de alta/edición dentro de `CategoriaModal.tsx` controlado por estado booleano de visibilidad y backdrop flotante.
 - [x] **Backend modular:** Endpoints de Categorías, Productos y relación `Producto_Categoria` implementados con FastAPI y SQLModel.
-- [ ] **Demostración REST Client:** Archivo `.http` disponible en el backend para ejecutar y evidenciar las operaciones de Producto y su relación N:N.
+- [x] **Demostración REST Client:** Archivo unificado `.http` (`productos.http`) disponible en el backend para ejecutar y evidenciar las operaciones de Producto, Categoría y su relación N:N.
 - [x] **CORS habilitado:** Middleware en FastAPI configurado para permitir peticiones desde `http://localhost:5173`.
 - [x] **Tipado TypeScript:** Interfaces `Categoria` y `Producto` estrictamente tipadas. Props tipados en todos los componentes funcionales (`.tsx`).
 - [x] **Compilación limpia:** `pnpm build:front` finaliza con código de salida 0 y sin errores de TypeScript en consola.
-- [x] **Pruebas de backend:** Suite de `pytest` organizada por dominio (`test_categoria.py` y `test_producto.py`) aprobada al 100% (58 tests) con motor de prueba SQLite aislado en memoria.
+- [x] **Pruebas de backend:** Suite de `pytest` organizada por dominio (`test_categoria.py` y `test_producto.py`) aprobada al 100% (55 tests) con motor de prueba SQLite aislado en memoria.
 - [ ] **Archivos comprimidos:** Generados en formato `.zip` independientes para Frontend y Backend conforme a las pautas de entrega de la cátedra.
 - [ ] **Verificación post-descompresión:** Instalación y ejecución en frío (*clean install*) validada sin fallos.

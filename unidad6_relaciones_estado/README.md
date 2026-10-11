@@ -61,7 +61,7 @@ cd unidad6_frontend && pnpm install && cd ..
 
 El proyecto puede ejecutarse de manera unificada en una sola terminal (mediante `concurrently`) o en terminales independientes por cada capa:
 
-### Opción A — Ejecución Unificada (Recomendada)
+### Opción A — Ejecución Unificada
 
 Desde la raíz del proyecto, levantar simultáneamente Frontend y Backend con un solo comando:
 
@@ -183,15 +183,17 @@ unidad6_relaciones_estado/
 │   ├── requirements.txt            # Dependencias Python
 │   ├── pytest.ini                  # Configuración de pytest
 │   ├── .env.example                # Plantilla de variables de entorno
+│   ├── productos.http              # Archivo unificado de pruebas REST Client
 │   ├── README.md                   # Documentación específica del backend
 │   ├── app/
 │   │   ├── main.py                 # Instancia de FastAPI, CORS y routers
 │   │   ├── database.py             # Engine de base de datos y sesiones SQLModel
-│   │   ├── models/                 # Modelos de base de datos relacionales
-│   │   └── modules/                # Módulos por dominio de negocio
-│   │       ├── categoria/          # Endpoints, schemas y servicio de Categorías
-│   │       └── producto/           # Endpoints, schemas y servicio de Productos
-│   └── tests/                      # Suite de tests con fixtures SQLite aisladas
+│   │   ├── models/                 # Modelos persistentes (categoria.py, producto.py)
+│   │   └── modules/                # Módulos por dominio de negocio (categoria, producto)
+│   └── tests/                      # Suite de tests organizada por dominio
+│       ├── conftest.py             # Fixtures y aislamiento de base de datos en memoria
+│       ├── test_categoria.py       # Pruebas integradas de Categoría (15 tests)
+│       └── test_producto.py        # Pruebas integradas de Producto y relación N:N (40 tests)
 │
 └── unidad6_frontend/               # Capa Frontend: React 19 + TypeScript + Tailwind
     ├── package.json                # Dependencias de React y scripts Vite

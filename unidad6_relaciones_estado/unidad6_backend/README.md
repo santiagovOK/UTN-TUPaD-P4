@@ -60,17 +60,22 @@ cp .env.example .env
 
 El backend permite operar indistintamente con PostgreSQL o SQLite mediante la variable `DATABASE_URL`:
 
-- **Opción A — SQLite Local (Recomendado para desarrollo rápido sin servicios externos):**
-  ```env
-  DATABASE_URL=sqlite:///./dev.db
-  ```
-  *(O `sqlite:///:memory:` para base de datos volátil en memoria).*
-
-- **Opción B — PostgreSQL:**
+- **Opción A — PostgreSQL (Entorno principal de entrega y evaluación):**
   ```env
   DATABASE_URL=postgresql+psycopg2://postgres:postgres@localhost:5432/tp6_relaciones
   ```
 
+- **Opción B — SQLite con persistencia en disco (Fallback local / DBeaver):**
+  ```env
+  DATABASE_URL=sqlite:///./dev.db
+  ```
+  *(Genera `dev.db` en el directorio de `unidad6_backend` para inspección visual).*
+
+- **Opción C — SQLite en memoria (Pruebas volátiles en RAM):**
+  ```env
+  DATABASE_URL=sqlite:///:memory:
+  ```
+  *(100% en memoria mediante `StaticPool`. No escribe archivos en disco y se reinicia en cada arranque).*
 > **Nota sobre pruebas (`pytest`):**  
 > La suite de tests automatizada (`tests/conftest.py`) utiliza por defecto un motor **SQLite en memoria (`sqlite:///:memory:`)** completamente aislado por sesión de test, por lo que las pruebas no requieren ninguna base de datos externa en ejecución.
 
@@ -121,8 +126,7 @@ Todas las pruebas se ejecutan contra SQLite en memoria con rollback y aislamient
 
 ### Pruebas con REST Client (`.http`)
 
-Para validar los endpoints sin interfaz gráfica (tal como solicita la consigna para el módulo de Productos), se proporcionan archivos `.http` ejecutables con la extensión **REST Client** de VS Code / Cursor o herramientas como JetBrains HTTP Client.
-
+Para validar los endpoints sin interfaz gráfica (tal como solicita la consigna para el módulo de Productos y ProductoCategoria), se proporciona el archivo unificado `productos.http` ejecutable con la extensión **REST Client** de VS Code / Cursor o herramientas como JetBrains HTTP Client. Incluye el ciclo de vida completo de Categorías, Productos, relación N:N y casos de error (35 solicitudes organizadas y documentadas).
 ---
 
 ## 📁 Estructura del Código Fuente
@@ -131,25 +135,26 @@ Para validar los endpoints sin interfaz gráfica (tal como solicita la consigna 
 unidad6_backend/
 ├── requirements.txt            # Lista de dependencias del backend Python
 ├── pytest.ini                  # Configuración de pruebas para pytest
-├── .env.example                # Plantilla de variables de entorno
+├── .env.example                # Plantilla de variables de entorno (PostgreSQL / SQLite)
+├── productos.http              # Archivo unificado de pruebas REST Client (CRUD y relación N:N)
 ├── app/
 │   ├── main.py                 # Factoría FastAPI, middlewares de CORS y montaje de routers
 │   ├── database.py             # Configuración del motor de base de datos y sesiones SQLModel
 │   ├── models/                 # Modelos de base de datos persistibles (SQLModel table=True)
-│   │   └── producto.py         # Modelos relacionales de persistencia
+│   │   ├── categoria.py        # Entidad persistente Categoria con relación a Producto
+│   │   └── producto.py         # Entidad persistente Producto y tabla intermedia ProductoCategoria
 │   └── modules/                # Arquitectura modular por dominio de negocio
 │       ├── categoria/          # Módulo de Categorías (consumido por Frontend)
 │       │   ├── routers.py      # Endpoints REST (GET, POST, PUT, DELETE)
 │       │   ├── schemas.py      # DTOs y esquemas Pydantic (Create, Read, Update)
 │       │   └── services.py     # Lógica de persistencia y reglas de negocio
 │       └── producto/           # Módulo de Productos (demostrado vía REST Client)
-│           ├── routers.py      # Endpoints REST de Producto y relaciones
+│           ├── routers.py      # Endpoints REST de Producto y relaciones N:N
 │           ├── schemas.py      # DTOs Pydantic de Producto
-│           ├── services.py     # Lógica de consulta relacional y persistencia
+│           ├── services.py     # Lógica de consulta relacional, Eager Loading y servicios N:N
 │           └── validators.py   # Validaciones de reglas de negocio
-└── tests/                      # Suite de pruebas automatizadas
-    ├── conftest.py             # Fixtures de base de datos aislada en memoria
-    ├── test_fase1_database_and_models.py
-    ├── test_fase2_tarea2_1_validators.py
-    └── test_fase2_tarea2_2_services.py
+└── tests/                      # Suite de pruebas automatizadas organizada por dominio
+    ├── conftest.py             # Fixtures de base de datos aislada en memoria (StaticPool)
+    ├── test_categoria.py       # Pruebas de dominio Categoría (DDL, servicios y endpoints)
+    └── test_producto.py        # Pruebas de dominio Producto y relación N:N
 ```

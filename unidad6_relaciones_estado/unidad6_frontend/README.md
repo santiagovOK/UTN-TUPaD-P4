@@ -69,11 +69,13 @@ unidad6_frontend/
     ├── App.tsx                 # Componente contenedor: estado global (useState), efectos (useEffect) y llamadas fetch
     ├── index.css               # Importación de directivas de Tailwind CSS v4
     ├── types/
-    │   └── categoria.ts        # Interface TypeScript para la entidad Categoria
+    │   ├── categoria.ts        # Interface TypeScript para la entidad Categoria
+    │   ├── producto.ts         # Interface TypeScript para la entidad Producto
+    │   └── index.ts            # Re-exportaciones centralizadas de tipos
     └── components/
         ├── Navbar.tsx          # Barra de navegación accesible con branding
         ├── CategoriaCard.tsx   # Tarjeta atómica: muestra nombre, descripción, estado y botones Editar/Eliminar
-        ├── CategoriaList.tsx   # Grilla contenedora: recibe lista de categorías por props y mapea las tarjetas
+        ├── CategoriaList.tsx   # Contenedor tabular: renderiza cabeceras (NÚMERO, NOMBRE, DESCRIPCIÓN, ACCIONES) y filas CategoriaCard
         ├── CategoriaModal.tsx  # Formulario modal accesible para creación y edición de categorías
         └── Footer.tsx          # Pie de página institucional con año dinámico
 ```
