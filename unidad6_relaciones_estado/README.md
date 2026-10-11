@@ -8,6 +8,10 @@ El sistema implementa:
 
 Resolución paso a paso y seguimiento Kanban de este trabajo en: [docs/resolucion_tp6.md](/docs/resolucion_tp6.md).
 
+> **Nota sobre Modalidad de Entrega y Repositorio Unificado:**  
+> Si bien el Trabajo Práctico se entrega en dos archivos comprimidos independientes (`.zip` para **Frontend** y `.zip` para **Backend**) conforme a las pautas de la cátedra, el proyecto completo puede clonarse y ejecutarse íntegramente (incluyendo la orquestación concurrente con `pnpm dev`) a partir del repositorio en GitHub:  
+> **[https://github.com/santiagovOK/UTN-TUPaD-P4/tree/main/unidad6_relaciones_estado](https://github.com/santiagovOK/UTN-TUPaD-P4/tree/main/unidad6_relaciones_estado)**
+
 ---
 
 ## ✨ Estudiante
@@ -15,6 +19,7 @@ Resolución paso a paso y seguimiento Kanban de este trabajo en: [docs/resolucio
 - **Nombre:** Varela, Santiago Octavio
 - **Email institucional:** santiago.varela@tupad.utn.edu.ar
 - **Repositorio Programación IV:** [https://github.com/santiagovOK/UTN-TUPaD-P4](https://github.com/santiagovOK/UTN-TUPaD-P4)
+- **Directorio Unidad 6:** [https://github.com/santiagovOK/UTN-TUPaD-P4/tree/main/unidad6_relaciones_estado](https://github.com/santiagovOK/UTN-TUPaD-P4/tree/main/unidad6_relaciones_estado)
 
 ---
 

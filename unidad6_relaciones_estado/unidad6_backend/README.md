@@ -4,6 +4,10 @@ Backend para el Trabajo Práctico de la **Unidad 6** de **Programación IV (TUPa
 
 Expone una API REST con arquitectura modular por dominio (`categoria`, `producto`), soporte completo de CORS para frontend en `http://localhost:5173`, y documentación interactiva automática en Swagger UI.
 
+> **Nota sobre Entrega y Ejecución Unificada:**  
+> Si bien el trabajo se entrega en dos archivos `.zip` independientes (uno para el Backend y otro para el Frontend) según las pautas de la cátedra, el proyecto Full Stack puede ejecutarse íntegramente a partir del repositorio de GitHub en:  
+> **[https://github.com/santiagovOK/UTN-TUPaD-P4/tree/main/unidad6_relaciones_estado](https://github.com/santiagovOK/UTN-TUPaD-P4/tree/main/unidad6_relaciones_estado)**
+
 ---
 
 ## Tecnologías y Librerías
