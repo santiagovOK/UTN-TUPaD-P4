@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlmodel import SQLModel, Session
 
-# Directorio raíz del módulo backend (unidad6_backend)
+# [Consigna TP7 - Arquitectura Backend Models-Schemas-Service-Router]: Directorio raíz del módulo backend (unidad7_backend)
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 
-# Cargar variables de entorno desde el archivo .env en la raíz de unidad6_backend
+# Cargar variables de entorno desde el archivo .env en la raíz de unidad7_backend
 ENV_FILE_PATH = BACKEND_DIR / ".env"
 if ENV_FILE_PATH.exists():
     load_dotenv(dotenv_path=ENV_FILE_PATH, override=True)
@@ -46,8 +46,8 @@ engine = create_engine(
 )
 
 
-# [Consigna TP6 - Parte A, inciso b & Rúbrica Backend / Tarea 3.1]:
-# Creación automática de tablas persistentes (categoria, producto, productocategoria) en la base de datos relacional.
+# [Consigna TP7 - Arquitectura Backend Models-Schemas-Service-Router]: Configuración de motor SQLModel/SQLAlchemy y sesión transaccional.
+# [Diagrama UML - Clúster Catálogo de Productos]: Registra y materializa las tablas relacionales CATEGORIA, PRODUCTO y la tabla asociativa N:N PRODUCTO_CATEGORIA.
 def create_db_and_tables():
     """Crea las tablas desde los metadatos SQLModel existentes.
 

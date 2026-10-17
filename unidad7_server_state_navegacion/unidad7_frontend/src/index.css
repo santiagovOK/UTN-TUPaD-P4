@@ -1,3 +1,7 @@
+/* [Consigna TP7 - Conclusiones Esperadas & Requerimientos Clave]:
+   "Estilizado de componentes mediante clases predefinidas de Tailwind CSS" */
+/* [Diagrama UML - docs/UML_FOOD_STORE.svg]:
+   Hoja de estilos global para las vistas del catálogo (CATEGORIA y PRODUCTO). */
 @import "tailwindcss";
 
 /* Estilos globales */

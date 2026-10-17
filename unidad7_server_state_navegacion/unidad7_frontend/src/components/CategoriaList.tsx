@@ -1,7 +1,8 @@
 import type { Categoria } from '../types/categoria';
 import { CategoriaCard } from './CategoriaCard';
 
-// [Consigna TP6 - Parte B, inciso d]: CategoriaList.tsx — recibe Categoria[] por props y renderiza las tarjetas.
+// [Consigna TP7 - CRUD de Categorías & Tipado TypeScript]: Tabla presentacional que recibe Categoria[] por props tipados.
+// [Diagrama UML - Entidad CATEGORIA]: Lista los registros activos del catálogo (excluyendo bajas lógicas deleted_at != NULL en el backend).
 export interface CategoriaListProps {
   categorias: Categoria[];
   onEdit?: (categoria: Categoria) => void;

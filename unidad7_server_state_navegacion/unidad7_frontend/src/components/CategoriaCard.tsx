@@ -1,6 +1,7 @@
 import type { Categoria } from '../types/categoria';
 
-// [Consigna TP6 - Parte B, inciso d]: CategoriaCard.tsx — tarjeta que muestra una categoría (nombre + descripción). Recibe props tipados con Categoria e incluye botones Editar y Eliminar.
+// [Consigna TP7 - CRUD de Categorías & Tipado TypeScript]: Componente presentacional de fila con props tipados (Categoria) y acciones de edición/eliminación.
+// [Diagrama UML - Entidad CATEGORIA]: Visualiza los atributos id (INTEGER PK), nombre (VARCHAR(100) UNIQUE NN) y descripcion (TEXT).
 export interface CategoriaCardProps {
   categoria: Categoria;
   onEdit?: (categoria: Categoria) => void;

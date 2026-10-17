@@ -1,6 +1,7 @@
 import type { Categoria } from '../types/categoria';
 
-// [Consigna TP6 - Parte B, inciso d]: CategoriaModal.tsx — formulario de alta/edición dentro de un modal accesible.
+// [Consigna TP7 - Requerimientos Clave]: "Formulario de alta y edición dentro de un Modal controlado con estado booleano mediante useState."
+// [Diagrama UML - Entidad CATEGORIA]: Captura los campos de negocio nombre (VARCHAR(100) NN UNIQUE) y descripcion (TEXT) para creación (POST) y actualización (PATCH/PUT).
 export interface CategoriaModalProps {
   isOpen?: boolean;
   categoriaAEditar?: Categoria | null;
@@ -84,7 +85,7 @@ export function CategoriaModal({
                 Cancelar
               </button>
             )}
-            {/* [Consigna TP6 - Parte B, inciso e]: Prevención de doble envío mediante isSubmitting y estado disabled. */}
+            {/* [Consigna TP7 - Requerimientos Clave]: Prevención de doble envío mediante isSubmitting y estado disabled. */}
             <button
               type="submit"
               disabled={isSubmitting}

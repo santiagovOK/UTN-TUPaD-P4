@@ -57,6 +57,11 @@
    * `App.tsx` carece por completo de estado y llamadas HTTP; únicamente renderiza `<Navbar />` y el bloque `<Routes>`.
    * Prohibido el uso de `<a href="...">` para rutas internas; se emplea `<NavLink>`, `<Link>` o `useNavigate()`.
    * En rutas dinámicas (`/productos/:id`), los parámetros extraídos con `useParams()` (`string | undefined`) se convierten explícitamente con `Number(id)` y se validan con `!Number.isNaN(numericId)` antes de habilitar la consulta (`enabled`).
+6. **Trazabilidad Explícita en Código (`[Consigna TP7]` + `[Diagrama UML]`):**
+   * Cada archivo, módulo y componente implementado a lo largo de todas las fases del proyecto debe incluir comentarios explícitos en su cabecera y bloques críticos especificando:
+     - `[Consigna TP7 - ...]`: El inciso, requerimiento funcional o regla de `docs/consigna.md` que satisface.
+     - `[Diagrama UML - ...]`: La entidad, atributo, clave (PK/FK), relación relacional (1:N, N:N) o principio de diseño (ej. SRP) de `docs/UML_FOOD_STORE.svg` al que corresponde.
+   * Queda estrictamente prohibido mantener referencias obsoletas o residuales a `TP6` o `unidad6_backend` en los módulos de producción de la Unidad 7.
 
 ---
 ## 2. Matriz de Trazabilidad Rápida
@@ -97,7 +102,7 @@
 | :---: | :--- | :---: | :---: | :--- |
 | **1.1** | Migración de archivos base sin cambios desde Unidad 6 | Fase 1 | ✅ **Done** | `requirements.txt`, `pytest.ini`, `app/database.py`, `validators.py`, componentes `.tsx` base, `tsconfig*.json`, `index.css` |
 | **1.2** | Configuración de orquestación raíz y dependencias de frontend (`package.json`) | Fase 1 | ✅ **Done** | `package.json`, `unidad7_frontend/package.json` (`@tanstack/react-query`, `react-router-dom`) |
-| **1.3** | Configuración de proveedores raíz (`QueryClientProvider`, `BrowserRouter`) con `staleTime` y `gcTime` | Fase 1 | ⏳ **Pendiente** | `unidad7_frontend/src/main.tsx` |
+| **1.3** | Configuración de proveedores raíz (`QueryClientProvider`, `BrowserRouter`) con `staleTime` y `gcTime` | Fase 1 | ✅ **Done** | `unidad7_frontend/src/main.tsx` |
 | **2.1** | Adaptación de modelos SQLModel según UML (Auditoría, `deleted_at`, `precio_base`, `imagenes_url`, `es_principal`) | Fase 2 | ⏳ **Pendiente** | `app/models/categoria.py`, `app/models/producto.py` |
 | **2.2** | Schemas DTO, validaciones declarativas y respuestas paginadas (`{ total, items }`) | Fase 2 | ⏳ **Pendiente** | `app/modules/categoria/schemas.py`, `app/modules/producto/schemas.py` |
 | **2.3** | Capa de servicio y router de Categorías (CRUD, soft delete, `Query(ge, le)`, `func.count()`, PUT/PATCH) | Fase 2 | ⏳ **Pendiente** | `app/modules/categoria/services.py`, `routers.py` |
@@ -118,7 +123,7 @@
 ---
 
 ### FASE 1: Infraestructura Base, Dependencias y Archivos Semilla
-> **Estado:** **EN PROGRESO**  
+> **Estado:** ✅ **COMPLETADA**  
 > **Criterio de Dependencia:** Nivel 0 (Base). Establece los paquetes y la estructura de directorios requerida tanto en frontend como en backend.
 
 #### Tarea 1.1: Migración de archivos base sin cambios desde Unidad 6
@@ -155,7 +160,7 @@
     });
     ```
   - `<BrowserRouter>` para conectar la aplicación con la History API del navegador.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-01, HU-04.
 - **Reglas de Negocio asociadas:** RN-01, RN-02.
 ---

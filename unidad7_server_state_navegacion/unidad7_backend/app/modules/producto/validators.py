@@ -1,5 +1,9 @@
 """
-Validadores dedicados para reglas de negocio del dominio Producto.
+[Consigna TP7 - Arquitectura Backend & Validación con Pydantic]:
+Validación temprana de cadenas no vacías para schemas de entrada antes de invocar la capa de servicio.
+
+[Diagrama UML - Entidad PRODUCTO]:
+Garantiza la restricción {NN} (Not Null / no vacío) sobre el atributo nombre : VARCHAR(150) {NN}.
 
 Este módulo es importado por schemas.py (validación temprana, antes del service).
 No importa el estado de la BD ni los services.
