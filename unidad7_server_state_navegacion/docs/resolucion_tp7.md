@@ -2,7 +2,7 @@
 
 > **Materia:** Programación IV (Tecnicatura Universitaria en Programación a Distancia - UTN)  
 > **Tema:** Server State (TanStack Query) y Navegación (React Router + TypeScript) en Frontend; Optimización de Endpoints y Relaciones en Backend (FastAPI + SQLModel / PostgreSQL).  
-> **Estrategia:** Descomposición "Bottom-Up" (de menor a mayor dependencia) orientada a tablero Kanban. Cada tarea referencia explícitamente las Historias de Usuario (HU), Reglas de Negocio (RN) y los lineamientos de `docs/consigna.md`, `docs/guidelines/unidad7_guia_maestra.md`, `docs/guidelines/javaismos_guia.md` y `docs/UML_FOOD_STORE.svg`.
+> **Estrategia:** Descomposición combinada **"Bottom-Up"** (orden cronológico de hojas a raíz en el grafo de dependencias) + **"Walking Skeleton"** (esqueleto mínimo compilable en verde desde la Fase 1), orientada a tablero Kanban. Cada tarea referencia explícitamente las Historias de Usuario (HU), Reglas de Negocio (RN) y los lineamientos de `docs/consigna.md`, `docs/guidelines/unidad7_guia_maestra.md`, `docs/guidelines/javaismos_guia.md` y `docs/UML_FOOD_STORE.svg`.
 
 ---
 
@@ -62,6 +62,9 @@
      - `[Consigna TP7 - ...]`: El inciso, requerimiento funcional o regla de `docs/consigna.md` que satisface.
      - `[Diagrama UML - ...]`: La entidad, atributo, clave (PK/FK), relación relacional (1:N, N:N) o principio de diseño (ej. SRP) de `docs/UML_FOOD_STORE.svg` al que corresponde.
    * Queda estrictamente prohibido mantener referencias obsoletas o residuales a `TP6` o `unidad6_backend` en los módulos de producción de la Unidad 7.
+7. **Estrategia Combinada Bottom-Up + Walking Skeleton (Compilación Continua en Verde):**
+   * **Orden Bottom-Up (Grafo Acíclico de Dependencias):** Ningún archivo se crea antes que los módulos hoja que importa (`src/types/categoria.ts` precede a los componentes presentacionales de `src/components/`, y el esqueleto `src/App.tsx` precede al consumidor raíz `src/main.tsx`).
+   * **Alcance Walking Skeleton:** Al cierre de la Fase 1 el proyecto cuenta con un esqueleto funcional de extremo a extremo que compila en verde (`tsc -b --noEmit` = `0 errores`), evitando importaciones rotas entre fases y permitiendo evolucionar `App.tsx` en la Fase 3 cuando las vistas definitivas ya existen.
 
 ---
 ## 2. Matriz de Trazabilidad Rápida
@@ -100,21 +103,21 @@
 
 | ID Tarea | Tarea | Fase | Estado | Componentes / Módulos Afectados |
 | :---: | :--- | :---: | :---: | :--- |
-| **1.1** | Migración de archivos base sin cambios desde Unidad 6 | Fase 1 | ✅ **Done** | `requirements.txt`, `pytest.ini`, `app/database.py`, `validators.py`, componentes `.tsx` base, `tsconfig*.json`, `index.css` |
+| **1.1** | Migración de archivos base y contratos hoja (`src/types/categoria.ts`) desde Unidad 6 | Fase 1 | ✅ **Done** | `requirements.txt`, `pytest.ini`, `app/database.py`, `validators.py`, `src/types/categoria.ts`, componentes `.tsx` base, `tsconfig*.json`, `index.css` |
 | **1.2** | Configuración de orquestación raíz y dependencias de frontend (`package.json`) | Fase 1 | ✅ **Done** | `package.json`, `unidad7_frontend/package.json` (`@tanstack/react-query`, `react-router-dom`) |
-| **1.3** | Configuración de proveedores raíz (`QueryClientProvider`, `BrowserRouter`) con `staleTime` y `gcTime` | Fase 1 | ✅ **Done** | `unidad7_frontend/src/main.tsx` |
+| **1.3** | Configuración de *Walking Skeleton* (`App.tsx` mínimo) y proveedores raíz en `main.tsx` (`QueryClientProvider`, `BrowserRouter`) | Fase 1 | ✅ **Done** | `unidad7_frontend/src/App.tsx`, `unidad7_frontend/src/main.tsx` |
 | **2.1** | Adaptación de modelos SQLModel según UML (Auditoría, `deleted_at`, `precio_base`, `imagenes_url`, `es_principal`) | Fase 2 | ⏳ **Pendiente** | `app/models/categoria.py`, `app/models/producto.py` |
 | **2.2** | Schemas DTO, validaciones declarativas y respuestas paginadas (`{ total, items }`) | Fase 2 | ⏳ **Pendiente** | `app/modules/categoria/schemas.py`, `app/modules/producto/schemas.py` |
 | **2.3** | Capa de servicio y router de Categorías (CRUD, soft delete, `Query(ge, le)`, `func.count()`, PUT/PATCH) | Fase 2 | ⏳ **Pendiente** | `app/modules/categoria/services.py`, `routers.py` |
 | **2.4** | Capa de servicio y router de Productos y relación N:N (`selectinload`, `ProductoCategoriaAssign`) | Fase 2 | ⏳ **Pendiente** | `app/modules/producto/services.py`, `routers.py` |
 | **2.5** | Middleware CORS, instancia de aplicación y configuración de entorno | Fase 2 | ⏳ **Pendiente** | `app/main.py`, `.env.example` |
 | **2.6** | Suite integral de solicitudes HTTP (`productos.http`) para REST Client | Fase 2 | ⏳ **Pendiente** | `unidad7_backend/productos.http` |
-| **3.1** | Actualización de contratos de datos TypeScript (`Categoria`, `Producto`, `PaginatedResponse<T>`) | Fase 3 | ⏳ **Pendiente** | `src/types/categoria.ts`, `producto.ts`, `index.ts` |
+| **3.1** | Consolidación de contratos de datos TypeScript del catálogo (`Producto`, `ProductoCreate`, `index.ts`) | Fase 3 | ⏳ **Pendiente** | `src/types/categoria.ts`, `producto.ts`, `index.ts` |
 | **3.2** | Creación de capa de servicios HTTP con control de `!res.ok` (`categorias.service.ts`, `productos.service.ts`) | Fase 3 | ⏳ **Pendiente** | `src/services/categorias.service.ts`, `productos.service.ts`, `api.ts` |
 | **3.3** | Integración de TanStack Query para Categorías (`useQuery`, `useMutation`, `invalidateQueries`, adaptación de `CategoriaModal`) | Fase 3 | ⏳ **Pendiente** | `src/pages/CategoriasPage.tsx`, `src/components/CategoriaModal.tsx` |
 | **3.4** | Adaptación de `Navbar.tsx` con enlaces activos de React Router (`NavLink`) | Fase 3 | ⏳ **Pendiente** | `src/components/Navbar.tsx` |
 | **3.5** | Implementación de vistas `CategoriasPage.tsx`, `ProductsPage.tsx` (paginada) y `ProductDetailPage.tsx` (`:id`) | Fase 3 | ⏳ **Pendiente** | `src/pages/CategoriasPage.tsx`, `src/pages/ProductsPage.tsx`, `src/pages/ProductDetailPage.tsx` |
-| **3.6** | Refactorización de `App.tsx` (exclusivo para rutas estáticas/dinámicas y Navbar, sin lógica de negocio) | Fase 3 | ⏳ **Pendiente** | `src/App.tsx` |
+| **3.6** | Evolución del *Walking Skeleton* en `App.tsx` al enrutador definitivo (`Navbar` + `Routes`, sin lógica de negocio) | Fase 3 | ⏳ **Pendiente** | `src/App.tsx` |
 | **4.1** | Smoke Test E2E de integración Full Stack (CRUD Categorías, catálogo paginado y navegación reactiva) | Fase 4 | ⏳ **Pendiente** | Navegador / Consola / Servidores concurrentes |
 | **4.2** | Demostración REST Client de Producto y ProductoCategoria | Fase 4 | ⏳ **Pendiente** | `productos.http` |
 | **4.3** | Verificación estática TypeScript (`tsc`) y ejecución de tests backend (`pytest`) | Fase 4 | ⏳ **Pendiente** | `tsc -b`, `pytest` |
@@ -126,10 +129,11 @@
 > **Estado:** ✅ **COMPLETADA**  
 > **Criterio de Dependencia:** Nivel 0 (Base). Establece los paquetes y la estructura de directorios requerida tanto en frontend como en backend.
 
-#### Tarea 1.1: Migración de archivos base sin cambios desde Unidad 6
-- **Acción:** Copiar archivos de infraestructura e inicialización que no requieren alteración estructural:
+#### Tarea 1.1: Migración de archivos base y contratos hoja (`src/types/categoria.ts`)
+- **Acción:** Copiar archivos de infraestructura e inicialización que no requieren alteración estructural y proveer el contrato hoja en orden *Bottom-Up*:
   - Backend: `requirements.txt`, `pytest.ini`, `app/database.py`, `app/modules/producto/validators.py` y archivos `__init__.py`.
-  - Frontend: `index.html`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `pnpm-workspace.yaml`, `src/index.css` y los componentes de presentación `CategoriaCard.tsx`, `CategoriaList.tsx`, `CategoriaModal.tsx`.
+  - Frontend (Base Hoja): `src/types/categoria.ts` (`Categoria`, `CategoriaCreate`, `CategoriaUpdate`, `PaginatedResponse<T>`) para satisfacer las importaciones de los componentes presentacionales desde el primer momento.
+  - Frontend (Configuración y Presentación): `index.html`, `tsconfig.json`, `tsconfig.app.json`, `tsconfig.node.json`, `pnpm-workspace.yaml`, `src/index.css` y los componentes `CategoriaCard.tsx`, `CategoriaList.tsx`, `CategoriaModal.tsx`.
 - **Estado:** ✅ **Done**
 
 #### Tarea 1.2: Configuración de orquestación raíz y dependencias de frontend
@@ -144,25 +148,27 @@
 - **Estado:** ✅ **Done**
 - **Reglas de Negocio asociadas:** RN-02, RN-07.
 
-#### Tarea 1.3: Configuración de proveedores raíz en `main.tsx`
-- **Acción:** Crear `unidad7_frontend/src/main.tsx` envolviendo la aplicación en:
-  - `<QueryClientProvider client={queryClient}>` instanciado a nivel de módulo (fuera del árbol de renderizado) con políticas explícitas de ciclo de vida de caché (TanStack Query v5):
-    ```typescript
-    const queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          staleTime: 1000 * 60 * 5, // 5 minutos de datos considerados "frescos" (FRESH)
-          gcTime: 1000 * 60 * 10,   // 10 minutos en memoria antes de recolección de basura (INACTIVE)
-          retry: 1,                 // 1 reintento automático ante fallos transitorios
-          refetchOnWindowFocus: false, // evita refetches accidentales al cambiar de ventana
+#### Tarea 1.3: Configuración de *Walking Skeleton* (`App.tsx`) y proveedores raíz en `main.tsx`
+- **Acción:** Construir el esqueleto mínimo compilable en orden *Bottom-Up* (primero el módulo consumido `App.tsx` y luego la raíz `main.tsx`):
+  - Crear `unidad7_frontend/src/App.tsx` (*Walking Skeleton*): contenedor esquelético libre de lógica de negocio con `<Routes>` inicial para garantizar compilación limpia (`tsc -b --noEmit` = `0 errores`) desde el cierre de la Fase 1.
+  - Crear `unidad7_frontend/src/main.tsx` envolviendo `<App />` en:
+    - `<QueryClientProvider client={queryClient}>` instanciado a nivel de módulo (fuera del árbol de renderizado) con políticas explícitas de ciclo de vida de caché (TanStack Query v5):
+      ```typescript
+      const queryClient = new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 1000 * 60 * 5, // 5 minutos de datos considerados "frescos" (FRESH)
+            gcTime: 1000 * 60 * 10,   // 10 minutos en memoria antes de recolección de basura (INACTIVE)
+            retry: 1,                 // 1 reintento automático ante fallos transitorios
+            refetchOnWindowFocus: false, // evita refetches accidentales al cambiar de ventana
+          },
         },
-      },
-    });
-    ```
-  - `<BrowserRouter>` para conectar la aplicación con la History API del navegador.
+      });
+      ```
+    - `<BrowserRouter>` para conectar la aplicación con la History API del navegador.
 - **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-01, HU-04.
-- **Reglas de Negocio asociadas:** RN-01, RN-02.
+- **Reglas de Negocio asociadas:** RN-01, RN-02, RN-07.
 ---
 
 ### FASE 2: Backend — Modelos UML, Servicios y Endpoints Optimizados
@@ -274,8 +280,9 @@
 > **Estado:** ⏳ **PENDIENTE**  
 > **Criterio de Dependencia:** Nivel 2. Conecta la interfaz de usuario con la API REST mediante TanStack Query y desacopla la navegación mediante React Router.
 
-#### Tarea 3.1: Actualización de contratos de datos TypeScript
+#### Tarea 3.1: Consolidación de contratos de datos TypeScript del catálogo
 - **Acción:**
+  - Verificar `src/types/categoria.ts` (creado como nodo hoja en Tarea 1.1) y completar el árbol de tipos del catálogo:
   - `src/types/categoria.ts`:
     ```typescript
     export interface Categoria {
@@ -391,9 +398,9 @@
 - **Historias de Usuario asociadas:** HU-01, HU-02, HU-03, HU-04, HU-05.
 - **Reglas de Negocio asociadas:** RN-01, RN-02, RN-07.
 
-#### Tarea 3.6: Refactorización de `App.tsx` (Sin lógica de negocio)
+#### Tarea 3.6: Evolución del *Walking Skeleton* en `App.tsx` al enrutador definitivo (Sin lógica de negocio)
 - **Acción:**
-  - `App.tsx` debe contener **exclusivamente** el layout global (`<Navbar />`) y la definición declarativa de rutas (`<Routes>`):
+  - Reemplazar la ruta esquelética inicial de `App.tsx` por el layout global definitivo (`<Navbar />`) y la definición declarativa de rutas (`<Routes>`) hacia las páginas construidas en la Tarea 3.5:
     ```tsx
     export function App() {
       return (
