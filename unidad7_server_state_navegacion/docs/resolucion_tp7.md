@@ -96,7 +96,7 @@
 | ID Tarea | Tarea | Fase | Estado | Componentes / Módulos Afectados |
 | :---: | :--- | :---: | :---: | :--- |
 | **1.1** | Migración de archivos base sin cambios desde Unidad 6 | Fase 1 | ✅ **Done** | `requirements.txt`, `pytest.ini`, `app/database.py`, `validators.py`, componentes `.tsx` base, `tsconfig*.json`, `index.css` |
-| **1.2** | Configuración de orquestación raíz y dependencias de frontend (`package.json`) | Fase 1 | ⏳ **Pendiente** | `package.json`, `unidad7_frontend/package.json` (`@tanstack/react-query`, `react-router-dom`) |
+| **1.2** | Configuración de orquestación raíz y dependencias de frontend (`package.json`) | Fase 1 | ✅ **Done** | `package.json`, `unidad7_frontend/package.json` (`@tanstack/react-query`, `react-router-dom`) |
 | **1.3** | Configuración de proveedores raíz (`QueryClientProvider`, `BrowserRouter`) con `staleTime` y `gcTime` | Fase 1 | ⏳ **Pendiente** | `unidad7_frontend/src/main.tsx` |
 | **2.1** | Adaptación de modelos SQLModel según UML (Auditoría, `deleted_at`, `precio_base`, `imagenes_url`, `es_principal`) | Fase 2 | ⏳ **Pendiente** | `app/models/categoria.py`, `app/models/producto.py` |
 | **2.2** | Schemas DTO, validaciones declarativas y respuestas paginadas (`{ total, items }`) | Fase 2 | ⏳ **Pendiente** | `app/modules/categoria/schemas.py`, `app/modules/producto/schemas.py` |
@@ -136,7 +136,7 @@
     - React Router (`react-router-dom`).
     - Tailwind CSS v4 (`@tailwindcss/vite`, `tailwindcss`).
   - Crear `unidad7_frontend/vite.config.ts`.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Reglas de Negocio asociadas:** RN-02, RN-07.
 
 #### Tarea 1.3: Configuración de proveedores raíz en `main.tsx`
