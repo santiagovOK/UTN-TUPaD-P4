@@ -1,3 +1,5 @@
+from . import routers, services
+from .routers import router
 from .schemas import (
     CategoriaBase,
     CategoriaCreate,
@@ -5,6 +7,10 @@ from .schemas import (
     CategoriaRead,
     CategoriaUpdate,
 )
+from .services import CategoriaConflictError
+
+# Alias de compatibilidad arquitectónica
+service = services
 
 __all__ = [
     "CategoriaBase",
@@ -12,4 +18,9 @@ __all__ = [
     "CategoriaRead",
     "CategoriaUpdate",
     "CategoriaPaginatedResponse",
+    "CategoriaConflictError",
+    "router",
+    "routers",
+    "services",
+    "service",
 ]

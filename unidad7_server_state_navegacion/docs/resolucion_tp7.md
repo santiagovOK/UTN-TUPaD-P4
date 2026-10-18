@@ -108,7 +108,7 @@
 | **1.3** | Configuración de *Walking Skeleton* (`App.tsx` mínimo) y proveedores raíz en `main.tsx` (`QueryClientProvider`, `BrowserRouter`) | Fase 1 | ✅ **Done** | `unidad7_frontend/src/App.tsx`, `unidad7_frontend/src/main.tsx` |
 | **2.1** | Adaptación de modelos SQLModel según UML (Auditoría, `deleted_at`, `precio_base`, `imagenes_url`, `es_principal`) | Fase 2 | ✅ **Done** | `app/models/categoria.py`, `app/models/producto.py` |
 | **2.2** | Schemas DTO, validaciones declarativas y respuestas paginadas (`{ total, items }`) | Fase 2 | ✅ **Done** | `unidad7_backend/app/modules/categoria/schemas.py`, `unidad7_backend/app/modules/producto/schemas.py`, módulos `__init__.py` |
-| **2.3** | Capa de servicio y router de Categorías (CRUD, soft delete, `Query(ge, le)`, `func.count()`, PUT/PATCH) | Fase 2 | ⏳ **Pendiente** | `app/modules/categoria/services.py`, `routers.py` |
+| **2.3** | Capa de servicio y router de Categorías (CRUD, soft delete, `Query(ge, le)`, `func.count()`, PUT/PATCH) | Fase 2 | ✅ **Done** | `app/modules/categoria/services.py`, `routers.py` |
 | **2.4** | Capa de servicio y router de Productos y relación N:N (`selectinload`, `ProductoCategoriaAssign`) | Fase 2 | ⏳ **Pendiente** | `app/modules/producto/services.py`, `routers.py` |
 | **2.5** | Middleware CORS, instancia de aplicación y configuración de entorno | Fase 2 | ⏳ **Pendiente** | `app/main.py`, `.env.example` |
 | **2.6** | Suite integral de solicitudes HTTP (`productos.http`) para REST Client | Fase 2 | ⏳ **Pendiente** | `unidad7_backend/productos.http` |
@@ -235,7 +235,7 @@
     - `GET /categorias/{id}` (Detalle `200 OK` o `404 Not Found`).
     - `PUT /categorias/{id}` y `PATCH /categorias/{id}` (Actualización total o parcial).
     - `DELETE /categorias/{id}` (Status `204 No Content`).
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-01, HU-02, HU-03.
 - **Reglas de Negocio asociadas:** RN-03, RN-04.
 
