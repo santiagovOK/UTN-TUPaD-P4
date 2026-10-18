@@ -111,7 +111,7 @@
 | **2.3** | Capa de servicio y router de Categorías (CRUD, soft delete, `Query(ge, le)`, `func.count()`, PUT/PATCH) | Fase 2 | ✅ **Done** | `app/modules/categoria/services.py`, `routers.py` |
 | **2.4** | Capa de servicio y router de Productos y relación N:N (`selectinload`, `ProductoCategoriaAssign`) | Fase 2 | ✅ **Done** | `app/modules/producto/services.py`, `routers.py` |
 | **2.5** | Middleware CORS, instancia de aplicación y configuración de entorno | Fase 2 | ✅ **Done** | `app/main.py`, `.env.example` |
-| **2.6** | Suite integral de solicitudes HTTP (`productos.http`) para REST Client | Fase 2 | ⏳ **Pendiente** | `unidad7_backend/productos.http` |
+| **2.6** | Suite integral de solicitudes HTTP (`productos.http`) para REST Client | Fase 2 | ✅ **Done** | `unidad7_backend/productos.http` |
 | **3.1** | Consolidación de contratos de datos TypeScript del catálogo (`Producto`, `ProductoCreate`, `index.ts`) | Fase 3 | ⏳ **Pendiente** | `src/types/categoria.ts`, `producto.ts`, `index.ts` |
 | **3.2** | Creación de capa de servicios HTTP con control de `!res.ok` (`categorias.service.ts`, `productos.service.ts`) | Fase 3 | ⏳ **Pendiente** | `src/services/categorias.service.ts`, `productos.service.ts`, `api.ts` |
 | **3.3** | Integración de TanStack Query para Categorías (`useQuery`, `useMutation`, `invalidateQueries`, adaptación de `CategoriaModal`) | Fase 3 | ⏳ **Pendiente** | `src/pages/CategoriasPage.tsx`, `src/components/CategoriaModal.tsx` |
@@ -172,7 +172,7 @@
 ---
 
 ### FASE 2: Backend — Modelos UML, Servicios y Endpoints Optimizados
-> **Estado:** 🔄 **EN PROGRESO**
+> **Estado:** ✅ **COMPLETADA**
 > **Criterio de Dependencia:** Nivel 1. Provee la API REST requerida para el catálogo, alineada a `docs/UML_FOOD_STORE.svg` y `docs/guidelines/unidad7_guia_maestra.md`.
 
 #### Tarea 2.1: Adaptación de modelos SQLModel según UML
@@ -271,7 +271,7 @@
     3. Asignación N:N mediante `POST /productos/categorias/asignar` (verificando `es_principal: true/false`).
     4. Desasignación de relación mediante `DELETE /productos/{id}/categorias/{cat_id}`.
     5. Validación de errores semánticos (`404`, `409`, `422`).
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Reglas de Negocio asociadas:** RN-06.
 
 ---
