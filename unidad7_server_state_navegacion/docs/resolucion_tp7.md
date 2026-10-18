@@ -115,8 +115,8 @@
 | **3.2** | Creación de capa de servicios HTTP con control de `!res.ok` (`categorias.service.ts`, `productos.service.ts`) | Fase 3 | ✅ **Done** | `src/services/categorias.service.ts`, `productos.service.ts`, `api.ts` |
 | **3.3** | Integración de TanStack Query para Categorías (`useQuery`, `useMutation`, `invalidateQueries`, adaptación de `CategoriaModal` y montaje inicial en `App.tsx`) | Fase 3 | ✅ **Done** | `src/pages/CategoriasPage.tsx`, `src/components/CategoriaModal.tsx`, `src/App.tsx` |
 | **3.4** | Adaptación de `Navbar.tsx` con enlaces activos de React Router (`NavLink`) e incorporación al layout de `App.tsx` | Fase 3 | ✅ **Done** | `src/components/Navbar.tsx`, `src/App.tsx` |
-| **3.5** | Implementación de vistas de catálogo `ProductsPage.tsx` (paginada) y `ProductDetailPage.tsx` (`:id`) | Fase 3 | ⏳ **Pendiente** | `src/pages/ProductsPage.tsx`, `src/pages/ProductDetailPage.tsx` |
-| **3.6** | Cierre del *Walking Skeleton* en `App.tsx` con el enrutador completo (`Navbar` + `Routes` de Categorías y Productos, sin lógica de negocio) | Fase 3 | ⏳ **Pendiente** | `src/App.tsx` |
+| **3.5** | Implementación de vistas de catálogo `ProductsPage.tsx` (paginada) y `ProductDetailPage.tsx` (`:id`) | Fase 3 | ✅ **Done** | `src/pages/ProductsPage.tsx`, `src/pages/ProductDetailPage.tsx` |
+| **3.6** | Cierre del *Walking Skeleton* en `App.tsx` con el enrutador completo (`Navbar` + `Routes` de Categorías y Productos, sin lógica de negocio) | Fase 3 | ✅ **Done** | `src/App.tsx` |
 | **4.1** | Smoke Test E2E de integración Full Stack (CRUD Categorías, catálogo paginado y navegación reactiva) | Fase 4 | ⏳ **Pendiente** | Navegador / Consola / Servidores concurrentes |
 | **4.2** | Demostración REST Client de Producto y ProductoCategoria | Fase 4 | ⏳ **Pendiente** | `productos.http` |
 | **4.3** | Verificación estática TypeScript (`tsc`) y ejecución de tests backend (`pytest`) | Fase 4 | ⏳ **Pendiente** | `tsc -b`, `pytest` |
@@ -276,7 +276,7 @@
 ---
 
 ### FASE 3: Frontend — Capa de Servicios, Server State y Navegación
-> **Estado:** 🔄 **EN PROGRESO**  
+> **Estado:** ✅ **COMPLETADA**  
 > **Criterio de Dependencia:** Nivel 2. Conecta la interfaz de usuario con la API REST mediante TanStack Query y desacopla la navegación mediante React Router.
 
 #### Tarea 3.1: Consolidación de contratos de datos TypeScript del catálogo
@@ -394,7 +394,7 @@
   - `src/pages/ProductDetailPage.tsx`:
     - Extrae `:id` con `useParams<{ id: string }>()`, convierte a número (`const numericId = Number(id)`) y ejecuta `useQuery({ queryKey: ["producto", numericId], queryFn: () => getProductoById(numericId), enabled: Boolean(id) && !Number.isNaN(numericId) && numericId > 0 })`.
     - Muestra ficha completa del producto con sus categorías e incluye botón *"← Volver al listado de productos"* mediante `useNavigate()`.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-04, HU-05.
 - **Reglas de Negocio asociadas:** RN-01, RN-02, RN-07.
 
@@ -419,7 +419,7 @@
     }
     ```
   - **Cero lógica de negocio**, cero `useState` de datos y cero llamadas `fetch` o `useQuery` en `App.tsx`.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-04.
 - **Reglas de Negocio asociadas:** RN-01.
 ---
