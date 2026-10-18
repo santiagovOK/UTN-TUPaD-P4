@@ -109,7 +109,7 @@
 | **2.1** | Adaptación de modelos SQLModel según UML (Auditoría, `deleted_at`, `precio_base`, `imagenes_url`, `es_principal`) | Fase 2 | ✅ **Done** | `app/models/categoria.py`, `app/models/producto.py` |
 | **2.2** | Schemas DTO, validaciones declarativas y respuestas paginadas (`{ total, items }`) | Fase 2 | ✅ **Done** | `unidad7_backend/app/modules/categoria/schemas.py`, `unidad7_backend/app/modules/producto/schemas.py`, módulos `__init__.py` |
 | **2.3** | Capa de servicio y router de Categorías (CRUD, soft delete, `Query(ge, le)`, `func.count()`, PUT/PATCH) | Fase 2 | ✅ **Done** | `app/modules/categoria/services.py`, `routers.py` |
-| **2.4** | Capa de servicio y router de Productos y relación N:N (`selectinload`, `ProductoCategoriaAssign`) | Fase 2 | ⏳ **Pendiente** | `app/modules/producto/services.py`, `routers.py` |
+| **2.4** | Capa de servicio y router de Productos y relación N:N (`selectinload`, `ProductoCategoriaAssign`) | Fase 2 | ✅ **Done** | `app/modules/producto/services.py`, `routers.py` |
 | **2.5** | Middleware CORS, instancia de aplicación y configuración de entorno | Fase 2 | ⏳ **Pendiente** | `app/main.py`, `.env.example` |
 | **2.6** | Suite integral de solicitudes HTTP (`productos.http`) para REST Client | Fase 2 | ⏳ **Pendiente** | `unidad7_backend/productos.http` |
 | **3.1** | Consolidación de contratos de datos TypeScript del catálogo (`Producto`, `ProductoCreate`, `index.ts`) | Fase 3 | ⏳ **Pendiente** | `src/types/categoria.ts`, `producto.ts`, `index.ts` |
@@ -252,7 +252,7 @@
       - `POST /productos/categorias/asignar` (Status `201 Created`, recibe `ProductoCategoriaAssign`, crea o actualiza el vínculo con `es_principal`).
       - `POST /productos/{id}/categorias/{categoria_id}` (alias de conveniencia RESTful para compatibilidad con pruebas previas).
       - `DELETE /productos/{producto_id}/categorias/{categoria_id}` (desvincula la categoría con `204 No Content` o `404 Not Found` si el vínculo no existe).
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-05.
 - **Reglas de Negocio asociadas:** RN-03, RN-06.
 

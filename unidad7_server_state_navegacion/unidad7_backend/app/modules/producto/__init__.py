@@ -1,3 +1,5 @@
+from . import routers, services
+from .routers import router
 from .schemas import (
     ProductoBase,
     ProductoCategoriaAssign,
@@ -8,6 +10,10 @@ from .schemas import (
     ProductoReadConCategorias,
     ProductoUpdate,
 )
+from .services import ProductoConflictError
+
+# Alias de compatibilidad arquitectónica
+service = services
 
 __all__ = [
     "ProductoBase",
@@ -18,4 +24,9 @@ __all__ = [
     "ProductoPaginatedResponse",
     "ProductoCategoriaAssign",
     "ProductoCategoriaRead",
+    "ProductoConflictError",
+    "router",
+    "routers",
+    "services",
+    "service",
 ]
