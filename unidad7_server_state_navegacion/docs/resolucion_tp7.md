@@ -113,7 +113,7 @@
 | **2.5** | Middleware CORS, instancia de aplicación y configuración de entorno | Fase 2 | ✅ **Done** | `app/main.py`, `.env.example` |
 | **2.6** | Suite integral de solicitudes HTTP (`productos.http`) para REST Client | Fase 2 | ✅ **Done** | `unidad7_backend/productos.http` |
 | **3.1** | Consolidación de contratos de datos TypeScript del catálogo (`Producto`, `ProductoCreate`, `index.ts`) | Fase 3 | ✅ **Done** | `src/types/categoria.ts`, `producto.ts`, `index.ts` |
-| **3.2** | Creación de capa de servicios HTTP con control de `!res.ok` (`categorias.service.ts`, `productos.service.ts`) | Fase 3 | ⏳ **Pendiente** | `src/services/categorias.service.ts`, `productos.service.ts`, `api.ts` |
+| **3.2** | Creación de capa de servicios HTTP con control de `!res.ok` (`categorias.service.ts`, `productos.service.ts`) | Fase 3 | ✅ **Done** | `src/services/categorias.service.ts`, `productos.service.ts`, `api.ts` |
 | **3.3** | Integración de TanStack Query para Categorías (`useQuery`, `useMutation`, `invalidateQueries`, adaptación de `CategoriaModal`) | Fase 3 | ⏳ **Pendiente** | `src/pages/CategoriasPage.tsx`, `src/components/CategoriaModal.tsx` |
 | **3.4** | Adaptación de `Navbar.tsx` con enlaces activos de React Router (`NavLink`) | Fase 3 | ⏳ **Pendiente** | `src/components/Navbar.tsx` |
 | **3.5** | Implementación de vistas `CategoriasPage.tsx`, `ProductsPage.tsx` (paginada) y `ProductDetailPage.tsx` (`:id`) | Fase 3 | ⏳ **Pendiente** | `src/pages/CategoriasPage.tsx`, `src/pages/ProductsPage.tsx`, `src/pages/ProductDetailPage.tsx` |
@@ -337,7 +337,7 @@
   - Crear `src/services/productos.service.ts`:
     - `getProductos(offset = 0, limit = 6, nombre?: string, disponible?: boolean)`: Retorna `Promise<PaginatedResponse<Producto>>`.
     - `getProductoById(id: number)`: `GET /productos/{id}` (retorna `Promise<Producto>`).
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-01, HU-02, HU-03, HU-05.
 - **Reglas de Negocio asociadas:** RN-02.
 
