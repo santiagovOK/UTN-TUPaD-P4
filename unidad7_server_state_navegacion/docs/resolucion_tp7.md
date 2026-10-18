@@ -110,7 +110,7 @@
 | **2.2** | Schemas DTO, validaciones declarativas y respuestas paginadas (`{ total, items }`) | Fase 2 | ✅ **Done** | `unidad7_backend/app/modules/categoria/schemas.py`, `unidad7_backend/app/modules/producto/schemas.py`, módulos `__init__.py` |
 | **2.3** | Capa de servicio y router de Categorías (CRUD, soft delete, `Query(ge, le)`, `func.count()`, PUT/PATCH) | Fase 2 | ✅ **Done** | `app/modules/categoria/services.py`, `routers.py` |
 | **2.4** | Capa de servicio y router de Productos y relación N:N (`selectinload`, `ProductoCategoriaAssign`) | Fase 2 | ✅ **Done** | `app/modules/producto/services.py`, `routers.py` |
-| **2.5** | Middleware CORS, instancia de aplicación y configuración de entorno | Fase 2 | ⏳ **Pendiente** | `app/main.py`, `.env.example` |
+| **2.5** | Middleware CORS, instancia de aplicación y configuración de entorno | Fase 2 | ✅ **Done** | `app/main.py`, `.env.example` |
 | **2.6** | Suite integral de solicitudes HTTP (`productos.http`) para REST Client | Fase 2 | ⏳ **Pendiente** | `unidad7_backend/productos.http` |
 | **3.1** | Consolidación de contratos de datos TypeScript del catálogo (`Producto`, `ProductoCreate`, `index.ts`) | Fase 3 | ⏳ **Pendiente** | `src/types/categoria.ts`, `producto.ts`, `index.ts` |
 | **3.2** | Creación de capa de servicios HTTP con control de `!res.ok` (`categorias.service.ts`, `productos.service.ts`) | Fase 3 | ⏳ **Pendiente** | `src/services/categorias.service.ts`, `productos.service.ts`, `api.ts` |
@@ -260,7 +260,7 @@
 - **Acción:**
   - En `app/main.py`: Configurar `CORSMiddleware` para `http://localhost:5173` y `http://127.0.0.1:5173`, registrar routers y actualizar título/descripción a Unidad 7.
   - En `.env.example`: Configurar variables para base de datos de Unidad 7 (`tp7_server_state` o SQLite dev).
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Reglas de Negocio asociadas:** RN-05.
 
 #### Tarea 2.6: Suite de pruebas REST Client (`productos.http`)
