@@ -114,7 +114,7 @@
 | **3.1** | Consolidación de contratos de datos TypeScript del catálogo (`Producto`, `ProductoCreate`, `index.ts`) | Fase 3 | ✅ **Done** | `src/types/categoria.ts`, `producto.ts`, `index.ts` |
 | **3.2** | Creación de capa de servicios HTTP con control de `!res.ok` (`categorias.service.ts`, `productos.service.ts`) | Fase 3 | ✅ **Done** | `src/services/categorias.service.ts`, `productos.service.ts`, `api.ts` |
 | **3.3** | Integración de TanStack Query para Categorías (`useQuery`, `useMutation`, `invalidateQueries`, adaptación de `CategoriaModal` y montaje inicial en `App.tsx`) | Fase 3 | ✅ **Done** | `src/pages/CategoriasPage.tsx`, `src/components/CategoriaModal.tsx`, `src/App.tsx` |
-| **3.4** | Adaptación de `Navbar.tsx` con enlaces activos de React Router (`NavLink`) e incorporación al layout de `App.tsx` | Fase 3 | ⏳ **Pendiente** | `src/components/Navbar.tsx`, `src/App.tsx` |
+| **3.4** | Adaptación de `Navbar.tsx` con enlaces activos de React Router (`NavLink`) e incorporación al layout de `App.tsx` | Fase 3 | ✅ **Done** | `src/components/Navbar.tsx`, `src/App.tsx` |
 | **3.5** | Implementación de vistas de catálogo `ProductsPage.tsx` (paginada) y `ProductDetailPage.tsx` (`:id`) | Fase 3 | ⏳ **Pendiente** | `src/pages/ProductsPage.tsx`, `src/pages/ProductDetailPage.tsx` |
 | **3.6** | Cierre del *Walking Skeleton* en `App.tsx` con el enrutador completo (`Navbar` + `Routes` de Categorías y Productos, sin lógica de negocio) | Fase 3 | ⏳ **Pendiente** | `src/App.tsx` |
 | **4.1** | Smoke Test E2E de integración Full Stack (CRUD Categorías, catálogo paginado y navegación reactiva) | Fase 4 | ⏳ **Pendiente** | Navegador / Consola / Servidores concurrentes |
@@ -381,7 +381,7 @@
   - Enlaces de navegación hacia **Categorías** (`/categorias`) y **Productos** (`/productos`).
   - Actualizar branding a *"Food Store Admin"* y badge a *"TP7"*.
   - Incorporar `<Navbar />` en la cabecera del layout de `src/App.tsx` para verificar visualmente la barra de navegación y el resaltado de ruta activa en el navegador.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-04.
 - **Reglas de Negocio asociadas:** RN-01.
 

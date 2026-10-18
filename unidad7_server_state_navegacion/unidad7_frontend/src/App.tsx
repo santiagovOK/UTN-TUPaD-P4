@@ -7,10 +7,12 @@
 //   - Contenedor raíz de enrutamiento para las vistas de las entidades CATEGORIA y PRODUCTO.
 import { Routes, Route } from "react-router-dom";
 import { CategoriasPage } from "./pages/CategoriasPage";
+import { Navbar } from "./components/Navbar";
 
 export function App() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
+      <Navbar />
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Routes>
           <Route path="/" element={<CategoriasPage />} />
