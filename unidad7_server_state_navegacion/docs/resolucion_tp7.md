@@ -95,7 +95,13 @@
                                ↓
 [ Fase 3: Frontend — Servicios, TanStack Query, Enrutamiento & Vistas ]
                                ↓
-[ Fase 4: Pruebas Integradas E2E, Verificación Estática & Empaquetado ]
+[ Fase 4: Pruebas Integradas E2E, Verificación Estática & Empaquetado Base ]
+                               ↓
+[ Fase 5: Backend — Catálogo Extendido, Seed, Reglas RN-01..22 & Relaciones N:M (18/10) ]
+                               ↓
+[ Fase 6: Frontend — Alineación de Servicios, PUT Total & Modal CRUD en ProductsPage (18/10) ]
+                               ↓
+[ Fase 7: Verificación E2E Full Stack, Documentación Sincronizada & Re-empaquetado (18/10) ]
 ```
 
 ### 3.1. Tablero Kanban de Estado de Tareas
@@ -121,6 +127,17 @@
 | **4.2** | Demostración REST Client de Producto y ProductoCategoria | Fase 4 | ✅ **Done** | `productos.http` |
 | **4.3** | Verificación estática TypeScript (`tsc`) y ejecución de tests backend (`pytest`) | Fase 4 | ✅ **Done** | `tsc -b`, `pytest` |
 | **4.4** | Limpieza de artefactos y empaquetado final en dos archivos `.zip` para entrega | Fase 4 | ⏳ **Pendiente** | Scripts de purgado y compresión `.zip` |
+| **5.1** | Modelos SQLModel y Seed de Catálogo (`UnidadMedida`, `Ingrediente`, `ProductoIngrediente`, `seed.py`) | Fase 5 | ⏳ **Pendiente** | `app/models/unidad_medida.py`, `app/models/ingrediente.py`, `app/models/producto.py`, `app/seed.py` |
+| **5.2** | Módulos completos `unidad_medida` (solo lectura) e `ingrediente` (CRUD con borrado lógico) | Fase 5 | ⏳ **Pendiente** | `app/modules/unidad_medida/`, `app/modules/ingrediente/` (schemas, services, routers) |
+| **5.3** | Adecuación de `categoria` a nuevas reglas (`RN-05` 409 al borrar con productos, query params estándar, `GET /{id}/productos`) | Fase 5 | ⏳ **Pendiente** | `app/modules/categoria/services.py`, `app/modules/categoria/routers.py` |
+| **5.4** | Refactorización de `producto` y relaciones N:M (`RN-06`, `RN-11`, `RN-12`, `RN-14`, `RN-19`..`RN-22`, `GET` inversos) | Fase 5 | ⏳ **Pendiente** | `app/modules/producto/schemas.py`, `app/modules/producto/services.py`, `app/modules/producto/routers.py` |
+| **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ⏳ **Pendiente** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
+| **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ⏳ **Pendiente** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
+| **6.2** | Formulario CRUD de Productos (`ProductoModal.tsx`) e integración de mutaciones en `ProductsPage.tsx` | Fase 6 | ⏳ **Pendiente** | `src/components/ProductoModal.tsx`, `src/pages/ProductsPage.tsx` |
+| **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ⏳ **Pendiente** | Suite de pruebas backend y REST Client |
+| **7.2** | Compilación estática TypeScript (`tsc -b`) y Smoke Test E2E Full Stack en navegador | Fase 7 | ⏳ **Pendiente** | Verificación de build y flujo interactivo en SPA |
+| **7.3** | Sincronización de documentación (`README.md` raíz, backend y frontend) con las nuevas especificaciones | Fase 7 | ⏳ **Pendiente** | `README.md`, `unidad7_backend/README.md`, `unidad7_frontend/README.md` |
+| **7.4** | Re-empaquetado limpio de entregables `.zip` libres de artefactos transitorios | Fase 7 | ⏳ **Pendiente** | Scripts de purgado y generación de `.zip` oficiales |
 
 ---
 
@@ -460,18 +477,368 @@
 
 ---
 
+## Revisión luego de que subieran un nuevo PDF con las consignas refinadas (18/10)
+
+Actualización integral de la consigna (`docs/consigna.md`), refinando el alcance técnico, formalizando una especificación de **7 Historias de Usuario (`HU-01` a `HU-07`)** con criterios de aceptación verificables, **22 Reglas de Negocio (`RN-01` a `RN-22`)** estrictas, dos nuevas entidades en el catálogo (`UnidadMedida` e `Ingrediente`), la gestión de asociaciones N:M consolidada exclusivamente en las operaciones del producto, endpoints de consulta relacional inversa y la incorporación de un formulario modal interactivo para productos en el frontend.
+
+Para absorber estos cambios de forma determinista y sin desestabilizar el código ya desarrollado y testeado en las Fases 1 a 4, se formula a continuación el diagnóstico de divergencias, las decisiones de diseño técnico, la nueva matriz de trazabilidad y el desglose de tareas de convergencia estructurado en las **Fases 5, 6 y 7** bajo la misma metodología *Bottom-Up + Walking Skeleton*.
+
+---
+
+### 1.1. Auditoría de Incongruencias entre la Implementación Previa (Fases 1–4) y la Nueva Consigna (18/10)
+
+| # | Eje de Divergencia | Implementación Previa (Fases 1–4) | Requerimiento Nueva Consigna (`docs/consigna.md` 18/10) | Impacto y Plan de Adaptación |
+| :-: | :--- | :--- | :--- | :--- |
+| **1** | **Nuevas Entidades de Catálogo (`UnidadMedida`, `Ingrediente`)** | Solo existen los modelos `Categoria`, `Producto` y `ProductoCategoria`. | Se exige la entidad `UnidadMedida` (catálogo de solo lectura poblado vía `seed.py` con 7 unidades exactas), la entidad `Ingrediente` (CRUD con borrado lógico) y la tabla intermedia `ProductoIngrediente`. | Crear modelos, schemas, seed idempotente y routers en backend (Fase 5, Tareas 5.1 y 5.2). |
+| **2** | **Gestión de Relaciones N:M (`RN-11`, `RN-12`, `RN-19`..`RN-22`)** | `ProductoCreate` no exigía `categoria_ids` y se disponía de endpoints separados (`POST /productos/categorias/asignar`, `POST /productos/{id}/categorias/{categoria_id}`, `DELETE /...`). | Las relaciones N:M se gestionan **exclusivamente** al crear (`POST /productos/`) o editar (`PUT /productos/{id}`). `categoria_ids` es obligatorio en `POST` (`min_length=1`, `422` si falta o vacío, `404` si algún id no existe). En `PUT`, si se envían `categoria_ids` o `ingredientes`, se reemplazan en su totalidad. Prohibidos endpoints separados (`RN-22`). | Eliminar endpoints mutadores independientes de relación; unificar la gestión en `services.py` y schemas de `producto` (Fase 5, Tarea 5.4). |
+| **3** | **Endpoints de Consulta Relacional Inversa (`HU-07`)** | No existían rutas dedicadas para consultar asociaciones inversas de forma desacoplada. | Se exige implementar: `GET /productos/{id}/categorias`, `GET /productos/{id}/ingredientes` y `GET /categorias/{id}/productos` (respondiendo `404 Not Found` si la entidad raíz no existe o fue eliminada). | Incorporar endpoints de solo lectura en los routers de `producto` y `categoria` con carga optimizada (Fase 5, Tareas 5.3 y 5.4). |
+| **4** | **Unicidad de Nombre en Producto (`RN-06`)** | `services.py` validaba unicidad de `Producto.nombre` y devolvía `409 Conflict`. | `RN-06` establece textualmente: *"El nombre de un producto es obligatorio (`min_length=1`) y no puede quedar vacío ni contener solo espacios. **No es único: pueden coexistir productos con el mismo nombre.**"* | Remover la comprobación de unicidad en `create_producto` y `update_producto` permitiendo nombres repetidos (Fase 5, Tarea 5.4). |
+| **5** | **Integridad Referencial al Eliminar Categoría (`HU-04`, `RN-05`)** | `DELETE /categorias/{id}` ejecutaba el borrado lógico directamente sin validar vínculos con productos. | `RN-05`: *"Una categoría con productos asociados no puede eliminarse hasta desasociar esos productos o eliminarlos"* → Debe responder HTTP `409 Conflict`. | Añadir verificación de productos asociados en `delete_categoria` antes de aplicar la baja lógica (Fase 5, Tarea 5.3). |
+| **6** | **Borrado en Cascada de Asociaciones de Producto (`HU-06`, `RN-14`)** | `delete_producto` marcaba `deleted_at` pero conservaba vivas las tuplas en `ProductoCategoria`. | `RN-14`: Al eliminar un producto (borrado lógico), se eliminan en cascada sus asociaciones en `ProductoCategoria` y `ProductoIngrediente` para desvincularlo de categorías e ingredientes. | En `delete_producto`, marcar `deleted_at` y purgar sus filas asociadas en las tablas intermedias dentro de la misma transacción (Fase 5, Tarea 5.4). |
+| **7** | **Parámetros Comunes de Colección (`offset`, `limit`, `nombre`, `incluir_inactivos`)** | `GET /categorias/` utilizaba `limit=50` por defecto y parámetro `search`. `GET /productos/` no soportaba `incluir_inactivos`. | Ambos listados deben alinearse al estándar: `offset: int = 0`, `limit: int = 10`, `nombre: Optional[str] = None` (manteniendo `search` como alias retrocompatible en categorías) e `incluir_inactivos: bool = False`. | Actualizar firmas y lógica de filtrado en routers y servicios de `categoria` y `producto` (Fase 5, Tareas 5.3 y 5.4). |
+| **8** | **Endpoints de Salud (`/health/` y `/health/db`)** | Solo existía el endpoint raíz de comprobación general `GET /`. | Se exige formalmente `GET /health/` (`200 OK`) y `GET /health/db` (`200 OK` comprobando conectividad real a la base de datos con `SELECT 1`). | Implementar ambos endpoints en `app/main.py` manteniendo `GET /` como alias de compatibilidad (Fase 5, Tarea 5.5). |
+| **9** | **Método HTTP en Edición de Categoría en Frontend (`HU-03`)** | `categorias.service.ts` emitía `PATCH /categorias/{id}`. | `HU-03`: *"Al guardar se envía `PUT /categorias/{id}` (reemplazo total), que responde 200 con la categoría actualizada..."*. | Cambiar el método de mutación a `PUT` en `categorias.service.ts` (Fase 6, Tarea 6.1). |
+| **10** | **Formulario CRUD de Productos en Frontend (`ProductsPage.tsx`, Inciso `g`)** | `ProductsPage.tsx` solo implementaba el catálogo paginado y filtro de búsqueda de solo lectura. | La consigna exige que `ProductsPage` posea estructura similar a `CategoriasPage`: listado + formulario modal (`ProductoModal.tsx`) para crear/editar con validación y confirmación de baja. | Crear `ProductoModal.tsx` con soporte de `categoria_ids` e integrar mutaciones con TanStack Query en `ProductsPage.tsx` (Fase 6, Tarea 6.2). |
+
+---
+
+### 1.2. Decisiones de Diseño Técnico para las Nuevas Entidades y Contratos
+
+#### 1. Entidad `UnidadMedida` (Catálogo de Solo Lectura — `app/models/unidad_medida.py`)
+* **Naturaleza:** Entidad `<<Catalog>>` inmutable en runtime; carece de endpoints de mutación (`POST`, `PUT`, `DELETE`).
+* **Estructura relacional:**
+  ```python
+  class UnidadMedida(SQLModel, table=True):
+      __tablename__ = "unidad_medida"
+
+      id: Optional[int] = Field(default=None, primary_key=True)
+      nombre: str = Field(max_length=50, unique=True, nullable=False, index=True)
+      simbolo: str = Field(max_length=10, nullable=False)
+      tipo: str = Field(max_length=30, nullable=False)  # masa, volumen, unidad, area
+  ```
+* **Poblado Semilla (`app/seed.py`):**
+  Función `seed_unidades_medida(session: Session)` invocada durante el evento `lifespan` de FastAPI luego de `create_db_and_tables()`. Inserta de forma idempotente las 7 unidades oficiales definidas por la cátedra:
+  1. `kilogramo` (`kg`, `masa`)
+  2. `gramo` (`g`, `masa`)
+  3. `litro` (`L`, `volumen`)
+  4. `mililitro` (`mL`, `volumen`)
+  5. `pieza` (`u`, `unidad`)
+  6. `docena` (`doc`, `unidad`)
+  7. `metro cuadrado` (`m²`, `area`)
+* **Contratos DTO y Endpoints:**
+  - `GET /unidades-medida/` → Retorna `UnidadMedidaListResponse(total=7, items=[UnidadMedidaRead, ...])`.
+  - `GET /unidades-medida/{id}` → Retorna `UnidadMedidaRead` o HTTP `404 Not Found`.
+
+#### 2. Entidad `Ingrediente` (Catálogo Dinámico — `app/models/ingrediente.py`)
+* **Naturaleza:** Entidad con auditoría completa y soporte de borrado lógico (`deleted_at`).
+* **Estructura relacional:**
+  ```python
+  class Ingrediente(SQLModel, table=True):
+      __tablename__ = "ingrediente"
+
+      id: Optional[int] = Field(default=None, primary_key=True)
+      nombre: str = Field(max_length=100, unique=True, nullable=False, index=True)
+      descripcion: Optional[str] = Field(default="")
+      unidad_medida_id: int = Field(foreign_key="unidad_medida.id", nullable=False)
+      activo: bool = Field(default=True, nullable=False)
+      created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
+      updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
+      deleted_at: Optional[datetime] = Field(default=None, nullable=True)
+  ```
+* **Contratos DTO y Endpoints (`/ingredientes/`):**
+  - `GET /ingredientes/?offset=0&limit=10&nombre=...&incluir_inactivos=false` → `IngredientePaginatedResponse`.
+  - `POST /ingredientes/` (`201 Created`): Valida existencia de `unidad_medida_id` (`404`) y unicidad insensible a mayúsculas de `nombre` (`409`).
+  - `GET /ingredientes/{id}` (`200 OK` o `404`).
+  - `PUT /ingredientes/{id}` (`200 OK` reemplazo o `404`/`409`).
+  - `DELETE /ingredientes/{id}` (`204 No Content` borrado lógico; rechaza con `409 Conflict` si está asociado a productos activos).
+
+#### 3. Tabla Intermedia `ProductoIngrediente` (`app/models/producto.py`)
+* **Naturaleza:** Asociación N:M entre `Producto` e `Ingrediente` con atributos extendidos.
+* **Estructura relacional:**
+  ```python
+  class ProductoIngrediente(SQLModel, table=True):
+      __tablename__ = "producto_ingrediente"
+
+      producto_id: int = Field(foreign_key="producto.id", primary_key=True)
+      ingrediente_id: int = Field(foreign_key="ingrediente.id", primary_key=True)
+      cantidad: float = Field(default=1.0, gt=0, nullable=False)
+      es_opcional: bool = Field(default=False, nullable=False)
+      created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc), nullable=False)
+  ```
+
+#### 4. Contratos DTO de Producto Actualizados (`app/modules/producto/schemas.py`)
+* **`ProductoCreate`:**
+  ```python
+  class ProductoCreate(ProductoBase):
+      categoria_ids: List[int] = Field(min_length=1, description="Lista obligatoria de al menos un ID de categoría existente")
+      ingredientes: Optional[List[Union[int, ProductoIngredienteInput]]] = Field(
+          default=None,
+          description="Lista opcional de ingredientes (IDs enteros o payloads con cantidad y es_opcional)"
+      )
+  ```
+* **`ProductoUpdate`:**
+  ```python
+  class ProductoUpdate(SQLModel):
+      nombre: Optional[str] = None
+      descripcion: Optional[str] = None
+      precio_base: Optional[float] = Field(default=None, ge=0)
+      disponible: Optional[bool] = None
+      imagenes_url: Optional[List[str]] = None
+      categoria_ids: Optional[List[int]] = Field(default=None, min_length=1)
+      ingredientes: Optional[List[Union[int, ProductoIngredienteInput]]] = None
+  ```
+* **`ProductoRead`:** Retorna la información completa del producto con sus relaciones hidratadas:
+  `id`, `nombre`, `descripcion`, `precio_base`, `disponible`, `imagenes_url`, `categorias: List[CategoriaRead]` e `ingredientes: List[ProductoIngredienteRead]`.
+
+---
+
+### 1.3. Nueva Matriz de Trazabilidad Integral (`HU-01` a `HU-07` y `RN-01` a `RN-22`)
+
+#### Historias de Usuario (HU)
+| ID | Denominación y Alcance | Canal de Verificación | Criterios de Aceptación Clave | Fase / Tarea |
+| :---: | :--- | :--- | :--- | :---: |
+| **HU-01** | Listar categorías | Frontend (React) | Monta `CategoriasPage`, ejecuta `useQuery` con `GET /categorias`, renderiza nombre y descripción, muestra estado vacío o error `{"detail": "..."}`. | Fase 3 / 3.3 (Vigente) |
+| **HU-02** | Crear una categoría | Frontend (React) | Modal con formulario vacío, `nombre` obligatorio (`min_length=1`, sin espacios solos), `POST /categorias/` (`201`), conflicto duplicado (`409`), refetch e invalidación sin recarga. | Fase 3 / 3.3 (Vigente) |
+| **HU-03** | Editar una categoría | Frontend (React) | Modal con campos precargados, envío de `PUT /categorias/{id}` (reemplazo total, `200`), control de `404` y `409`, actualización reactiva y cierre de modal. | Fase 6 / 6.1 (Adaptación PUT) |
+| **HU-04** | Eliminar una categoría | Frontend (React) | Botón eliminar dispara `DELETE /categorias/{id}` (`204`), control de `404` y bloqueo `409` si tiene productos asociados (`RN-05`). Confirmación previa obligatoria. | Fase 5 / 5.3 (RN-05 Backend) |
+| **HU-05** | Navegar entre páginas con React Router | Frontend (React) | Enlaces en `Navbar` hacia `/categorias` y `/productos` mediante React Router, sin recarga de navegador. `App.tsx` desacoplado sin lógica de negocio. | Fase 3 / 3.4 y 3.6 (Vigente) |
+| **HU-06** | CRUD de Productos desde REST Client | Backend (REST Client) | `GET /productos`, `POST /productos` (`201` con `categoria_ids` obligatorio `min_length=1` e ingredientes opcionales), `PUT /productos/{id}` (`200` con reemplazo de relaciones), `DELETE /productos/{id}` (`204` con cascada de vínculos). Demostrado vía `productos.http`. | Fase 5 / 5.4 y 5.5 |
+| **HU-07** | Consultar relación N:M Producto-Categoría y Producto-Ingrediente | Backend (REST Client) | `GET /productos/{id}/categorias`, `GET /productos/{id}/ingredientes`, `GET /categorias/{id}/productos`. Relaciones gestionadas ÚNICAMENTE en `POST`/`PUT` de productos. Error `404` si la entidad base no existe. | Fase 5 / 5.3, 5.4 y 5.5 |
+
+#### Reglas de Negocio (RN)
+| ID | Regla de Negocio | Entidad / Código Esperado | Criterio de Verificación | Fase / Tarea |
+| :---: | :--- | :--- | :--- | :---: |
+| **RN-01** | `Categoria.nombre` obligatorio (`min_length=1`), no vacío ni solo espacios | Categoria / `422 Unprocessable Entity` | Schema `CategoriaCreate` / `CategoriaUpdate` con validador strip y `min_length=1`. | Fase 2 / 2.2 (Vigente) |
+| **RN-02** | `Categoria.nombre` único (insensible a mayúsculas/espacios) | Categoria / `409 Conflict` | Comprobación `func.lower(nombre)` en `categoria.services`. | Fase 2 / 2.3 (Vigente) |
+| **RN-03** | `Categoria.descripcion` opcional con default `""` | Categoria / `200` o `201` | Schema `descripcion: str = ""` persistido sin error. | Fase 1 y 2 (Vigente) |
+| **RN-04** | No actualizar ni eliminar categoría con ID inexistente | Categoria / `404 Not Found` | Verificación en `get_categoria_by_id` en service/router. | Fase 2 / 2.3 (Vigente) |
+| **RN-05** | Categoría con productos asociados no puede eliminarse | Categoria / `409 Conflict` | Conteo en `producto_categoria` previo a baja; lanza conflicto si count > 0. | Fase 5 / 5.3 |
+| **RN-06** | `Producto.nombre` obligatorio (`min_length=1`). **No es único: se permiten repetidos** | Producto / `422` (si inválido) | Permitir nombres duplicados en `create_producto` y `update_producto`. | Fase 5 / 5.4 |
+| **RN-07** | `Producto.precio_base` debe ser $\ge 0$ | Producto / `422 Unprocessable Entity` | Validación Pydantic `Field(ge=0)`. | Fase 2 / 2.2 (Vigente) |
+| **RN-08** | `Producto.disponible` booleano con default `True` | Producto / `201 Created` | Valor predeterminado en modelo y schema. | Fase 2 / 2.1 (Vigente) |
+| **RN-09** | `Producto.imagenes_url` lista de cadenas (puede ser vacía) | Producto / `422` (si tipo erróneo) | Declaración `List[str] = Field(default_factory=list)`. | Fase 2 / 2.1 (Vigente) |
+| **RN-10** | No consultar, actualizar ni eliminar producto con ID inexistente | Producto / `404 Not Found` | Retorno `404` si `get_producto_by_id` es `None`. | Fase 2 / 2.4 (Vigente) |
+| **RN-11** | En `POST`/`PUT` producto, todas las categorías en `categoria_ids` deben existir | Relación / `404 Not Found` | Verificación de existencia de cada ID contra la tabla `categoria`. | Fase 5 / 5.4 |
+| **RN-12** | En `PUT /productos/{id}`, si se envían `categoria_ids`, se reemplazan TODAS las asociaciones | Relación / `200 OK` (`409` si conflicto de estado) | Eliminación y recreación transaccional de tuplas en `producto_categoria`. | Fase 5 / 5.4 |
+| **RN-13** | Cardinalidad N:M entre Producto y Categoría | Relación / `GET` inversos | Verificación con `GET /productos/{id}/categorias` y `GET /categorias/{id}/productos`. | Fase 5 / 5.3 y 5.4 |
+| **RN-14** | Al eliminar un producto, borrado en cascada de sus asociaciones N:M | Relación / Consistencia tras `DELETE` | Purgado de filas en `producto_categoria` y `producto_ingrediente` al aplicar soft delete. | Fase 5 / 5.4 |
+| **RN-15** | IDs autoincrementales asignados por el backend (solo lectura) | Todas / Autoincrement | Prohibido enviar o mutar PK `id` desde el cliente. | Fase 2 (Vigente) |
+| **RN-16** | Persistencia consistente durante la ejecución del servidor | Todas / Runtime | SQLite en disco / PostgreSQL según variable `DATABASE_URL`. | Fase 2 / 2.5 (Vigente) |
+| **RN-17** | Operaciones inválidas devuelven error y no mutan el estado | Todas / `404`, `409`, `422` | Transacciones atómicas de sesión en SQLAlchemy/SQLModel. | Fase 2 (Vigente) |
+| **RN-18** | Enrutamiento SPA gestionado en el cliente con React Router | Frontend / SPA puro | `BrowserRouter`, `Routes`, `Route`, `NavLink` sin recargas completas. | Fase 3 / 3.4 y 3.6 (Vigente) |
+| **RN-19** | En `POST /productos/`, `categoria_ids` es obligatorio con al menos un ID | Producto / `422 Unprocessable Entity` | Pydantic `Field(min_length=1)` sobre `categoria_ids`. | Fase 5 / 5.4 |
+| **RN-20** | `ingredientes` es opcional al crear o actualizar producto | Producto / `201` o `200` | Si se omite, el producto se crea o mantiene sin ingredientes asociados. | Fase 5 / 5.4 |
+| **RN-21** | En `PUT /productos/{id}`, si se envían `ingredientes`, se reemplazan TODOS los existentes | Producto / `200 OK` | Reemplazo transaccional completo en `producto_ingrediente`. | Fase 5 / 5.4 |
+| **RN-22** | No existen endpoints `POST`/`DELETE` específicos para relaciones N:M | Relación / Arquitectura | Gestión exclusiva en `POST /productos/` y `PUT /productos/{id}`. | Fase 5 / 5.4 |
+
+---
+
+### 1.4. Tablero Kanban de Readaptación (Fases 5, 6 y 7)
+
+```text
+[ FASE 5: Backend — Catálogo Extendido, Seed, Reglas RN-01..22 & Relaciones N:M ]
+                                      ↓
+[ FASE 6: Frontend — Alineación de Servicios, PUT Total & Modal CRUD en ProductsPage ]
+                                      ↓
+[ FASE 7: Verificación E2E Full Stack, Documentación Sincronizada & Re-empaquetado ]
+```
+
+| ID Tarea | Tarea | Fase | Estado | Componentes / Módulos Afectados |
+| :---: | :--- | :---: | :---: | :--- |
+| **5.1** | Modelos SQLModel y Seed de Catálogo (`UnidadMedida`, `Ingrediente`, `ProductoIngrediente`, `seed.py`) | Fase 5 | ⏳ **Pendiente** | `app/models/unidad_medida.py`, `app/models/ingrediente.py`, `app/models/producto.py`, `app/seed.py` |
+| **5.2** | Módulos completos `unidad_medida` (solo lectura) e `ingrediente` (CRUD con borrado lógico) | Fase 5 | ⏳ **Pendiente** | `app/modules/unidad_medida/`, `app/modules/ingrediente/` (schemas, services, routers) |
+| **5.3** | Adecuación de `categoria` a nuevas reglas (`RN-05` 409 al borrar con productos, query params estándar, `GET /{id}/productos`) | Fase 5 | ⏳ **Pendiente** | `app/modules/categoria/services.py`, `app/modules/categoria/routers.py` |
+| **5.4** | Refactorización de `producto` y relaciones N:M (`RN-06`, `RN-11`, `RN-12`, `RN-14`, `RN-19`..`RN-22`, `GET` inversos) | Fase 5 | ⏳ **Pendiente** | `app/modules/producto/schemas.py`, `app/modules/producto/services.py`, `app/modules/producto/routers.py` |
+| **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ⏳ **Pendiente** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
+| **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ⏳ **Pendiente** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
+| **6.2** | Formulario CRUD de Productos (`ProductoModal.tsx`) e integración de mutaciones en `ProductsPage.tsx` | Fase 6 | ⏳ **Pendiente** | `src/components/ProductoModal.tsx`, `src/pages/ProductsPage.tsx` |
+| **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ⏳ **Pendiente** | Suite de pruebas backend y REST Client |
+| **7.2** | Compilación estática TypeScript (`tsc -b`) y Smoke Test E2E Full Stack en navegador | Fase 7 | ⏳ **Pendiente** | Verificación de build y flujo interactivo en SPA |
+| **7.3** | Sincronización de documentación (`README.md` raíz, backend y frontend) con las nuevas especificaciones | Fase 7 | ⏳ **Pendiente** | `README.md`, `unidad7_backend/README.md`, `unidad7_frontend/README.md` |
+| **7.4** | Re-empaquetado limpio de entregables `.zip` libres de artefactos transitorios | Fase 7 | ⏳ **Pendiente** | Scripts de purgado y generación de `.zip` oficiales |
+
+---
+
+### FASE 5: Backend — Catálogo Extendido, Seed, Reglas RN-01..22 & Relaciones N:M
+> **Estado:** ⏳ **PENDIENTE**  
+> **Criterio de Dependencia:** Nivel 4 (Construye sobre el backend base de la Fase 2 para cumplir al 100% la especificación del 18/10).
+
+#### Tarea 5.1: Modelos SQLModel y Seed de Catálogo
+- **Acción:**
+  - Crear `app/models/unidad_medida.py`: Definir modelo `UnidadMedida` con `__tablename__ = "unidad_medida"`, campos `id`, `nombre` (único, indexado), `simbolo` y `tipo`.
+  - Crear `app/models/ingrediente.py`: Definir modelo `Ingrediente` con `__tablename__ = "ingrediente"`, campos `id`, `nombre` (único), `descripcion`, `unidad_medida_id` (FK a `unidad_medida.id`), `activo`, marcas temporales de auditoría (`created_at`, `updated_at`, `deleted_at`).
+  - Actualizar `app/models/producto.py`: Incorporar tabla intermedia `ProductoIngrediente` con clave primaria compuesta `(producto_id, ingrediente_id)`, campos `cantidad: float = Field(default=1.0, gt=0)` y `es_opcional: bool = Field(default=False)`.
+  - Crear `app/seed.py`: Función `seed_unidades_medida(session: Session)` idempotente que verifique registros existentes e inserte las 7 unidades oficiales definidas por la cátedra (`kilogramo`, `gramo`, `litro`, `mililitro`, `pieza`, `docena`, `metro cuadrado`).
+- **Estado:** ⏳ **Pendiente**
+- **Historias de Usuario asociadas:** HU-06, HU-07.
+- **Reglas de Negocio asociadas:** RN-15, RN-16, RN-20.
+
+#### Tarea 5.2: Módulos completos `unidad_medida` e `ingrediente`
+- **Acción:**
+  - Módulo `app/modules/unidad_medida/`:
+    - `schemas.py`: `UnidadMedidaRead(id: int, nombre: str, simbolo: str, tipo: str)` y `UnidadMedidaListResponse(total: int, items: List[UnidadMedidaRead])`.
+    - `services.py`: `get_unidades_medida(session)` y `get_unidad_medida_by_id(session, id)`.
+    - `routers.py`: `GET /unidades-medida/` y `GET /unidades-medida/{id}` (solo lectura, sin endpoints de escritura).
+  - Módulo `app/modules/ingrediente/`:
+    - `schemas.py`: `IngredienteBase`, `IngredienteCreate` (con validación de `nombre` y `unidad_medida_id`), `IngredienteUpdate`, `IngredienteRead` e `IngredientePaginatedResponse(total: int, items: List[IngredienteRead])`.
+    - `services.py`: CRUD completo con filtrado dinámico (`nombre`, `incluir_inactivos`), conteo atómico SQL, validación de existencia de unidad de medida y chequeo de no duplicidad de nombre. Borrado lógico marcando `deleted_at` y `activo = False`. Bloqueo con excepción de conflicto si el ingrediente está vinculado a productos activos.
+    - `routers.py`: `GET /ingredientes/`, `POST /ingredientes/` (`201`), `GET /ingredientes/{id}`, `PUT /ingredientes/{id}` y `DELETE /ingredientes/{id}` (`204`).
+- **Estado:** ⏳ **Pendiente**
+- **Historias de Usuario asociadas:** HU-07.
+- **Reglas de Negocio asociadas:** RN-15, RN-16, RN-17.
+
+#### Tarea 5.3: Adecuación de `categoria` a nuevas reglas de negocio
+- **Acción:**
+  - En `app/modules/categoria/routers.py`:
+    - Ajustar parámetros de `GET /categorias/`: `offset: int = Query(0, ge=0)`, `limit: int = Query(10, ge=1, le=100)`, `nombre: Optional[str] = Query(None)` (manteniendo `search` como alias retrocompatible opcional) e `incluir_inactivos: bool = Query(False)`.
+    - Incorporar endpoint de consulta inversa relacional: `GET /categorias/{id}/productos` (`HU-07`) retornando la lista de productos asociados a la categoría solicitada, o `404 Not Found` si la categoría no existe o está dada de baja.
+  - En `app/modules/categoria/services.py`:
+    - Modificar `delete_categoria` (`RN-05`): Verificar previamente si existen registros en `producto_categoria` asociados a la categoría; en caso afirmativo, abortar la baja y retornar un indicador de conflicto para que el router emita `409 Conflict`.
+- **Estado:** ⏳ **Pendiente**
+- **Historias de Usuario asociadas:** HU-04, HU-07.
+- **Reglas de Negocio asociadas:** RN-01, RN-02, RN-03, RN-04, RN-05.
+
+#### Tarea 5.4: Refactorización de `producto` y relaciones N:M
+- **Acción:**
+  - En `app/modules/producto/schemas.py`:
+    - Actualizar `ProductoCreate` incorporando `categoria_ids: List[int] = Field(min_length=1)` (`RN-19`) e `ingredientes: Optional[List[Union[int, ProductoIngredienteInput]]] = None` (`RN-20`).
+    - Actualizar `ProductoUpdate` incorporando `categoria_ids: Optional[List[int]] = Field(default=None, min_length=1)` e `ingredientes: Optional[List[Union[int, ProductoIngredienteInput]]] = None`.
+    - Reflejar en `ProductoRead` la lista de categorías e ingredientes asociados.
+  - En `app/modules/producto/services.py`:
+    - Remover la restricción de nombre único (`RN-06`): Permitir productos con nombres idénticos.
+    - En `create_producto`: Validar que todos los `categoria_ids` existan en la tabla `categoria` (`RN-11`, retornando `404` ante identificadores faltantes); si se enviaron `ingredientes`, validar existencia de cada uno. Crear transaccionalmente el producto y registrar los vínculos en `producto_categoria` y `producto_ingrediente`.
+    - En `update_producto`: Si se provee `categoria_ids` (`RN-12`), validar existencia de todos los IDs (`RN-11`) y reemplazar atómicamente todas las relaciones previas en `producto_categoria`. Si se provee `ingredientes` (`RN-21`), reemplazar atómicamente los vínculos en `producto_ingrediente`.
+    - En `delete_producto` (`RN-14`): Aplicar borrado lógico en `Producto` (`deleted_at = datetime.now(timezone.utc)`) y eliminar en cascada sus filas en `producto_categoria` y `producto_ingrediente`.
+    - Implementar funciones de consulta relacional: `get_categorias_by_producto_id(session, id)` y `get_ingredientes_by_producto_id(session, id)`.
+  - En `app/modules/producto/routers.py`:
+    - Eliminar los endpoints dedicados `POST /productos/categorias/asignar`, `POST /productos/{id}/categorias/{categoria_id}` y `DELETE /productos/{id}/categorias/{categoria_id}` (`RN-22`).
+    - Ajustar parámetros en `GET /productos/`: `offset: int = Query(0, ge=0)`, `limit: int = Query(10, ge=1, le=100)`, `nombre: Optional[str] = None`, `incluir_inactivos: bool = False`.
+    - Agregar endpoints de consulta inversa: `GET /productos/{id}/categorias` y `GET /productos/{id}/ingredientes` (`HU-07`).
+- **Estado:** ⏳ **Pendiente**
+- **Historias de Usuario asociadas:** HU-06, HU-07.
+- **Reglas de Negocio asociadas:** RN-06, RN-07, RN-08, RN-09, RN-10, RN-11, RN-12, RN-13, RN-14, RN-19, RN-20, RN-21, RN-22.
+
+#### Tarea 5.5: Endpoints de salud, ciclo lifespan y suite de pruebas actualizada
+- **Acción:**
+  - En `app/main.py`:
+    - Implementar los endpoints `GET /health/` (`200 {"status": "ok"}`) y `GET /health/db` (`200 {"status": "ok", "database": "connected"}` ejecutando `session.exec(text("SELECT 1"))`).
+    - En el contextmanager `lifespan`: Asegurar la invocación de `seed_unidades_medida(session)` tras `create_db_and_tables()`.
+    - Registrar los nuevos routers de `unidad_medida` e `ingrediente`.
+  - En `unidad7_backend/productos.http`:
+    - Reestructurar el archivo con las secciones oficiales:
+      1. Comprobación de salud (`/health/`, `/health/db`).
+      2. Catálogo inmutable de Unidades de Medida (`GET /unidades-medida/`, `GET /unidades-medida/1`).
+      3. CRUD de Ingredientes (`POST`, `GET`, `PUT`, `DELETE`).
+      4. CRUD de Categorías con reglas de conflicto (`POST`, `GET`, `PUT`, `DELETE` con `409` si tiene productos).
+      5. CRUD de Productos con relaciones N:M unificadas en `POST` (`categoria_ids` obligatorio) y `PUT` (reemplazo total de categorías e ingredientes).
+      6. Consultas relacionales inversas N:M (`GET /productos/{id}/categorias`, `GET /productos/{id}/ingredientes`, `GET /categorias/{id}/productos`).
+      7. Comprobación de borrado en cascada de vínculos al eliminar producto (`RN-14`).
+  - Actualizar `tests/test_productos_http.py` para asegurar que la suite automatizada cubra todas las nuevas rutas y aserciones.
+- **Estado:** ⏳ **Pendiente**
+- **Historias de Usuario asociadas:** HU-06, HU-07.
+- **Reglas de Negocio asociadas:** RN-05, RN-06, RN-11..14, RN-19..22.
+
+---
+
+### FASE 6: Frontend — Alineación de Servicios, PUT Total & Modal CRUD en `ProductsPage`
+> **Estado:** ⏳ **PENDIENTE**  
+> **Criterio de Dependencia:** Nivel 5 (Consume los endpoints y esquemas actualizados en la Fase 5).
+
+#### Tarea 6.1: Tipado TypeScript extendido y servicios HTTP
+- **Acción:**
+  - Crear `src/types/ingrediente.ts`: Tipos `UnidadMedida`, `Ingrediente` e `IngredienteInput`.
+  - Actualizar `src/types/producto.ts`: Incorporar `categoria_ids: number[]` e `ingredientes?: ...` en `ProductoCreate` y `ProductoUpdate`, y actualizar `Producto` con su detalle de categorías e ingredientes.
+  - En `src/services/categorias.service.ts`:
+    - Modificar `updateCategoria`: Enviar método HTTP `PUT` en lugar de `PATCH` hacia `/categorias/{id}` para dar cumplimiento estricto a `HU-03`.
+  - En `src/services/productos.service.ts`:
+    - Completar el cliente API de productos con las operaciones de mutación requeridas:
+      - `createProducto(payload: ProductoCreate)`: `POST /productos/`.
+      - `updateProducto({ id, data }: { id: number; data: ProductoUpdate })`: `PUT /productos/{id}`.
+      - `deleteProducto(id: number)`: `DELETE /productos/{id}`.
+- **Estado:** ⏳ **Pendiente**
+- **Historias de Usuario asociadas:** HU-03, HU-06.
+- **Reglas de Negocio asociadas:** RN-01, RN-06, RN-07, RN-19.
+
+#### Tarea 6.2: Formulario CRUD de Productos (`ProductoModal.tsx`) y refinamiento de `ProductsPage.tsx`
+- **Acción:**
+  - Crear `src/components/ProductoModal.tsx`:
+    - Modal flotante con control reactivo de inputs: `nombre`, `descripcion`, `precio_base`, `disponible`, selección de categorías (`categoria_ids` con checkboxes o multiselect validando al menos 1 categoría seleccionada).
+    - Soporte dual de modo Alta (*"Nuevo Producto"*) y modo Edición (*"Editar Producto"*).
+    - Despliegue de mensajes de error de validación/conflicto dentro del modal (`errorMessage`).
+    - Deshabilitación de controles durante el envío (`isSubmitting`).
+  - Refinar `src/pages/ProductsPage.tsx`:
+    - Incorporar botón *"Nuevo Producto"* en la cabecera.
+    - Gestionar estado de modal: `isModalOpen: boolean` y `editingProducto: Producto | null`.
+    - Integrar `useMutation` para creación (`createMutation`), edición (`updateMutation`) y baja con confirmación interactiva (`deleteMutation`).
+    - Invalidar la caché de productos tras cada mutación exitosa: `queryClient.invalidateQueries({ queryKey: ["productos"] })`.
+    - Agregar botones de *Editar* y *Eliminar* en cada tarjeta de producto.
+- **Estado:** ⏳ **Pendiente**
+- **Historias de Usuario asociadas:** HU-05, HU-06.
+- **Reglas de Negocio asociadas:** RN-06, RN-07, RN-08, RN-11, RN-12, RN-19.
+
+---
+
+### FASE 7: Verificación E2E Full Stack, Documentación Sincronizada & Re-empaquetado
+> **Estado:** ⏳ **PENDIENTE**  
+> **Criterio de Dependencia:** Nivel 6 (Consolida y verifica la totalidad de la aplicación actualizada).
+
+#### Tarea 7.1: Verificación de suite pytest y REST Client `productos.http`
+- **Acción:**
+  - Ejecutar la suite completa de backend mediante `pytest` asegurando 100% de tests pasando en verde.
+  - Probar de punta a punta el archivo `productos.http` verificando el seed de unidades de medida, CRUD de ingredientes, CRUD de categorías con bloqueo `409` por productos asociados, CRUD de productos con validación obligatoria de `categoria_ids` (`422`/`404`), reemplazo en `PUT`, endpoints de consulta inversa N:M y comprobación de salud en `/health/` y `/health/db`.
+- **Estado:** ⏳ **Pendiente**
+- **Historias de Usuario asociadas:** HU-06, HU-07.
+- **Reglas de Negocio asociadas:** RN-01..RN-22.
+
+#### Tarea 7.2: Compilación estática TypeScript y Smoke Test E2E Full Stack
+- **Acción:**
+  - Ejecutar `pnpm build:front` (`tsc -b && vite build`) comprobando compilación limpia con 0 errores de tipado en componentes, servicios y vistas.
+  - Levantar concurrentemente el frontend y backend para comprobar de forma interactiva en navegador:
+    1. Navegación fluida por React Router entre `/categorias` y `/productos`.
+    2. Ciclo completo de Categorías: creación con modal, edición con `PUT`, eliminación con confirmación.
+    3. Ciclo completo de Productos: creación con selección obligatoria de categorías en `ProductoModal`, edición de atributos y asociaciones, baja lógica interactiva y reflejo instantáneo en la grilla paginada.
+- **Estado:** ⏳ **Pendiente**
+- **Historias de Usuario asociadas:** HU-01 a HU-05.
+
+#### Tarea 7.3: Sincronización de archivos de documentación (`README.md`)
+- **Acción:**
+  - Actualizar `README.md` (raíz), `unidad7_backend/README.md` y `unidad7_frontend/README.md` detallando:
+    - El clúster completo de entidades (`UnidadMedida`, `Ingrediente`, `Categoria`, `Producto`, `ProductoCategoria`, `ProductoIngrediente`).
+    - La carga semilla automática de unidades de medida (`seed.py`).
+    - Los nuevos endpoints disponibles y las reglas de gestión N:M unificadas en `POST`/`PUT`.
+    - El modal interactivo de productos en el frontend.
+- **Estado:** ⏳ **Pendiente**
+
+#### Tarea 7.4: Re-empaquetado limpio para entrega final
+- **Acción:**
+  - Purgar directorios y cachés temporales (`node_modules/`, `.venv/`, `.pytest_cache/`, `dist/`, `__pycache__/`).
+  - Generar los dos archivos `.zip` finales para entrega de la cátedra:
+    - `Varela_Santiago_TPI_unidad7_frontend.zip`
+    - `Varela_Santiago_TPI_unidad7_backend.zip`
+- **Estado:** ⏳ **Pendiente**
+- **Reglas de Negocio asociadas:** RN-08.
+
+---
+
 ## 4. Checklist de Control de Entrega
 
 - [ ] **Estructura de Carpetas:** El frontend cuenta con las carpetas `src/components/`, `src/types/`, `src/services/` y `src/pages/`.
 - [ ] **Arquitectura de `App.tsx`:** `App.tsx` carece totalmente de lógica de negocio o llamadas a API; solo define rutas con React Router y renderiza el `Navbar`.
-- [ ] **Server State con TanStack Query:** El consumo de la API utiliza `useQuery` y `useMutation`, con invalidación de caché (`queryClient.invalidateQueries({ queryKey: ["categorias"] })`), verificación `if (!res.ok) throw new Error(...)` en `services/` y sin copiar `data` a `useState`.
-- [ ] **Modal Reactivo:** El formulario de alta y edición se presenta dentro de `CategoriaModal.tsx` controlado con `useState` booleano en `CategoriasPage.tsx`.
+- [ ] **Server State con TanStack Query:** El consumo de la API utiliza `useQuery` y `useMutation`, con invalidación de caché (`queryClient.invalidateQueries({ queryKey: [...] })`), verificación `if (!res.ok) throw new Error(...)` en `services/` y sin copiar `data` a `useState`.
+- [ ] **Modal Reactivo de Categorías:** El formulario de alta y edición se presenta dentro de `CategoriaModal.tsx` controlado con `useState` booleano en `CategoriasPage.tsx`. Edición envía `PUT /categorias/{id}` (`HU-03`).
+- [ ] **Modal Reactivo de Productos:** Formulario interactivo en `ProductoModal.tsx` integrado en `ProductsPage.tsx` con soporte de selección obligatoria de categorías (`categoria_ids`, `RN-19`), ingredientes opcionales y baja con confirmación.
 - [ ] **Navegación con React Router:** Separación en páginas independientes (`CategoriasPage`, `ProductsPage` y `ProductDetailPage`) navegables mediante `NavLink` y `useNavigate` sin recarga de documento.
-- [ ] **Catálogo de Productos en Frontend:** `ProductsPage.tsx` muestra la grilla paginada y filtrable de productos con sus categorías asociadas, disponibilidad y navegación a `/productos/:id`.
-- [ ] **Tipado Estricto TypeScript:** Interfaces `Categoria`, `Producto` y `PaginatedResponse<T>` definidas formalmente; props tipados en todos los componentes `.tsx`; 0 errores en compilación de TypeScript (`tsc -b`).
+- [ ] **Catálogo Inmutable de Unidades de Medida:** Modelo `UnidadMedida` poblado automáticamente al arrancar la aplicación vía `seed.py` con las 7 unidades oficiales (`RN-15`, `RN-16`), accesible exclusivamente mediante endpoints de lectura `GET /unidades-medida/` y `GET /unidades-medida/{id}`.
+- [ ] **CRUD de Ingredientes:** Modelo `Ingrediente` con borrado lógico (`deleted_at`), validación de clave foránea a unidad de medida y endpoints completos en `/ingredientes/`.
+- [ ] **Gestión Unificada de Relaciones N:M:** Relaciones N:M gestionadas exclusivamente a través de `POST /productos/` (`categoria_ids` obligatorio `min_length=1`, `RN-19`) y `PUT /productos/{id}` (reemplazo atómico total de categorías e ingredientes, `RN-12`, `RN-21`), sin endpoints `POST`/`DELETE` separados (`RN-22`).
+- [ ] **Consultas Relacionales Inversas N:M:** Endpoints `GET /productos/{id}/categorias`, `GET /productos/{id}/ingredientes` y `GET /categorias/{id}/productos` implementados y operativos (`HU-07`).
+- [ ] **Protección de Integridad en Categoría (`RN-05`):** `DELETE /categorias/{id}` rechaza la eliminación con `409 Conflict` si la categoría tiene productos asociados activos.
+- [ ] **Flexibilidad en Nombre de Producto (`RN-06`):** `Producto.nombre` no requiere unicidad y permite productos con nombres idénticos.
+- [ ] **Borrado en Cascada de Asociaciones (`RN-14`):** Al eliminar un producto se purgan automáticamente sus vínculos en `producto_categoria` y `producto_ingrediente`.
+- [ ] **Endpoints de Salud y Diagnóstico:** `GET /health/` (`200 OK`) y `GET /health/db` (`200 OK` comprobando conectividad real a la base de datos).
+- [ ] **Tipado Estricto TypeScript:** Interfaces completas en `src/types/` (`Categoria`, `Producto`, `Ingrediente`, `UnidadMedida`); props tipados en todos los componentes `.tsx`; 0 errores en compilación de TypeScript (`tsc -b`).
 - [ ] **Backend Modular FastAPI:** Arquitectura Models-Schemas-Service-Router con Pydantic y SQLModel, libre de `HTTPException` en la capa de servicio y sin *java-ismos*.
-- [ ] **Paginación y Filtros Dinámicos:** Endpoints de colección con validación declarativa `fastapi.Query(ge=0, le=100)`, conteo atómico `func.count()` sobre subquery filtrada y respuesta estructurada `{ total, items }`.
-- [ ] **Endpoints de Producto y ProductoCategoria:** Endpoints construidos con `selectinload` (prevención de $N+1$), funcionales y demostrados mediante archivo `productos.http` (incluyendo asignación con `es_principal`).
+- [ ] **Paginación y Filtros Estándar:** Endpoints de colección con validación `fastapi.Query(ge=0, le=100)`, parámetros `offset`, `limit` (default 10), `nombre`, `incluir_inactivos`, conteo atómico `func.count()` y respuesta estructurada `{ total, items }`.
 - [ ] **CORS Habilitado:** Configurado en FastAPI para permitir peticiones desde el origen del frontend (`http://localhost:5173` y `http://127.0.0.1:5173`).
-- [ ] **Estilizado Tailwind CSS:** Clases aplicadas coherentemente y sin errores visuales.
-- [ ] **Archivos de Entrega:** Dos archivos `.zip` independientes (`frontend` y `backend`) excluyendo `node_modules` y `.venv`.
+- [ ] **Suite de Pruebas y REST Client:** Archivo `productos.http` actualizado cubriendo todos los endpoints y casos de prueba, y suite `pytest` en verde.
+- [ ] **Archivos de Entrega:** Dos archivos `.zip` independientes (`frontend` y `backend`) excluyendo estrictamente `node_modules`, `.venv`, cachés y temporales.
