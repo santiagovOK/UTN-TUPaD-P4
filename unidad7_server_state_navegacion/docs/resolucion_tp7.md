@@ -62,10 +62,9 @@
      - `[Consigna TP7 - ...]`: El inciso, requerimiento funcional o regla de `docs/consigna.md` que satisface.
      - `[Diagrama UML - ...]`: La entidad, atributo, clave (PK/FK), relación relacional (1:N, N:N) o principio de diseño (ej. SRP) de `docs/UML_FOOD_STORE.svg` al que corresponde.
    * Queda estrictamente prohibido mantener referencias obsoletas o residuales a `TP6` o `unidad6_backend` en los módulos de producción de la Unidad 7.
-7. **Estrategia Combinada Bottom-Up + Walking Skeleton (Compilación Continua en Verde):**
+7. **Estrategia Combinada Bottom-Up + Walking Skeleton con Montaje Progresivo (Feedback Visual Continuo):**
    * **Orden Bottom-Up (Grafo Acíclico de Dependencias):** Ningún archivo se crea antes que los módulos hoja que importa (`src/types/categoria.ts` precede a los componentes presentacionales de `src/components/`, y el esqueleto `src/App.tsx` precede al consumidor raíz `src/main.tsx`).
-   * **Alcance Walking Skeleton:** Al cierre de la Fase 1 el proyecto cuenta con un esqueleto funcional de extremo a extremo que compila en verde (`tsc -b --noEmit` = `0 errores`), evitando importaciones rotas entre fases y permitiendo evolucionar `App.tsx` en la Fase 3 cuando las vistas definitivas ya existen.
-
+   * **Alcance Walking Skeleton y Montaje Progresivo en `App.tsx`:** Al cierre de la Fase 1 el proyecto cuenta con un esqueleto funcional de extremo a extremo que compila en verde (`tsc -b --noEmit` = `0 errores`). Dado que en una SPA React el único punto de entrada visual al ejecutar el servidor de desarrollo (`pnpm dev`) es `App.tsx`, el *Walking Skeleton* **no permanece inerte ni congela la visualización hasta el final de la Fase 3**: a medida que cada vista o barra de navegación se completa en orden *Bottom-Up* (comenzando por `CategoriasPage` y `CategoriaModal` en la Tarea 3.3, siguiendo con `Navbar` en la 3.4 y las vistas de productos en la 3.5), **se monta de inmediato en `App.tsx`** para garantizar inspección visual en tiempo real (HMR), validación de estilos Tailwind y prueba interactiva antes de avanzar al siguiente eslabón.
 ---
 ## 2. Matriz de Trazabilidad Rápida
 
@@ -114,10 +113,10 @@
 | **2.6** | Suite integral de solicitudes HTTP (`productos.http`) para REST Client | Fase 2 | ✅ **Done** | `unidad7_backend/productos.http` |
 | **3.1** | Consolidación de contratos de datos TypeScript del catálogo (`Producto`, `ProductoCreate`, `index.ts`) | Fase 3 | ✅ **Done** | `src/types/categoria.ts`, `producto.ts`, `index.ts` |
 | **3.2** | Creación de capa de servicios HTTP con control de `!res.ok` (`categorias.service.ts`, `productos.service.ts`) | Fase 3 | ✅ **Done** | `src/services/categorias.service.ts`, `productos.service.ts`, `api.ts` |
-| **3.3** | Integración de TanStack Query para Categorías (`useQuery`, `useMutation`, `invalidateQueries`, adaptación de `CategoriaModal`) | Fase 3 | ⏳ **Pendiente** | `src/pages/CategoriasPage.tsx`, `src/components/CategoriaModal.tsx` |
-| **3.4** | Adaptación de `Navbar.tsx` con enlaces activos de React Router (`NavLink`) | Fase 3 | ⏳ **Pendiente** | `src/components/Navbar.tsx` |
-| **3.5** | Implementación de vistas `CategoriasPage.tsx`, `ProductsPage.tsx` (paginada) y `ProductDetailPage.tsx` (`:id`) | Fase 3 | ⏳ **Pendiente** | `src/pages/CategoriasPage.tsx`, `src/pages/ProductsPage.tsx`, `src/pages/ProductDetailPage.tsx` |
-| **3.6** | Evolución del *Walking Skeleton* en `App.tsx` al enrutador definitivo (`Navbar` + `Routes`, sin lógica de negocio) | Fase 3 | ⏳ **Pendiente** | `src/App.tsx` |
+| **3.3** | Integración de TanStack Query para Categorías (`useQuery`, `useMutation`, `invalidateQueries`, adaptación de `CategoriaModal` y montaje inicial en `App.tsx`) | Fase 3 | ✅ **Done** | `src/pages/CategoriasPage.tsx`, `src/components/CategoriaModal.tsx`, `src/App.tsx` |
+| **3.4** | Adaptación de `Navbar.tsx` con enlaces activos de React Router (`NavLink`) e incorporación al layout de `App.tsx` | Fase 3 | ⏳ **Pendiente** | `src/components/Navbar.tsx`, `src/App.tsx` |
+| **3.5** | Implementación de vistas de catálogo `ProductsPage.tsx` (paginada) y `ProductDetailPage.tsx` (`:id`) | Fase 3 | ⏳ **Pendiente** | `src/pages/ProductsPage.tsx`, `src/pages/ProductDetailPage.tsx` |
+| **3.6** | Cierre del *Walking Skeleton* en `App.tsx` con el enrutador completo (`Navbar` + `Routes` de Categorías y Productos, sin lógica de negocio) | Fase 3 | ⏳ **Pendiente** | `src/App.tsx` |
 | **4.1** | Smoke Test E2E de integración Full Stack (CRUD Categorías, catálogo paginado y navegación reactiva) | Fase 4 | ⏳ **Pendiente** | Navegador / Consola / Servidores concurrentes |
 | **4.2** | Demostración REST Client de Producto y ProductoCategoria | Fase 4 | ⏳ **Pendiente** | `productos.http` |
 | **4.3** | Verificación estática TypeScript (`tsc`) y ejecución de tests backend (`pytest`) | Fase 4 | ⏳ **Pendiente** | `tsc -b`, `pytest` |
@@ -150,7 +149,7 @@
 
 #### Tarea 1.3: Configuración de *Walking Skeleton* (`App.tsx`) y proveedores raíz en `main.tsx`
 - **Acción:** Construir el esqueleto mínimo compilable en orden *Bottom-Up* (primero el módulo consumido `App.tsx` y luego la raíz `main.tsx`):
-  - Crear `unidad7_frontend/src/App.tsx` (*Walking Skeleton*): contenedor esquelético libre de lógica de negocio con `<Routes>` inicial para garantizar compilación limpia (`tsc -b --noEmit` = `0 errores`) desde el cierre de la Fase 1.
+  - Crear `unidad7_frontend/src/App.tsx` (*Walking Skeleton*): contenedor esquelético libre de lógica de negocio con `<Routes>` inicial para garantizar compilación limpia (`tsc -b --noEmit` = `0 errores`) desde el cierre de la Fase 1, sirviendo como arnés de montaje progresivo en la Fase 3 a medida que se construyen las vistas.
   - Crear `unidad7_frontend/src/main.tsx` envolviendo `<App />` en:
     - `<QueryClientProvider client={queryClient}>` instanciado a nivel de módulo (fuera del árbol de renderizado) con políticas explícitas de ciclo de vida de caché (TanStack Query v5):
       ```typescript
@@ -341,26 +340,33 @@
 - **Historias de Usuario asociadas:** HU-01, HU-02, HU-03, HU-05.
 - **Reglas de Negocio asociadas:** RN-02.
 
-#### Tarea 3.3: Integración de TanStack Query para Categorías y refinamiento de `CategoriaModal.tsx`
+#### Tarea 3.3: Integración de TanStack Query para Categorías, refinamiento de `CategoriaModal.tsx` y montaje visual en `App.tsx`
 - **Acción:**
   - Refinar `src/components/CategoriaModal.tsx` para soportar estado controlado de los campos (`nombre`, `descripcion`) sincronizado al abrir para crear o editar, recibir `errorMessage?: string | null` para mostrar errores de validación/conflicto (`409`/`422`) dentro del modal sin perder lo escrito, y deshabilitar botones mientras `isSubmitting` sea `true`.
-  - En `src/pages/CategoriasPage.tsx`:
-    - Lectura declarativa con `useQuery`:
+  - Implementar `src/pages/CategoriasPage.tsx`:
+    - **Client State (`useState`):**
+      - `isModalOpen: boolean` (control booleano de apertura del modal).
+      - `editingCategoria: Categoria | null` (categoría seleccionada para edición).
+      - `search: string` (término de búsqueda dinámico incluido en `queryKey`).
+    - **Lectura declarativa con `useQuery` (RN-02):**
       ```typescript
       const { data, isLoading, isError, error, refetch } = useQuery({
         queryKey: ["categorias", { search }],
         queryFn: () => getCategorias(0, 50, search),
       });
       ```
-    - Escritura imperativa con `useMutation` y el flujo de sincronización en 5 pasos:
+      Renderiza directamente `data?.items ?? []` en `CategoriaList` sin copiar el listado en un `useState` local, mostrando contador `Total registradas: {data?.total ?? 0}`, estados de carga (`isLoading`) y alerta de error (`isError`) con reintento.
+    - **Escritura imperativa con `useMutation` y flujo de sincronización en 5 pasos:**
       - `createMutation`: Invoca `createCategoria`, y en `onSuccess` ejecuta `queryClient.invalidateQueries({ queryKey: ["categorias"] })` y cierra el modal.
       - `updateMutation`: Invoca `updateCategoria`, y en `onSuccess` invalida `["categorias"]` y cierra el modal.
       - `deleteMutation`: Invoca `deleteCategoria`, y en `onSuccess` invalida `["categorias"]`.
-- **Estado:** ⏳ **Pendiente**
+  - **Montaje progresivo en `src/App.tsx` (Feedback Visual Inmediato):**
+    - Conectar las rutas iniciales `/` y `/categorias` hacia `<CategoriasPage />` dentro del `<Routes>` de `App.tsx` (manteniendo un fallback para rutas aún no implementadas). Esto permite levantar `pnpm dev` de inmediato y verificar visualmente en el navegador la tabla, los estilos de `CategoriaModal` y el ciclo CRUD sin trabajar a ciegas.
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-01, HU-02, HU-03.
-- **Reglas de Negocio asociadas:** RN-02, RN-07.
+- **Reglas de Negocio asociadas:** RN-01, RN-02, RN-07.
 
-#### Tarea 3.4: Adaptación de `Navbar.tsx` con React Router
+#### Tarea 3.4: Adaptación de `Navbar.tsx` con React Router y montaje en `App.tsx`
 - **Acción:**
   - Crear/adaptar `src/components/Navbar.tsx` reemplazando hipervínculos `<a href="#">` por `<NavLink>` de `react-router-dom`.
   - Aplicar función de clases activas:
@@ -374,19 +380,13 @@
     ```
   - Enlaces de navegación hacia **Categorías** (`/categorias`) y **Productos** (`/productos`).
   - Actualizar branding a *"Food Store Admin"* y badge a *"TP7"*.
+  - Incorporar `<Navbar />` en la cabecera del layout de `src/App.tsx` para verificar visualmente la barra de navegación y el resaltado de ruta activa en el navegador.
 - **Estado:** ⏳ **Pendiente**
 - **Historias de Usuario asociadas:** HU-04.
 - **Reglas de Negocio asociadas:** RN-01.
 
-#### Tarea 3.5: Implementación de páginas `CategoriasPage.tsx`, `ProductsPage.tsx` y `ProductDetailPage.tsx`
+#### Tarea 3.5: Implementación de vistas de catálogo `ProductsPage.tsx` y `ProductDetailPage.tsx`
 - **Acción:**
-  - `src/pages/CategoriasPage.tsx`:
-    - **Client State (`useState`):**
-      - `isModalOpen: boolean` (control booleano de apertura del modal).
-      - `editingCategoria: Categoria | null` (categoría seleccionada para edición).
-      - `search: string` (término de búsqueda dinámico incluido en `queryKey`).
-    - **Server State (TanStack Query):** Consume `useQuery` y las mutaciones de la Tarea 3.3, renderizando directamente `data?.items ?? []` en `CategoriaList` sin copiar el listado en un `useState` local.
-    - Muestra contador `Total registradas: {data?.total ?? 0}`, estados de carga (`isLoading`), alerta de error (`isError`) con opción de reintento, tabla `CategoriaList` y modal `CategoriaModal`.
   - `src/pages/ProductsPage.tsx`:
     - **Client State (`useState`):** `page: number` (página actual base 1) y `nombre: string` (filtro de búsqueda que reinicia `setPage(1)` al cambiar).
     - **Server State (`useQuery`):** Calcula `offset = (page - 1) * PAGE_SIZE` y ejecuta `useQuery({ queryKey: ["productos", { offset, limit: PAGE_SIZE, nombre }], queryFn: () => getProductos(offset, PAGE_SIZE, nombre) })`.
@@ -395,12 +395,12 @@
     - Extrae `:id` con `useParams<{ id: string }>()`, convierte a número (`const numericId = Number(id)`) y ejecuta `useQuery({ queryKey: ["producto", numericId], queryFn: () => getProductoById(numericId), enabled: Boolean(id) && !Number.isNaN(numericId) && numericId > 0 })`.
     - Muestra ficha completa del producto con sus categorías e incluye botón *"← Volver al listado de productos"* mediante `useNavigate()`.
 - **Estado:** ⏳ **Pendiente**
-- **Historias de Usuario asociadas:** HU-01, HU-02, HU-03, HU-04, HU-05.
+- **Historias de Usuario asociadas:** HU-04, HU-05.
 - **Reglas de Negocio asociadas:** RN-01, RN-02, RN-07.
 
-#### Tarea 3.6: Evolución del *Walking Skeleton* en `App.tsx` al enrutador definitivo (Sin lógica de negocio)
+#### Tarea 3.6: Cierre del *Walking Skeleton* en `App.tsx` al enrutador definitivo (Sin lógica de negocio)
 - **Acción:**
-  - Reemplazar la ruta esquelética inicial de `App.tsx` por el layout global definitivo (`<Navbar />`) y la definición declarativa de rutas (`<Routes>`) hacia las páginas construidas en la Tarea 3.5:
+  - Completar la tabla declarativa de rutas (`<Routes>`) en `App.tsx` conectando las páginas `ProductsPage` y `ProductDetailPage` construidas en la Tarea 3.5 junto a `Navbar` y `CategoriasPage` ya montadas:
     ```tsx
     export function App() {
       return (
