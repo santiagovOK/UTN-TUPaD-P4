@@ -117,9 +117,9 @@
 | **3.4** | Adaptación de `Navbar.tsx` con enlaces activos de React Router (`NavLink`) e incorporación al layout de `App.tsx` | Fase 3 | ✅ **Done** | `src/components/Navbar.tsx`, `src/App.tsx` |
 | **3.5** | Implementación de vistas de catálogo `ProductsPage.tsx` (paginada) y `ProductDetailPage.tsx` (`:id`) | Fase 3 | ✅ **Done** | `src/pages/ProductsPage.tsx`, `src/pages/ProductDetailPage.tsx` |
 | **3.6** | Cierre del *Walking Skeleton* en `App.tsx` con el enrutador completo (`Navbar` + `Routes` de Categorías y Productos, sin lógica de negocio) | Fase 3 | ✅ **Done** | `src/App.tsx` |
-| **4.1** | Smoke Test E2E de integración Full Stack (CRUD Categorías, catálogo paginado y navegación reactiva) | Fase 4 | ⏳ **Pendiente** | Navegador / Consola / Servidores concurrentes |
-| **4.2** | Demostración REST Client de Producto y ProductoCategoria | Fase 4 | ⏳ **Pendiente** | `productos.http` |
-| **4.3** | Verificación estática TypeScript (`tsc`) y ejecución de tests backend (`pytest`) | Fase 4 | ⏳ **Pendiente** | `tsc -b`, `pytest` |
+| **4.1** | Smoke Test E2E de integración Full Stack (CRUD Categorías, catálogo paginado y navegación reactiva) | Fase 4 | ✅ **Done** | Navegador / Consola / Servidores concurrentes |
+| **4.2** | Demostración REST Client de Producto y ProductoCategoria | Fase 4 | ✅ **Done** | `productos.http` |
+| **4.3** | Verificación estática TypeScript (`tsc`) y ejecución de tests backend (`pytest`) | Fase 4 | ✅ **Done** | `tsc -b`, `pytest` |
 | **4.4** | Limpieza de artefactos y empaquetado final en dos archivos `.zip` para entrega | Fase 4 | ⏳ **Pendiente** | Scripts de purgado y compresión `.zip` |
 
 ---
@@ -425,7 +425,7 @@
 ---
 
 ### FASE 4: Pruebas Integradas E2E, Verificación Estática y Empaquetado
-> **Estado:** ⏳ **PENDIENTE**  
+> **Estado:** 🔄 **EN PROGRESO**  
 > **Criterio de Dependencia:** Nivel 3. Consolida la entrega completa y asegura el cumplimiento de la rúbrica de evaluación.
 
 #### Tarea 4.1: Smoke Test E2E de integración Full Stack
@@ -436,18 +436,18 @@
   4. Edición de categoría existente y actualización reactiva en la tabla.
   5. Eliminación de categoría y remoción inmediata de la tabla tras la invalidación de la caché.
   6. Visualización paginada y filtrada de productos en `ProductsPage` con sus badges de categorías asociadas y acceso al detalle en `ProductDetailPage`.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-01, HU-02, HU-03, HU-04, HU-05.
 #### Tarea 4.2: Demostración REST Client de Producto y ProductoCategoria
 - **Acción:** Ejecutar las peticiones de `productos.http` verificando que los endpoints de Producto y ProductoCategoria responden con códigos HTTP semánticos (200, 201, 204, 404, 409, 422).
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Reglas de Negocio asociadas:** RN-06.
 
 #### Tarea 4.3: Verificación estática TypeScript y suite pytest
 - **Acción:**
   - Compilación limpia de frontend: `pnpm build:front` (`tsc -b && vite build`) sin errores de TypeScript.
   - Ejecución de suite de pruebas backend: `pytest` en `unidad7_backend/` con base de datos en memoria.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Reglas de Negocio asociadas:** RN-07.
 
 #### Tarea 4.4: Empaquetado para entrega según consigna
