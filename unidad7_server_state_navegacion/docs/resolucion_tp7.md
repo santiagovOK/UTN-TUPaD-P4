@@ -112,7 +112,7 @@
 | **2.4** | Capa de servicio y router de Productos y relación N:N (`selectinload`, `ProductoCategoriaAssign`) | Fase 2 | ✅ **Done** | `app/modules/producto/services.py`, `routers.py` |
 | **2.5** | Middleware CORS, instancia de aplicación y configuración de entorno | Fase 2 | ✅ **Done** | `app/main.py`, `.env.example` |
 | **2.6** | Suite integral de solicitudes HTTP (`productos.http`) para REST Client | Fase 2 | ✅ **Done** | `unidad7_backend/productos.http` |
-| **3.1** | Consolidación de contratos de datos TypeScript del catálogo (`Producto`, `ProductoCreate`, `index.ts`) | Fase 3 | ⏳ **Pendiente** | `src/types/categoria.ts`, `producto.ts`, `index.ts` |
+| **3.1** | Consolidación de contratos de datos TypeScript del catálogo (`Producto`, `ProductoCreate`, `index.ts`) | Fase 3 | ✅ **Done** | `src/types/categoria.ts`, `producto.ts`, `index.ts` |
 | **3.2** | Creación de capa de servicios HTTP con control de `!res.ok` (`categorias.service.ts`, `productos.service.ts`) | Fase 3 | ⏳ **Pendiente** | `src/services/categorias.service.ts`, `productos.service.ts`, `api.ts` |
 | **3.3** | Integración de TanStack Query para Categorías (`useQuery`, `useMutation`, `invalidateQueries`, adaptación de `CategoriaModal`) | Fase 3 | ⏳ **Pendiente** | `src/pages/CategoriasPage.tsx`, `src/components/CategoriaModal.tsx` |
 | **3.4** | Adaptación de `Navbar.tsx` con enlaces activos de React Router (`NavLink`) | Fase 3 | ⏳ **Pendiente** | `src/components/Navbar.tsx` |
@@ -277,7 +277,7 @@
 ---
 
 ### FASE 3: Frontend — Capa de Servicios, Server State y Navegación
-> **Estado:** ⏳ **PENDIENTE**  
+> **Estado:** 🔄 **EN PROGRESO**  
 > **Criterio de Dependencia:** Nivel 2. Conecta la interfaz de usuario con la API REST mediante TanStack Query y desacopla la navegación mediante React Router.
 
 #### Tarea 3.1: Consolidación de contratos de datos TypeScript del catálogo
@@ -323,7 +323,7 @@
     }
     ```
   - `src/types/index.ts`: Re-exportación limpia de todas las interfaces.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Reglas de Negocio asociadas:** RN-07.
 
 #### Tarea 3.2: Implementación de la capa de servicios HTTP (`src/services/`)
