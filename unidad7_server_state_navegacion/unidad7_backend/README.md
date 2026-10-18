@@ -85,8 +85,7 @@ El backend permite operar indistintamente con PostgreSQL o SQLite mediante la va
   *(100% en memoria mediante `StaticPool`. No escribe archivos en disco y se reinicia en cada arranque).*
 
 > **Nota sobre pruebas (`pytest`):**  
-> La suite de tests automatizada (`tests/conftest.py`) utiliza por defecto un motor **SQLite en memoria (`sqlite:///:memory:`)** completamente aislado por sesión de test, por lo que las pruebas no requieren ninguna base de datos externa en ejecución.
-
+> La suite de tests automatizada (`tests/test_productos_http.py`) utiliza por defecto un motor **SQLite en memoria (`sqlite:///:memory:`)** completamente aislado por sesión de test con `StaticPool`, por lo que las pruebas no requieren ninguna base de datos externa en ejecución.
 ---
 
 ## 💻 Servidor de Desarrollo
@@ -166,8 +165,7 @@ unidad7_backend/
 │           ├── schemas.py      # DTOs Pydantic de Producto y ProductoReadConCategorias
 │           ├── services.py     # Lógica de consulta relacional, Eager Loading y servicios N:N
 │           └── validators.py   # Validaciones de reglas de negocio
-└── tests/                      # Suite de pruebas automatizadas organizada por dominio
-    ├── conftest.py             # Fixtures de base de datos aislada en memoria (StaticPool)
-    ├── test_categoria.py       # Pruebas de dominio Categoría (DDL, servicios y endpoints)
-    └── test_producto.py        # Pruebas de dominio Producto y relación N:N
+└── tests/                      # Suite de pruebas automatizadas
+    ├── __init__.py
+    └── test_productos_http.py  # Suite integral: validación sintáctica, DDL y ejecución dinámica
 ```

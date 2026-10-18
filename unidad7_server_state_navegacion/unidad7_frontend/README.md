@@ -2,7 +2,7 @@
 
 Interfaz de usuario para el Trabajo Práctico de la **Unidad 7** de **Programación IV (TUPaD - UTN)**. Desarrollada con **React 19**, **TypeScript**, **TanStack Query** (v5), **React Router** (v7) y **Tailwind CSS v4**, empaquetada con **Vite**.
 
-Implementa una Single Page Application (SPA) modular con navegación por páginas, CRUD completo de **Categorías** gestionado mediante Server State reactivo con invalidación automática de caché, y catálogo de productos conectado al backend de FastAPI.
+Implementa una Single Page Application (SPA) modular con navegación por páginas (`/categorias`, `/productos`, `/productos/:id`), CRUD completo de **Categorías** gestionado mediante Server State reactivo con invalidación automática de caché, y catálogo de productos conectado al backend de FastAPI.
 
 > **Nota sobre Modalidad de Entrega y Ejecución Unificada:**  
 > Según las pautas de evaluación de la Unidad 7, el frontend se entrega como un archivo comprimido independiente:  
@@ -82,15 +82,19 @@ unidad7_frontend/
     ├── App.tsx                 # Enrutador estructural: define <Routes> y <Navbar /> (CERO lógica de negocio)
     ├── index.css               # Importación nativa de directivas de Tailwind CSS v4
     ├── types/                  # Interfaces de datos y contratos TypeScript
-    │   ├── categoria.ts        # Interface Categoria, CategoriaCreateInput y PaginatedResponse
-    │   ├── producto.ts         # Interface Producto alineada al backend (sin stock)
+    │   ├── categoria.ts        # Interfaces Categoria, CategoriaCreate, CategoriaUpdate y PaginatedResponse
+    │   ├── producto.ts         # Interfaces Producto, ProductoCreate y ProductoUpdate (con asociación N:N)
     │   └── index.ts            # Re-exportaciones centralizadas de tipos
     ├── services/               # Clientes y funciones HTTP puras (desacopladas de UI)
-    │   ├── api.ts              # Configuración base de cliente fetch y URL base
-    │   └── categoriaService.ts # Funciones asíncronas para el CRUD de Categorías
+    │   ├── api.ts              # Configuración base de cliente fetch, manejo de errores HTTP y URL base
+    │   ├── categorias.service.ts # Funciones asíncronas para el CRUD completo de Categorías
+    │   ├── productos.service.ts  # Funciones asíncronas para el catálogo paginado y detalle de Productos
+    │   └── index.ts            # Re-exportaciones centralizadas de servicios
     ├── pages/                  # Vistas completas por ruta
     │   ├── CategoriasPage.tsx  # Vista de Categorías: usa useQuery/useMutation y controla modal con useState
-    │   └── ProductsPage.tsx    # Vista de Productos: catálogo navegable de la aplicación
+    │   ├── ProductsPage.tsx    # Vista de Productos: catálogo paginado y filtrable con badges
+    │   ├── ProductDetailPage.tsx # Vista de detalle: ficha técnica del producto por ID con botón de retorno
+    │   └── index.ts            # Re-exportaciones centralizadas de páginas
     └── components/             # Componentes de presentación puros
         ├── Navbar.tsx          # Barra de navegación con NavLink a Categorías y Productos
         ├── CategoriaCard.tsx   # Fila tabular: muestra id, nombre, descripción y acciones Editar/Eliminar
@@ -112,6 +116,6 @@ unidad7_frontend/
    El estado puramente visual de apertura/cierre del modal (`isModalOpen: boolean`) y la categoría seleccionada para edición (`categoriaEnEdicion: Categoria | null`) residen localmente en `CategoriasPage.tsx` mediante `useState`.
 4. **Enrutamiento Declarativo con React Router:**  
    - `BrowserRouter` envuelve la raíz en `main.tsx`.
-   - Navegación instantánea sin recarga entre `/categorias` y `/productos` mediante `<NavLink>`, con estilos activos automáticos para mejorar la experiencia de usuario.
+   - Navegación instantánea sin recarga entre `/categorias`, `/productos` y `/productos/:id` mediante `<NavLink>` y `useNavigate`, con estilos activos automáticos para mejorar la experiencia de usuario.
 5. **Componentes Presentacionales Puros:**  
    `CategoriaList`, `CategoriaCard` y `CategoriaModal` son funciones puras que reciben datos y callbacks por `props` tipados. No tienen acoplamiento con la red ni con el enrutador.

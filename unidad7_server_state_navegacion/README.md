@@ -5,7 +5,7 @@ Siguiendo las [consignas del Trabajo Práctico](/docs/consigna.md), el diagrama 
 El sistema implementa:
 1. **Frontend (React + TanStack Query + React Router):**
    - CRUD completo de **Categorías** consumiendo la API de FastAPI mediante **TanStack Query** (`useQuery`, `useMutation`), con invalidación automática de la caché (`queryClient.invalidateQueries`) tras cada operación de alta, edición y baja.
-   - Navegación declarativa por páginas separadas (**CategoriasPage** en `/` y `/categorias`, y **ProductsPage** en `/productos`) utilizando **React Router** (`BrowserRouter`, `Routes`, `Route`, `NavLink`).
+   - Navegación declarativa por páginas separadas (**CategoriasPage** en `/` y `/categorias`, **ProductsPage** en `/productos` y **ProductDetailPage** en `/productos/:id`) utilizando **React Router** (`BrowserRouter`, `Routes`, `Route`, `NavLink`).
    - Formulario de alta y edición dentro de un modal accesible y flotante con backdrop (`CategoriaModal.tsx`), controlado con estado booleano mediante `useState` a nivel de página.
    - **Desacoplamiento estricto de `App.tsx`:** No contiene lógica de negocio, estado de datos ni llamadas a APIs; su única responsabilidad es definir la tabla de rutas y renderizar el `Navbar`.
    - Estilizado profesional con **Tailwind CSS v4** y tipado estático riguroso en TypeScript (`Categoria`, `Producto` y props en el 100% de los componentes `.tsx`).
@@ -162,7 +162,7 @@ El backend utiliza **SQLModel / SQLAlchemy**, lo que permite alternar transparen
    ```
 
 > **Nota sobre pruebas automatizadas (`pytest`):**  
-> La suite de tests automatizados (`tests/conftest.py`) utiliza por defecto un motor **SQLite en memoria (`sqlite:///:memory:`)** con `StaticPool` de manera aislada por prueba. Por lo tanto, `pytest` siempre ejecuta y valida los tests sin requerir PostgreSQL activo.
+> La suite de tests automatizados (`tests/test_productos_http.py`) utiliza por defecto un motor **SQLite en memoria (`sqlite:///:memory:`)** con `StaticPool` de manera aislada por prueba. Por lo tanto, `pytest` siempre ejecuta y valida los tests sin requerir PostgreSQL activo.
 
 ---
 
@@ -210,10 +210,9 @@ unidad7_server_state_navegacion/
 │   │   ├── database.py             # Engine de base de datos y sesiones SQLModel
 │   │   ├── models/                 # Modelos persistentes (categoria.py, producto.py)
 │   │   └── modules/                # Módulos por dominio de negocio (categoria, producto)
-│   └── tests/                      # Suite de tests organizada por dominio
-│       ├── conftest.py             # Fixtures y aislamiento de base de datos en memoria
-│       ├── test_categoria.py       # Pruebas integradas de Categoría
-│       └── test_producto.py        # Pruebas integradas de Producto y relación N:N
+│   └── tests/                      # Suite de tests automatizada de extremo a extremo
+│       ├── __init__.py
+│       └── test_productos_http.py  # Suite integral con base SQLite en memoria aislada (StaticPool)
 │
 └── unidad7_frontend/               # Capa Frontend: React 19 + TypeScript + TanStack Query + React Router
     ├── package.json                # Dependencias de React, TanStack Query y React Router
@@ -225,9 +224,9 @@ unidad7_server_state_navegacion/
         ├── main.tsx                # Entrada: montaje de QueryClientProvider y BrowserRouter
         ├── App.tsx                 # Enrutador principal: define <Routes> y <Navbar>, sin lógica de datos
         ├── index.css               # Estilos globales y Tailwind CSS v4
-        ├── types/                  # Interfaces TypeScript (categoria.ts, producto.ts)
-        ├── services/               # Clientes y funciones HTTP puras (categoriaService.ts)
-        ├── pages/                  # Vistas por ruta (CategoriasPage.tsx, ProductsPage.tsx)
+│       ├── types/                  # Interfaces TypeScript (categoria.ts, producto.ts, index.ts)
+│       ├── services/               # Clientes y funciones HTTP puras (categorias.service.ts, productos.service.ts, api.ts)
+│       ├── pages/                  # Vistas por ruta (CategoriasPage.tsx, ProductsPage.tsx, ProductDetailPage.tsx)
         └── components/             # Componentes presentacionales puros
             ├── Navbar.tsx          # Barra de navegación con NavLink a Categorías y Productos
             ├── CategoriaCard.tsx   # Fila tabular: id, nombre, descripción y acciones
