@@ -2,7 +2,7 @@
 
 Backend para el Trabajo Práctico de la **Unidad 7** de **Programación IV (TUPaD - UTN)**. Construido con **FastAPI**, **SQLModel** (SQLAlchemy + Pydantic), y preparado para persistencia en **PostgreSQL** con fallback transparente a **SQLite**.
 
-Expone una API REST optimizada para el catálogo de alimentos (`categoria`, `producto`, `productocategoria`), con paginación (`offset`, `limit`) y metadatos de conteo, soporte completo de CORS para frontend en `http://localhost:5173`, y documentación interactiva automática en Swagger UI.
+Expone una API REST para las entidades `unidad_medida` (catálogo seed de solo lectura), `ingrediente`, `categoria`, `producto` y las asociaciones `producto_categoria` y `producto_ingrediente`. El seed carga las 7 unidades oficiales al iniciar la aplicación. Ofrece paginación y filtros, baja lógica o física según el endpoint y documentación interactiva en Swagger UI; `/health/` y `/health/db` permiten comprobar la aplicación y la conexión a la base de datos.
 
 > **Nota sobre Modalidad de Entrega y Ejecución Unificada:**  
 > Según las pautas de evaluación de la Unidad 7, el backend se entrega como un archivo comprimido independiente:  
@@ -119,6 +119,60 @@ FastAPI genera automáticamente documentación interactiva basada en OpenAPI:
 
 ---
 
+## 🔌 Resumen de Endpoints
+
+Todas las rutas se sirven desde `http://localhost:8000`. Las listas paginadas responden con `total` e `items`; por defecto excluyen registros inactivos cuando admiten baja lógica. Los errores de validación de entrada usan `422`; los recursos inexistentes, `404`; y los conflictos de unicidad o reglas de negocio, `409`, según corresponda.
+
+### Categorías
+
+| Método | Ruta | Descripción / semántica |
+|---|---|---|
+| `POST` | `/categorias/` | Crear categoría (`201`); conflicto de nombre `409`. |
+| `GET` | `/categorias/` | Listado paginado con búsqueda y filtros. |
+| `GET` | `/categorias/{categoria_id}` | Obtener categoría activa (`404` si no existe o está inactiva). |
+| `PUT` / `PATCH` | `/categorias/{categoria_id}` | Actualización completa / parcial de categoría activa. |
+| `DELETE` | `/categorias/{categoria_id}` | Baja lógica por defecto; `?hard=true` solicita eliminación física. Valida asociaciones y conflictos de negocio (`409`). |
+| `GET` | `/categorias/{categoria_id}/productos` | Productos activos asociados a una categoría. |
+
+### Productos y relación muchos a muchos
+
+| Método | Ruta | Descripción / semántica |
+|---|---|---|
+| `POST` | `/productos/` | Crear producto (`201`); `categoria_ids` es obligatorio y requiere al menos una categoría (`RN-19`); `ingredientes` es opcional. |
+| `GET` | `/productos/` | Listado paginado con filtros. |
+| `GET` | `/productos/{producto_id}` | Obtener producto por ID (`404` si no existe o está inactivo). |
+| `PUT` | `/productos/{producto_id}` | Actualización completa; reemplaza las asociaciones de categorías e ingredientes cuando se envían. |
+| `DELETE` | `/productos/{producto_id}` | Baja lógica con borrado en cascada de asociaciones (`RN-14`). |
+| `GET` | `/productos/{producto_id}/categorias` | Categorías relacionadas con el producto. |
+| `GET` | `/productos/{producto_id}/ingredientes` | Ingredientes relacionados con el producto. |
+
+### Ingredientes
+
+| Método | Ruta | Descripción / semántica |
+|---|---|---|
+| `POST` | `/ingredientes/` | Crear ingrediente; unidad inexistente `404`, nombre duplicado `409`, creado `201`. |
+| `GET` | `/ingredientes/` | Listado paginado; admite filtro `nombre` (o alias `search`) e `incluir_inactivos`. |
+| `GET` | `/ingredientes/{ingrediente_id}` | Obtener ingrediente activo (`404` si no existe o está inactivo). |
+| `PUT` | `/ingredientes/{ingrediente_id}` | Actualización completa; conflictos de unicidad `409`. |
+| `DELETE` | `/ingredientes/{ingrediente_id}` | Baja lógica o física; `409` si tiene productos asociados. |
+
+### Unidades de medida
+
+| Método | Ruta | Descripción / semántica |
+|---|---|---|
+| `GET` | `/unidades-medida/` | Listar el catálogo oficial precargado de unidades (`total` e `items`). |
+| `GET` | `/unidades-medida/{unidad_id}` | Obtener unidad por ID (`404` si no existe). |
+
+### Salud
+
+| Método | Ruta | Descripción / semántica |
+|---|---|---|
+| `GET` | `/` | Health check con estado, servicio, versión y unidad académica. |
+| `GET` | `/health/` | Comprueba que la aplicación está activa (`{"status":"ok"}`). |
+| `GET` | `/health/db` | Ejecuta `SELECT 1` para comprobar conectividad con la base de datos. |
+
+---
+
 ## 🧪 Pruebas Automatizadas y Demostración REST Client
 
 ### Pruebas Unitarias e Integración (`pytest`)
@@ -133,11 +187,14 @@ Todas las pruebas se ejecutan contra SQLite en memoria con aislamiento automáti
 
 ### Pruebas con REST Client (`productos.http`)
 
-Para validar los endpoints sin interfaz gráfica (tal como solicita la consigna para los módulos de `Producto` y `ProductoCategoria`), se proporciona el archivo unificado `productos.http` ejecutable con la extensión **REST Client** de VS Code / Cursor o JetBrains HTTP Client. Incluye:
-1. Ciclo de vida completo de Categorías (`POST`, `GET` paginado, `GET /{id}`, `PUT`, borrado lógico y borrado físico).
-2. Ciclo de vida completo de Productos (`POST`, `GET` paginado, `GET /{id}`, `PUT`, borrado lógico).
-3. Relación muchos a muchos (`POST /productos/{id}/categorias/{cat_id}` y `DELETE /productos/{id}/categorias/{cat_id}`).
-4. Cobertura de códigos de estado semánticos (`200 OK`, `201 Created`, `204 No Content`, `404 Not Found`, `409 Conflict`, `422 Unprocessable Entity`).
+El archivo `productos.http` puede ejecutarse con **REST Client** de VS Code / Cursor o JetBrains HTTP Client. Organiza las peticiones en cinco secciones:
+1. **Health, Unidades de Medida e Ingredientes:** diagnóstico, consulta del catálogo seed de unidades y CRUD de ingredientes.
+2. **Categorías:** ciclo CRUD, listado paginado, filtros y bajas.
+3. **Productos con Relaciones N:M :** ciclo CRUD; `categoria_ids` obligatorio al crear e ingredientes opcionales; reemplazo total de asociaciones en `PUT`.
+4. **Consultas Relacionales Inversas N:M :** productos por categoría y categorías e ingredientes por producto (`HU-07`).
+5. **Errores Semánticos 404/409/422:** casos de recursos inexistentes, conflictos de negocio y entradas inválidas.
+
+Las peticiones contemplan códigos semánticos como `200 OK`, `201 Created`, `204 No Content`, `404 Not Found`, `409 Conflict` y `422 Unprocessable Entity`.
 
 ---
 
@@ -148,24 +205,34 @@ unidad7_backend/
 ├── requirements.txt            # Lista de dependencias del backend Python
 ├── pytest.ini                  # Configuración de pruebas para pytest
 ├── .env.example                # Plantilla de variables de entorno (PostgreSQL / SQLite)
-├── productos.http              # Archivo unificado de pruebas REST Client (CRUD y relación N:N)
+├── productos.http              # Peticiones REST Client (salud, catálogo, relaciones e ingredientes)
 ├── app/
-│   ├── main.py                 # Factoría FastAPI, middleware CORS y montaje de routers
+│   ├── main.py                 # FastAPI, health checks, CORS y montaje de routers
 │   ├── database.py             # Configuración del motor de base de datos y sesiones SQLModel
-│   ├── models/                 # Modelos de base de datos persistibles (SQLModel table=True)
-│   │   ├── categoria.py        # Entidad Categoria (id, nombre UQ, descripcion nullable, auditoría)
-│   │   └── producto.py         # Entidad Producto y tabla intermedia ProductoCategoria (con es_principal)
-│   └── modules/                # Arquitectura modular por dominio de negocio (Models-Schemas-Service-Router)
-│       ├── categoria/          # Módulo de Categorías (consumido por Frontend)
-│       │   ├── routers.py      # Endpoints REST (GET, POST, PUT, DELETE) con validación Query
-│       │   ├── schemas.py      # DTOs Pydantic (Create, Read, Update, PaginatedResponse)
-│       │   └── services.py     # Lógica de persistencia, paginación y conteo atómico SQL
-│       └── producto/           # Módulo de Productos (demostrado vía REST Client)
-│           ├── routers.py      # Endpoints REST de Producto y relaciones N:N
-│           ├── schemas.py      # DTOs Pydantic de Producto y ProductoReadConCategorias
-│           ├── services.py     # Lógica de consulta relacional, Eager Loading y servicios N:N
-│           └── validators.py   # Validaciones de reglas de negocio
+│   ├── seed.py                 # Precarga del catálogo oficial de unidades de medida
+│   ├── models/
+│   │   ├── categoria.py        # Entidad Categoria
+│   │   ├── producto.py         # Entidad Producto y tabla intermedia ProductoCategoria
+│   │   ├── ingrediente.py      # Entidad Ingrediente
+│   │   └── unidad_medida.py    # Entidad UnidadMedida
+│   └── modules/
+│       ├── categoria/          # Rutas, esquemas y servicios de categorías
+│       ├── producto/           # Rutas, esquemas, servicios y validadores de productos
+│       ├── ingrediente/        # Rutas, esquemas y servicios de ingredientes
+│       └── unidad_medida/      # Rutas, esquemas y servicios de solo lectura
 └── tests/                      # Suite de pruebas automatizadas
     ├── __init__.py
-    └── test_productos_http.py  # Suite integral: validación sintáctica, DDL y ejecución dinámica
+    └── test_productos_http.py  # Suite integral HTTP
 ```
+## 🧪 Pruebas Automatizadas y Demostración REST Client
+
+### Pruebas Unitarias e Integración (`pytest`)
+
+Ejecutar la suite completa con:
+
+```bash
+pytest -v
+```
+
+Todas las pruebas se ejecutan contra SQLite en memoria con aislamiento automático por fixture.
+

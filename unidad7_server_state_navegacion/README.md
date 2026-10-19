@@ -4,16 +4,19 @@ Siguiendo las [consignas del Trabajo Práctico](/docs/consigna.md), el diagrama 
 
 El sistema implementa:
 1. **Frontend (React + TanStack Query + React Router):**
-   - CRUD completo de **Categorías** consumiendo la API de FastAPI mediante **TanStack Query** (`useQuery`, `useMutation`), con invalidación automática de la caché (`queryClient.invalidateQueries`) tras cada operación de alta, edición y baja.
-   - Navegación declarativa por páginas separadas (**CategoriasPage** en `/` y `/categorias`, **ProductsPage** en `/productos` y **ProductDetailPage** en `/productos/:id`) utilizando **React Router** (`BrowserRouter`, `Routes`, `Route`, `NavLink`).
-   - Formulario de alta y edición dentro de un modal accesible y flotante con backdrop (`CategoriaModal.tsx`), controlado con estado booleano mediante `useState` a nivel de página.
-   - **Desacoplamiento estricto de `App.tsx`:** No contiene lógica de negocio, estado de datos ni llamadas a APIs; su única responsabilidad es definir la tabla de rutas y renderizar el `Navbar`.
-   - Estilizado profesional con **Tailwind CSS v4** y tipado estático riguroso en TypeScript (`Categoria`, `Producto` y props en el 100% de los componentes `.tsx`).
+   - CRUD de **Categorías** y **Productos** mediante `useQuery` y `useMutation`, con invalidación de caché (`queryClient.invalidateQueries`) luego de las operaciones de escritura; la edición de categorías usa `PUT /categorias/{id}` (`HU-03`).
+   - Navegación declarativa (**CategoriasPage** en `/` y `/categorias`, **ProductsPage** en `/productos` y **ProductDetailPage** en `/productos/:id`) con React Router (`BrowserRouter`, `Routes`, `Route`, `NavLink`).
+   - `ProductsPage.tsx` incorpora `ProductoModal.tsx` para alta y edición de productos con selección obligatoria de categorías (`categoria_ids`, `RN-19`), baja con confirmación e invalidación de caché en TanStack Query.
+   - Detalle del producto con información de Categorías e Ingredientes, incluyendo la unidad de medida y cantidad de cada ingrediente.
+   - Desacoplamiento estricto de `App.tsx`: define rutas y renderiza el `Navbar`, sin lógica de negocio, estado de datos ni llamadas a APIs.
+   - Tipado estático de Categorías, Productos, Ingredientes y unidades de medida en contratos TypeScript.
 2. **Backend (FastAPI + SQLModel):**
-   - Arquitectura en capas **Models-Schemas-Service-Router** para el catálogo de productos (`Categoria`, `Producto` y la tabla intermedia `ProductoCategoria`).
-   - Paginación eficiente con `offset` y `limit` validados declarativamente mediante `fastapi.Query` y respuesta estandarizada `{ "total": int, "items": list }`.
-   - Configuración de **CORS** para permitir peticiones desde el origen del frontend (`http://localhost:5173` y `http://127.0.0.1:5173`).
-   - Demostración de los endpoints de `Producto` y `ProductoCategoria` mediante suite unificada de **REST Client (`productos.http`)** y Swagger UI.
+   - Arquitectura en capas Models-Schemas-Service-Router para el clúster `UnidadMedida`, `Ingrediente`, `Categoria`, `Producto`, `ProductoCategoria` y `ProductoIngrediente`.
+   - `UnidadMedida` es un catálogo inmutable de solo lectura que se inicializa vía `app/seed.py` con las 7 unidades oficiales; `Ingrediente` dispone de CRUD con borrado lógico.
+   - Las relaciones N:M se gestionan exclusivamente al crear (`POST /productos/`) o actualizar (`PUT /productos/{id}`) un producto (`RN-11`, `RN-12`, `RN-19`..`RN-22`).
+   - Consultas relacionales inversas: `GET /productos/{id}/categorias`, `GET /productos/{id}/ingredientes` y `GET /categorias/{id}/productos` (`HU-07`); diagnóstico con `GET /health/` y `GET /health/db`.
+   - Paginación con `offset` y `limit` y respuesta estandarizada `{ "total": int, "items": list }` donde corresponde.
+   - Configuración de CORS para el frontend (`http://localhost:5173` y `http://127.0.0.1:5173`); documentación interactiva disponible en Swagger UI.
 
 Resolución paso a paso y seguimiento Kanban de este trabajo en: [docs/resolucion_tp7.md](/docs/resolucion_tp7.md).
 
@@ -208,8 +211,9 @@ unidad7_server_state_navegacion/
 │   ├── app/
 │   │   ├── main.py                 # Instancia de FastAPI, CORS y routers
 │   │   ├── database.py             # Engine de base de datos y sesiones SQLModel
-│   │   ├── models/                 # Modelos persistentes (categoria.py, producto.py)
-│   │   └── modules/                # Módulos por dominio de negocio (categoria, producto)
+│   │   ├── models/                 # Modelos persistentes: categoria.py, producto.py, ingrediente.py, unidad_medida.py
+│   │   ├── seed.py                 # Datos iniciales de ingredientes y unidades de medida
+│   │   └── modules/                # Módulos de dominio: categoria, producto, ingrediente, unidad_medida
 │   └── tests/                      # Suite de tests automatizada de extremo a extremo
 │       ├── __init__.py
 │       └── test_productos_http.py  # Suite integral con base SQLite en memoria aislada (StaticPool)
@@ -224,12 +228,13 @@ unidad7_server_state_navegacion/
         ├── main.tsx                # Entrada: montaje de QueryClientProvider y BrowserRouter
         ├── App.tsx                 # Enrutador principal: define <Routes> y <Navbar>, sin lógica de datos
         ├── index.css               # Estilos globales y Tailwind CSS v4
-│       ├── types/                  # Interfaces TypeScript (categoria.ts, producto.ts, index.ts)
-│       ├── services/               # Clientes y funciones HTTP puras (categorias.service.ts, productos.service.ts, api.ts)
-│       ├── pages/                  # Vistas por ruta (CategoriasPage.tsx, ProductsPage.tsx, ProductDetailPage.tsx)
-        └── components/             # Componentes presentacionales puros
+        ├── types/                  # Contratos TypeScript: categoría, producto, ingrediente y unidad de medida
+        ├── services/               # Clientes HTTP y servicios CRUD (categorias, productos, ingredientes, unidades)
+        ├── pages/                  # Vistas por ruta: CategoriasPage, ProductsPage, ProductDetailPage
+        └── components/             # Componentes presentacionales
             ├── Navbar.tsx          # Barra de navegación con NavLink a Categorías y Productos
             ├── CategoriaCard.tsx   # Fila tabular: id, nombre, descripción y acciones
             ├── CategoriaList.tsx   # Contenedor tabular con cabeceras y renderizado de filas
-            └── CategoriaModal.tsx  # Modal interactivo con backdrop para alta y edición
+            ├── CategoriaModal.tsx  # Modal interactivo para alta y edición de categorías
+            └── ProductoModal.tsx   # Modal para alta y edición de productos e ingredientes asociados
 ```

@@ -2,9 +2,9 @@
 
 Interfaz de usuario para el Trabajo Práctico de la **Unidad 7** de **Programación IV (TUPaD - UTN)**. Desarrollada con **React 19**, **TypeScript**, **TanStack Query** (v5), **React Router** (v7) y **Tailwind CSS v4**, empaquetada con **Vite**.
 
-Implementa una Single Page Application (SPA) modular con navegación por páginas (`/categorias`, `/productos`, `/productos/:id`), CRUD completo de **Categorías** gestionado mediante Server State reactivo con invalidación automática de caché, y catálogo de productos conectado al backend de FastAPI.
+Implementa una Single Page Application (SPA) modular con navegación por páginas (`/categorias`, `/productos`, `/productos/:id`), CRUD de **Categorías** con edición mediante `PUT /categorias/{id}` y CRUD interactivo de **Productos** desde `ProductsPage` mediante `ProductoModal` (incluida la asociación de categorías). El detalle del producto presenta su ficha junto con las categorías asociadas y los ingredientes que entrega el backend.
 
-> **Alcance de ingredientes en TP7:** Se incorporaron contratos TypeScript para ingredientes y asociaciones con productos, y el detalle del producto muestra los ingredientes que entrega el backend. Esto mantiene el frontend en concordancia con los modelos y respuestas del backend, y deja esa información preparada para su posible uso en próximos trabajos prácticos. TP7 no incluye aquí una pantalla de gestión (CRUD) de ingredientes ni una pantalla de unidades de medida.
+> **Alcance de ingredientes en TP7:** Se incorporaron contratos TypeScript para ingredientes y asociaciones con productos, y el detalle del producto muestra los ingredientes que entrega el backend. Esto mantiene el frontend en concordancia con los modelos y respuestas del backend. TP7 no incluye aquí una pantalla de gestión (CRUD) de ingredientes ni una pantalla de unidades de medida.
 
 > **Nota sobre Modalidad de Entrega y Ejecución Unificada:**  
 > Según las pautas de evaluación de la Unidad 7, el frontend se entrega como un archivo comprimido independiente:  
@@ -86,22 +86,24 @@ unidad7_frontend/
     ├── types/                  # Interfaces de datos y contratos TypeScript
     │   ├── categoria.ts        # Interfaces Categoria, CategoriaCreate, CategoriaUpdate y PaginatedResponse
     │   ├── producto.ts         # Interfaces Producto, ProductoCreate y ProductoUpdate (con asociación N:N)
+    │   ├── ingrediente.ts      # Contratos de ingredientes y asociaciones con productos
     │   └── index.ts            # Re-exportaciones centralizadas de tipos
     ├── services/               # Clientes y funciones HTTP puras (desacopladas de UI)
     │   ├── api.ts              # Configuración base de cliente fetch, manejo de errores HTTP y URL base
     │   ├── categorias.service.ts # Funciones asíncronas para el CRUD completo de Categorías
-    │   ├── productos.service.ts  # Funciones asíncronas para el catálogo paginado y detalle de Productos
+    │   ├── productos.service.ts  # Funciones asíncronas para catálogo paginado, detalle y CRUD de Productos
     │   └── index.ts            # Re-exportaciones centralizadas de servicios
     ├── pages/                  # Vistas completas por ruta
     │   ├── CategoriasPage.tsx  # Vista de Categorías: usa useQuery/useMutation y controla modal con useState
-    │   ├── ProductsPage.tsx    # Vista de Productos: catálogo paginado y filtrable con badges
-    │   ├── ProductDetailPage.tsx # Vista de detalle: ficha técnica del producto por ID con botón de retorno
+    │   ├── ProductsPage.tsx    # Catálogo paginado y filtrable; gestiona el CRUD de Productos
+    │   ├── ProductDetailPage.tsx # Ficha del producto por ID con categorías e ingredientes asociados
     │   └── index.ts            # Re-exportaciones centralizadas de páginas
     └── components/             # Componentes de presentación puros
         ├── Navbar.tsx          # Barra de navegación con NavLink a Categorías y Productos
         ├── CategoriaCard.tsx   # Fila tabular: muestra id, nombre, descripción y acciones Editar/Eliminar
         ├── CategoriaList.tsx   # Contenedor tabular: renderiza cabeceras (NÚMERO, NOMBRE, etc.) y filas
-        └── CategoriaModal.tsx  # Formulario modal flotante accesible con backdrop para alta y edición
+        ├── CategoriaModal.tsx  # Formulario modal flotante accesible con backdrop para alta y edición
+        └── ProductoModal.tsx   # Formulario modal controlado para crear y editar Productos y asociar categorías
 ```
 
 ---
@@ -111,13 +113,13 @@ unidad7_frontend/
 1. **`App.tsx` Libre de Lógica de Negocio (Regla Clave):**  
    A diferencia de implementaciones monolíticas anteriores, `App.tsx` ya no administra variables de estado ni realiza peticiones `fetch`. Su función es exclusivamente estructural: renderizar el layout global (`Navbar`) y definir la correspondencia de rutas mediante `<Routes>` y `<Route>`.
 2. **Server State Gestionado con TanStack Query:**  
-   - **Lectura (`useQuery`):** El listado de categorías se obtiene mediante una query declarativa identificada por `['categorias']`, gestionando automáticamente estados de carga (`isLoading`), error (`isError`) y caché.
-   - **Mutaciones (`useMutation`):** Las operaciones de alta (`POST`), modificación (`PUT`) y baja (`DELETE`) se ejecutan a través de mutaciones.
-   - **Invalidación Automática de Caché:** Tras el éxito de cualquier mutación, se invoca `queryClient.invalidateQueries({ queryKey: ['categorias'] })`, provocando un refetch automático en segundo plano sin manipular manualmente listas en memoria.
+   - **Lecturas (`useQuery`):** Las páginas consultan el listado de categorías y el catálogo/detalle de productos mediante queries declarativas, que gestionan estados de carga, error y caché.
+   - **Mutaciones (`useMutation`):** Las operaciones de alta (`POST`), modificación (`PUT`) y baja (`DELETE`) de categorías y productos se ejecutan como mutaciones.
+   - **Invalidación Automática de Caché:** Tras el éxito de una mutación, se invalidan las queries relevantes con `queryClient.invalidateQueries(...)` para refrescar los datos en segundo plano, sin copiar listas del servidor a estado local.
 3. **Client State Aislado con `useState`:**  
-   El estado puramente visual de apertura/cierre del modal (`isModalOpen: boolean`) y la categoría seleccionada para edición (`categoriaEnEdicion: Categoria | null`) residen localmente en `CategoriasPage.tsx` mediante `useState`.
+   El estado visual de apertura/cierre de los modales y la selección del registro para edición residen localmente en cada página. `CategoriasPage.tsx` y `ProductsPage.tsx` pasan esos datos y callbacks a sus respectivos modales controlados (`CategoriaModal` y `ProductoModal`).
 4. **Enrutamiento Declarativo con React Router:**  
    - `BrowserRouter` envuelve la raíz en `main.tsx`.
    - Navegación instantánea sin recarga entre `/categorias`, `/productos` y `/productos/:id` mediante `<NavLink>` y `useNavigate`, con estilos activos automáticos para mejorar la experiencia de usuario.
-5. **Componentes Presentacionales Puros:**  
-   `CategoriaList`, `CategoriaCard` y `CategoriaModal` son funciones puras que reciben datos y callbacks por `props` tipados. No tienen acoplamiento con la red ni con el enrutador.
+5. **Componentes Presentacionales:**  
+   `CategoriaList`, `CategoriaCard`, `CategoriaModal` y `ProductoModal` reciben datos, estado de apertura y callbacks por `props` tipados. Los modales sincronizan sus formularios con los datos de edición y no realizan directamente las peticiones HTTP.

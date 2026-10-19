@@ -138,9 +138,9 @@
 | **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ✅ **Done** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
 | **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ✅ **Done** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
 | **6.2** | Formulario CRUD de Productos (`ProductoModal.tsx`) e integración de mutaciones en `ProductsPage.tsx` | Fase 6 | ✅ **Done** | `src/components/ProductoModal.tsx`, `src/pages/ProductsPage.tsx` |
-| **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ⏳ **Pendiente** | Suite de pruebas backend y REST Client |
-| **7.2** | Compilación estática TypeScript (`tsc -b`) y Smoke Test E2E Full Stack en navegador | Fase 7 | ⏳ **Pendiente** | Verificación de build y flujo interactivo en SPA |
-| **7.3** | Sincronización de documentación (`README.md` raíz, backend y frontend) con las nuevas especificaciones | Fase 7 | ⏳ **Pendiente** | `README.md`, `unidad7_backend/README.md`, `unidad7_frontend/README.md` |
+| **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ✅ **Done** | Suite backend: 3/3 tests y 60 solicitudes HTTP |
+| **7.2** | Compilación estática TypeScript (`tsc -b`) y Smoke Test E2E Full Stack en navegador | Fase 7 | ✅ **Done** | Build frontend y smoke CRUD/navegación completados sobre stack local ya activo |
+| **7.3** | Sincronización de documentación (`README.md` raíz, backend y frontend) con las nuevas especificaciones | Fase 7 | ✅ **Done** | `README.md`, `unidad7_backend/README.md`, `unidad7_frontend/README.md` |
 | **4.4** | Empaquetado limpio final de los dos entregables `.zip` (tras completar Fase 7) | Cierre | ⏳ **Pendiente** | Purgado de artefactos y compresión final |
 
 ---
@@ -649,9 +649,9 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
 | **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ✅ **Done** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
 | **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ✅ **Done** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
 | **6.2** | Formulario CRUD de Productos (`ProductoModal.tsx`) e integración de mutaciones en `ProductsPage.tsx` | Fase 6 | ✅ **Done** | `src/components/ProductoModal.tsx`, `src/pages/ProductsPage.tsx` |
-| **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ⏳ **Pendiente** | Suite de pruebas backend y REST Client |
-| **7.2** | Compilación estática TypeScript (`tsc -b`) y Smoke Test E2E Full Stack en navegador | Fase 7 | ⏳ **Pendiente** | Verificación de build y flujo interactivo en SPA |
-| **7.3** | Sincronización de documentación (`README.md` raíz, backend y frontend) con las nuevas especificaciones | Fase 7 | ⏳ **Pendiente** | `README.md`, `unidad7_backend/README.md`, `unidad7_frontend/README.md` |
+| **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ✅ **Done** | Suite backend: 3/3 tests y 60 solicitudes HTTP |
+| **7.2** | Compilación estática TypeScript (`tsc -b`) y Smoke Test E2E Full Stack en navegador | Fase 7 | ✅ **Done** | Build frontend y smoke CRUD/navegación completados sobre stack local ya activo |
+| **7.3** | Sincronización de documentación (`README.md` raíz, backend y frontend) con las nuevas especificaciones | Fase 7 | ✅ **Done** | `README.md`, `unidad7_backend/README.md`, `unidad7_frontend/README.md` |
 | **4.4** | Empaquetado limpio final de los dos entregables `.zip` (tras completar Fase 7) | Cierre | ⏳ **Pendiente** | Purgado de artefactos y compresión final |
 
 ---
@@ -776,14 +776,14 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
 ---
 
 ### FASE 7: Verificación E2E Full Stack & Documentación Sincronizada
-> **Estado:** 🔄 **EN PROGRESO**
+> **Estado:** ✅ **COMPLETADA**
 > **Criterio de Dependencia:** Nivel 6 (Consolida y verifica la totalidad de la aplicación actualizada).
 
 #### Tarea 7.1: Verificación de suite pytest y REST Client `productos.http`
 - **Acción:**
   - Ejecutar la suite completa de backend mediante `pytest` asegurando 100% de tests pasando en verde.
   - Probar de punta a punta el archivo `productos.http` verificando el seed de unidades de medida, CRUD de ingredientes, CRUD de categorías con bloqueo `409` por productos asociados, CRUD de productos con validación obligatoria de `categoria_ids` (`422`/`404`), reemplazo en `PUT`, endpoints de consulta inversa N:M y comprobación de salud en `/health/` y `/health/db`.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done** — pytest: 3/3 tests; las 60 solicitudes de `productos.http` verificadas.
 - **Historias de Usuario asociadas:** HU-06, HU-07.
 - **Reglas de Negocio asociadas:** RN-01..RN-22.
 
@@ -794,7 +794,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
     1. Navegación fluida por React Router entre `/categorias` y `/productos`.
     2. Ciclo completo de Categorías: creación con modal, edición con `PUT`, eliminación con confirmación.
     3. Ciclo completo de Productos: creación con selección obligatoria de categorías en `ProductoModal`, edición de atributos y asociaciones, baja lógica interactiva y reflejo instantáneo en la grilla paginada.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done** — build frontend y smoke test de CRUD/navegación completados con un stack localhost que ya estaba activo; los registros temporales se eliminaron al terminar.
 - **Historias de Usuario asociadas:** HU-01 a HU-05.
 
 #### Tarea 7.3: Sincronización de archivos de documentación (`README.md`)
@@ -804,7 +804,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
     - La carga semilla automática de unidades de medida (`seed.py`).
     - Los nuevos endpoints disponibles y las reglas de gestión N:M unificadas en `POST`/`PUT`.
     - El modal interactivo de productos en el frontend.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 #### Tarea 4.4: Empaquetado limpio final para entrega según consigna
 - **Acción:**
   - Purgar directorios y cachés temporales (`node_modules/`, `.venv/`, `.pytest_cache/`, `dist/`, `__pycache__/`).
@@ -819,23 +819,23 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
 
 ## 4. Checklist de Control de Entrega
 
-- [ ] **Estructura de Carpetas:** El frontend cuenta con las carpetas `src/components/`, `src/types/`, `src/services/` y `src/pages/`.
-- [ ] **Arquitectura de `App.tsx`:** `App.tsx` carece totalmente de lógica de negocio o llamadas a API; solo define rutas con React Router y renderiza el `Navbar`.
-- [ ] **Server State con TanStack Query:** El consumo de la API utiliza `useQuery` y `useMutation`, con invalidación de caché (`queryClient.invalidateQueries({ queryKey: [...] })`), verificación `if (!res.ok) throw new Error(...)` en `services/` y sin copiar `data` a `useState`.
-- [ ] **Modal Reactivo de Categorías:** El formulario de alta y edición se presenta dentro de `CategoriaModal.tsx` controlado con `useState` booleano en `CategoriasPage.tsx`. Edición envía `PUT /categorias/{id}` (`HU-03`).
-- [ ] **Modal Reactivo de Productos:** Formulario interactivo en `ProductoModal.tsx` integrado en `ProductsPage.tsx` con soporte de selección obligatoria de categorías (`categoria_ids`, `RN-19`), ingredientes opcionales y baja con confirmación.
-- [ ] **Navegación con React Router:** Separación en páginas independientes (`CategoriasPage`, `ProductsPage` y `ProductDetailPage`) navegables mediante `NavLink` y `useNavigate` sin recarga de documento.
-- [ ] **Catálogo Inmutable de Unidades de Medida:** Modelo `UnidadMedida` poblado automáticamente al arrancar la aplicación vía `seed.py` con las 7 unidades oficiales (`RN-15`, `RN-16`), accesible exclusivamente mediante endpoints de lectura `GET /unidades-medida/` y `GET /unidades-medida/{id}`.
-- [ ] **CRUD de Ingredientes:** Modelo `Ingrediente` con borrado lógico (`deleted_at`), validación de clave foránea a unidad de medida y endpoints completos en `/ingredientes/`.
-- [ ] **Gestión Unificada de Relaciones N:M:** Relaciones N:M gestionadas exclusivamente a través de `POST /productos/` (`categoria_ids` obligatorio `min_length=1`, `RN-19`) y `PUT /productos/{id}` (reemplazo atómico total de categorías e ingredientes, `RN-12`, `RN-21`), sin endpoints `POST`/`DELETE` separados (`RN-22`).
-- [ ] **Consultas Relacionales Inversas N:M:** Endpoints `GET /productos/{id}/categorias`, `GET /productos/{id}/ingredientes` y `GET /categorias/{id}/productos` implementados y operativos (`HU-07`).
-- [ ] **Protección de Integridad en Categoría (`RN-05`):** `DELETE /categorias/{id}` rechaza la eliminación con `409 Conflict` si la categoría tiene productos asociados activos.
-- [ ] **Flexibilidad en Nombre de Producto (`RN-06`):** `Producto.nombre` no requiere unicidad y permite productos con nombres idénticos.
-- [ ] **Borrado en Cascada de Asociaciones (`RN-14`):** Al eliminar un producto se purgan automáticamente sus vínculos en `producto_categoria` y `producto_ingrediente`.
-- [ ] **Endpoints de Salud y Diagnóstico:** `GET /health/` (`200 OK`) y `GET /health/db` (`200 OK` comprobando conectividad real a la base de datos).
-- [ ] **Tipado Estricto TypeScript:** Interfaces completas en `src/types/` (`Categoria`, `Producto`, `Ingrediente`, `UnidadMedida`); props tipados en todos los componentes `.tsx`; 0 errores en compilación de TypeScript (`tsc -b`).
-- [ ] **Backend Modular FastAPI:** Arquitectura Models-Schemas-Service-Router con Pydantic y SQLModel, libre de `HTTPException` en la capa de servicio y sin *java-ismos*.
-- [ ] **Paginación y Filtros Estándar:** Endpoints de colección con validación `fastapi.Query(ge=0, le=100)`, parámetros `offset`, `limit` (default 10), `nombre`, `incluir_inactivos`, conteo atómico `func.count()` y respuesta estructurada `{ total, items }`.
-- [ ] **CORS Habilitado:** Configurado en FastAPI para permitir peticiones desde el origen del frontend (`http://localhost:5173` y `http://127.0.0.1:5173`).
-- [ ] **Suite de Pruebas y REST Client:** Archivo `productos.http` actualizado cubriendo todos los endpoints y casos de prueba, y suite `pytest` en verde.
+- [x] **Estructura de Carpetas:** El frontend cuenta con las carpetas `src/components/`, `src/types/`, `src/services/` y `src/pages/`.
+- [x] **Arquitectura de `App.tsx`:** `App.tsx` carece totalmente de lógica de negocio o llamadas a API; solo define rutas con React Router y renderiza el `Navbar`.
+- [x] **Server State con TanStack Query:** El consumo de la API utiliza `useQuery` y `useMutation`, con invalidación de caché (`queryClient.invalidateQueries({ queryKey: [...] })`), verificación `if (!res.ok) throw new Error(...)` en `services/` y sin copiar `data` a `useState`.
+- [x] **Modal Reactivo de Categorías:** El formulario de alta y edición se presenta dentro de `CategoriaModal.tsx` controlado con `useState` booleano en `CategoriasPage.tsx`. Edición envía `PUT /categorias/{id}` (`HU-03`).
+- [x] **Modal Reactivo de Productos:** Formulario interactivo en `ProductoModal.tsx` integrado en `ProductsPage.tsx` con soporte de selección obligatoria de categorías (`categoria_ids`, `RN-19`), ingredientes opcionales y baja con confirmación.
+- [x] **Navegación con React Router:** Separación en páginas independientes (`CategoriasPage`, `ProductsPage` y `ProductDetailPage`) navegables mediante `NavLink` y `useNavigate` sin recarga de documento.
+- [x] **Catálogo Inmutable de Unidades de Medida:** Modelo `UnidadMedida` poblado automáticamente al arrancar la aplicación vía `seed.py` con las 7 unidades oficiales (`RN-15`, `RN-16`), accesible exclusivamente mediante endpoints de lectura `GET /unidades-medida/` y `GET /unidades-medida/{id}`.
+- [x] **CRUD de Ingredientes:** Modelo `Ingrediente` con borrado lógico (`deleted_at`), validación de clave foránea a unidad de medida y endpoints completos en `/ingredientes/`.
+- [x] **Gestión Unificada de Relaciones N:M:** Relaciones N:M gestionadas exclusivamente a través de `POST /productos/` (`categoria_ids` obligatorio `min_length=1`, `RN-19`) y `PUT /productos/{id}` (reemplazo atómico total de categorías e ingredientes, `RN-12`, `RN-21`), sin endpoints `POST`/`DELETE` separados (`RN-22`).
+- [x] **Consultas Relacionales Inversas N:M:** Endpoints `GET /productos/{id}/categorias`, `GET /productos/{id}/ingredientes` y `GET /categorias/{id}/productos` implementados y operativos (`HU-07`).
+- [x] **Protección de Integridad en Categoría (`RN-05`):** `DELETE /categorias/{id}` rechaza la eliminación con `409 Conflict` si la categoría tiene productos asociados activos.
+- [x] **Flexibilidad en Nombre de Producto (`RN-06`):** `Producto.nombre` no requiere unicidad y permite productos con nombres idénticos.
+- [x] **Borrado en Cascada de Asociaciones (`RN-14`):** Al eliminar un producto se purgan automáticamente sus vínculos en `producto_categoria` y `producto_ingrediente`.
+- [x] **Endpoints de Salud y Diagnóstico:** `GET /health/` (`200 OK`) y `GET /health/db` (`200 OK` comprobando conectividad real a la base de datos).
+- [x] **Tipado Estricto TypeScript:** Interfaces completas en `src/types/` (`Categoria`, `Producto`, `Ingrediente`, `UnidadMedida`); props tipados en todos los componentes `.tsx`; 0 errores en compilación de TypeScript (`tsc -b`).
+- [x] **Backend Modular FastAPI:** Arquitectura Models-Schemas-Service-Router con Pydantic y SQLModel, libre de `HTTPException` en la capa de servicio y sin *java-ismos*.
+- [x] **Paginación y Filtros Estándar:** Endpoints de colección con validación `fastapi.Query(ge=0, le=100)`, parámetros `offset`, `limit` (default 10), `nombre`, `incluir_inactivos`, conteo atómico `func.count()` y respuesta estructurada `{ total, items }`.
+- [x] **CORS Habilitado:** Configurado en FastAPI para permitir peticiones desde el origen del frontend (`http://localhost:5173` y `http://127.0.0.1:5173`).
+- [x] **Suite de Pruebas y REST Client:** Archivo `productos.http` actualizado cubriendo todos los endpoints y casos de prueba, y suite `pytest` en verde (3/3 tests; 60 solicitudes verificadas).
 - [ ] **Archivos de Entrega:** Dos archivos `.zip` independientes (`frontend` y `backend`) excluyendo estrictamente `node_modules`, `.venv`, cachés y temporales.

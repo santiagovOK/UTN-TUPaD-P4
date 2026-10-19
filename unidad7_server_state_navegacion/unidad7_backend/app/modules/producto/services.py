@@ -30,15 +30,16 @@ def _validate_and_dedup_categorias(session: Session, categoria_ids: List[int]) -
 
 def _validate_and_normalize_ingredientes(
     session: Session,
-    ingredientes_input: List[Union[int, ProductoIngredienteInput]],
+    ingredientes_input: List[Union[int, ProductoIngredienteInput, dict]],
 ) -> List[ProductoIngredienteInput]:
     normalized: dict[int, ProductoIngredienteInput] = {}
     for item in ingredientes_input:
-        detalle = (
-            ProductoIngredienteInput(ingrediente_id=item)
-            if isinstance(item, int)
-            else item
-        )
+        if isinstance(item, int):
+            detalle = ProductoIngredienteInput(ingrediente_id=item)
+        elif isinstance(item, ProductoIngredienteInput):
+            detalle = item
+        else:
+            detalle = ProductoIngredienteInput.model_validate(item)
         normalized[detalle.ingrediente_id] = detalle
 
     for ingrediente_id in normalized:
