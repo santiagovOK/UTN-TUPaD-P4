@@ -167,16 +167,12 @@ def soft_delete_categoria(session: Session, categoria_id: int) -> Optional[Categ
     return categoria
 
 
-# [Consigna TP7 - Eliminación lógica por defecto o física según parámetro y validando RN-05]
+# [Consigna TP7 - Baja lógica de categoría validando RN-05 (no se borra nada de la base de datos)]
 # [Diagrama UML - Ciclo de vida de CATEGORIA]
-def delete_categoria(session: Session, categoria_id: int, hard_delete: bool = False) -> bool:
-    """Elimina una categoría lógica o físicamente tras validar que no tenga productos activos asociados."""
+def delete_categoria(session: Session, categoria_id: int) -> bool:
+    """Da de baja lógicamente una categoría tras validar que no tenga productos activos asociados."""
     categoria = session.get(Categoria, categoria_id)
-    if not categoria:
-        return False
-
-    if not hard_delete and categoria.deleted_at is not None:
-        # Ya estaba dada de baja lógica
+    if not categoria or categoria.deleted_at is not None:
         return False
 
     # RN-05: Validación de productos asociados activos
@@ -193,18 +189,6 @@ def delete_categoria(session: Session, categoria_id: int, hard_delete: bool = Fa
         raise CategoriaConflictError(
             "No se puede eliminar la categoría porque tiene productos asociados."
         )
-
-    if hard_delete:
-        vinculos_residuales = session.exec(
-            select(ProductoCategoria).where(
-                ProductoCategoria.categoria_id == categoria_id
-            )
-        ).all()
-        for v in vinculos_residuales:
-            session.delete(v)
-        session.delete(categoria)
-        session.commit()
-        return True
 
     now = _utc_now()
     categoria.deleted_at = now

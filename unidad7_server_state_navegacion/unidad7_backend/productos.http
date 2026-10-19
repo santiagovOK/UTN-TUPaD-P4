@@ -44,11 +44,6 @@ POST {{baseUrl}}/categorias/
 Content-Type: {{contentType}}
 
 {"nombre":"Postres","descripcion":"Postres artesanales"}
-### Alta categoría temporal 4
-POST {{baseUrl}}/categorias/
-Content-Type: {{contentType}}
-
-{"nombre":"Temporal","descripcion":"Borrado físico"}
 ### Listado paginado
 GET {{baseUrl}}/categorias/?offset=0&limit=10
 ### Búsqueda por nombre
@@ -69,8 +64,6 @@ Content-Type: {{contentType}}
 DELETE {{baseUrl}}/categorias/3
 ### Listar inactivas
 GET {{baseUrl}}/categorias/?incluir_inactivos=true
-### Borrado físico de categoría 4
-DELETE {{baseUrl}}/categorias/4?hard=true
 
 ### SECCIÓN 2: CRUD Y FILTRADO DINÁMICO DE PRODUCTOS CON RELACIONES N:M
 POST {{baseUrl}}/productos/
@@ -87,11 +80,6 @@ POST {{baseUrl}}/productos/
 Content-Type: {{contentType}}
 
 {"nombre":"Hamburguesa Doble Cheddar","precio_base":13000,"categoria_ids":[1]}
-### Producto temporal 4
-POST {{baseUrl}}/productos/
-Content-Type: {{contentType}}
-
-{"nombre":"Temporal","precio_base":1000,"categoria_ids":[1]}
 ### Listado
 GET {{baseUrl}}/productos/?offset=0&limit=10
 ### Filtro nombre
@@ -112,8 +100,6 @@ PATCH {{baseUrl}}/productos/1
 Content-Type: {{contentType}}
 
 {"precio_base":14500}
-### Borrado físico del temporal
-DELETE {{baseUrl}}/productos/4?hard=true
 
 ### SECCIÓN 3: CONSULTAS RELACIONALES INVERSAS N:M
 GET {{baseUrl}}/productos/1/categorias

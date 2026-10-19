@@ -219,19 +219,16 @@ def soft_delete_producto(session: Session, producto_id: int) -> Optional[Product
     return producto
 
 
-def delete_producto(session: Session, producto_id: int, hard_delete: bool = False) -> bool:
+def delete_producto(session: Session, producto_id: int) -> bool:
     producto = session.get(Producto, producto_id)
-    if producto is None or (not hard_delete and producto.deleted_at is not None):
+    if producto is None or producto.deleted_at is not None:
         return False
     _purge_producto_relations(session, producto_id)
-    if hard_delete:
-        session.delete(producto)
-    else:
-        now = _utc_now()
-        producto.deleted_at = now
-        producto.updated_at = now
-        producto.disponible = False
-        session.add(producto)
+    now = _utc_now()
+    producto.deleted_at = now
+    producto.updated_at = now
+    producto.disponible = False
+    session.add(producto)
     session.commit()
     return True
 

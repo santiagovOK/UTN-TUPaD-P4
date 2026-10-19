@@ -150,17 +150,10 @@ def update_ingrediente(
     return ingrediente
 
 
-def delete_ingrediente(
-    session: Session,
-    ingrediente_id: int,
-    hard_delete: bool = False,
-) -> bool:
-    """Elimina un ingrediente de forma lógica o física validando relaciones activas."""
+def delete_ingrediente(session: Session, ingrediente_id: int) -> bool:
+    """Da de baja lógicamente un ingrediente validando que no tenga productos activos asociados."""
     ingrediente = session.get(Ingrediente, ingrediente_id)
-    if not ingrediente:
-        return False
-
-    if not hard_delete and ingrediente.deleted_at is not None:
+    if not ingrediente or ingrediente.deleted_at is not None:
         return False
 
     # Verificar si tiene productos activos asociados
@@ -178,18 +171,6 @@ def delete_ingrediente(
         raise IngredienteConflictError(
             "No se puede eliminar el ingrediente porque tiene productos asociados."
         )
-
-    if hard_delete:
-        vinculos_residuales = session.exec(
-            select(ProductoIngrediente).where(
-                ProductoIngrediente.ingrediente_id == ingrediente_id
-            )
-        ).all()
-        for v in vinculos_residuales:
-            session.delete(v)
-        session.delete(ingrediente)
-        session.commit()
-        return True
 
     now = _utc_now()
     ingrediente.deleted_at = now

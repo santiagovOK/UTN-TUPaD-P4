@@ -149,9 +149,8 @@ def update_producto_patch(
 )
 def delete_producto(
     producto_id: int = Path(..., gt=0, description="Identificador único del producto"),
-    hard: bool = Query(False, description="Si es True realiza borrado físico; por defecto aplica borrado lógico"),
     session: Session = Depends(get_session),
 ):
-    if not services.delete_producto(session, producto_id, hard_delete=hard):
+    if not services.delete_producto(session, producto_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado")
     return None

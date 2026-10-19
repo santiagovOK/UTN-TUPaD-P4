@@ -141,16 +141,15 @@ def update_ingrediente_patch(
 @router.delete(
     "/{ingrediente_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Eliminar ingrediente (baja lógica o física)",
+    summary="Eliminar ingrediente (baja lógica)",
 )
 def delete_ingrediente(
     ingrediente_id: int = Path(..., gt=0, description="Identificador único del ingrediente"),
-    hard: bool = Query(False, description="Si es True, realiza borrado físico; si es False, baja lógica"),
     session: Session = Depends(get_session),
 ):
-    """Elimina un ingrediente mediante baja lógica o física verificando que no tenga productos asociados."""
+    """Da de baja lógicamente un ingrediente verificando que no tenga productos asociados."""
     try:
-        ok = services.delete_ingrediente(session, ingrediente_id, hard_delete=hard)
+        ok = services.delete_ingrediente(session, ingrediente_id)
         if not ok:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

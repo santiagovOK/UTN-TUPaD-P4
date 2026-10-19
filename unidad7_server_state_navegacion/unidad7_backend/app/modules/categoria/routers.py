@@ -148,7 +148,7 @@ def update_categoria_patch(
     return categoria
 
 
-# [Consigna TP7 - Endpoint DELETE /categorias/{categoria_id} con baja lógica por defecto o física]
+# [Consigna TP7 - Endpoint DELETE /categorias/{categoria_id} con baja lógica]
 # [Diagrama UML - Eliminación o baja de CATEGORIA]
 @router.delete(
     "/{categoria_id}",
@@ -157,12 +157,11 @@ def update_categoria_patch(
 )
 def delete_categoria(
     categoria_id: int = Path(..., gt=0, description="Identificador único de la categoría"),
-    hard: bool = Query(False, description="Si es True realiza borrado físico; por defecto aplica borrado lógico"),
     session: Session = Depends(get_session),
 ):
-    """Elimina una categoría mediante baja lógica (por defecto) o física (?hard=true) validando RN-05."""
+    """Da de baja lógicamente una categoría validando RN-05."""
     try:
-        deleted = services.delete_categoria(session, categoria_id, hard_delete=hard)
+        deleted = services.delete_categoria(session, categoria_id)
         if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
