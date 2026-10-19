@@ -1,6 +1,6 @@
 # Trabajo Práctico - Unidad 7 (FastAPI - React - Server State con TanStack Query y Enrutamiento)
 
-Siguiendo las [consignas del Trabajo Práctico](/docs/consigna.md), el diagrama [UML Food Store](/docs/UML_FOOD_STORE.svg) y la [Guía Maestra de la Unidad 7](/docs/guidelines/unidad7_guia_maestra.md), el presente trabajo aborda el desarrollo de una solución Full Stack integrando una Single Page Application (SPA) reactiva en **React 19 + TypeScript + TanStack Query + React Router** con un backend modular en **FastAPI + SQLModel / PostgreSQL**.
+Siguiendo las [consignas del Trabajo Práctico](docs/consigna.md) y el diagrama [UML Food Store](docs/UML_FOOD_STORE.svg), el presente trabajo aborda el desarrollo de una solución Full Stack integrando una Single Page Application (SPA) reactiva en **React 19 + TypeScript + TanStack Query + React Router** con un backend modular en **FastAPI + SQLModel / PostgreSQL**.
 
 El sistema implementa:
 1. **Frontend (React + TanStack Query + React Router):**
@@ -18,7 +18,10 @@ El sistema implementa:
    - Paginación con `offset` y `limit` y respuesta estandarizada `{ "total": int, "items": list }` donde corresponde.
    - Configuración de CORS para el frontend (`http://localhost:5173` y `http://127.0.0.1:5173`); documentación interactiva disponible en Swagger UI.
 
-Resolución paso a paso y seguimiento Kanban de este trabajo en: [docs/resolucion_tp7.md](/docs/resolucion_tp7.md).
+Resolución paso a paso y seguimiento Kanban de este trabajo en: [docs/resolucion_tp7.md](docs/resolucion_tp7.md).
+
+> **Nota sobre discrepancia entre Consignas y Diagrama UML:**  
+> En el diagrama provisto por la cátedra ([docs/UML_FOOD_STORE.svg](docs/UML_FOOD_STORE.svg)), el clúster *Catálogo de Productos* incluye únicamente las entidades `Categoria`, `Producto` y `ProductoCategoria`; no modela `Ingrediente`, `UnidadMedida` ni `ProductoIngrediente`. Sin embargo, en la especificación formal del Trabajo Práctico ([docs/consigna.md](docs/consigna.md)) se exige explícitamente el catálogo inmutable de `UnidadMedida` (solo lectura con 7 unidades en `seed.py`), el CRUD con baja lógica de `Ingrediente` y la asociación N:M `ProductoIngrediente` (`HU-06`, `HU-07`, `RN-20`, `RN-21`). Por ende, para garantizar estricta concordancia con la consigna, dichas entidades y relaciones fueron modeladas e implementadas en el backend y reflejadas en los contratos del frontend. Para un análisis detallado, consultar la sección 1.1 de [docs/resolucion_tp7.md](docs/resolucion_tp7.md).
 
 > **Nota sobre Modalidad de Entrega y Repositorio Unificado:**  
 > Según las pautas de cátedra de la Unidad 7, el proyecto se entrega dividido en dos archivos comprimidos independientes:
