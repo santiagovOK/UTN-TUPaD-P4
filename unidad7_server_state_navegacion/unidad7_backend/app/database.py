@@ -53,8 +53,10 @@ def create_db_and_tables():
 
     Importa los modelos para que queden registrados en SQLModel.metadata antes de create_all.
     """
-    from app.models.producto import Producto, ProductoCategoria  # noqa: F401
+    from app.models.producto import Producto, ProductoCategoria, ProductoIngrediente  # noqa: F401
     from app.models.categoria import Categoria  # noqa: F401
+    from app.models.unidad_medida import UnidadMedida  # noqa: F401
+    from app.models.ingrediente import Ingrediente  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
 

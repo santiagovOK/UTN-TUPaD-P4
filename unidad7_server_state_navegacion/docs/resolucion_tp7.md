@@ -95,7 +95,7 @@
                                ↓
 [ Fase 3: Frontend — Servicios, TanStack Query, Enrutamiento & Vistas ]
                                ↓
-[ Fase 4: Pruebas Integradas E2E, Verificación Estática & Empaquetado Base ]
+[ Fase 4: Pruebas Integradas E2E y Verificación Estática ]
                                ↓
 [ Fase 5: Backend — Catálogo Extendido, Seed, Reglas RN-01..22 & Relaciones N:M (18/10) ]
                                ↓
@@ -126,10 +126,9 @@
 | **4.1** | Smoke Test E2E de integración Full Stack (CRUD Categorías, catálogo paginado y navegación reactiva) | Fase 4 | ✅ **Done** | Navegador / Consola / Servidores concurrentes |
 | **4.2** | Demostración REST Client de Producto y ProductoCategoria | Fase 4 | ✅ **Done** | `productos.http` |
 | **4.3** | Verificación estática TypeScript (`tsc`) y ejecución de tests backend (`pytest`) | Fase 4 | ✅ **Done** | `tsc -b`, `pytest` |
-| **4.4** | Limpieza de artefactos y empaquetado final en dos archivos `.zip` para entrega | Fase 4 | ⏳ **Pendiente** | Scripts de purgado y compresión `.zip` |
-| **5.1** | Modelos SQLModel y Seed de Catálogo (`UnidadMedida`, `Ingrediente`, `ProductoIngrediente`, `seed.py`) | Fase 5 | ⏳ **Pendiente** | `app/models/unidad_medida.py`, `app/models/ingrediente.py`, `app/models/producto.py`, `app/seed.py` |
-| **5.2** | Módulos completos `unidad_medida` (solo lectura) e `ingrediente` (CRUD con borrado lógico) | Fase 5 | ⏳ **Pendiente** | `app/modules/unidad_medida/`, `app/modules/ingrediente/` (schemas, services, routers) |
-| **5.3** | Adecuación de `categoria` a nuevas reglas (`RN-05` 409 al borrar con productos, query params estándar, `GET /{id}/productos`) | Fase 5 | ⏳ **Pendiente** | `app/modules/categoria/services.py`, `app/modules/categoria/routers.py` |
+| **5.1** | Modelos SQLModel y Seed de Catálogo (`UnidadMedida`, `Ingrediente`, `ProductoIngrediente`, `seed.py`) | Fase 5 | ✅ **Done** | `app/models/unidad_medida.py`, `app/models/ingrediente.py`, `app/models/producto.py`, `app/seed.py` |
+| **5.2** | Módulos completos `unidad_medida` (solo lectura) e `ingrediente` (CRUD con borrado lógico) | Fase 5 | ✅ **Done** | `app/modules/unidad_medida/`, `app/modules/ingrediente/` (schemas, services, routers) |
+| **5.3** | Adecuación de `categoria` a nuevas reglas (`RN-05` 409 al borrar con productos, query params estándar, `GET /{id}/productos`) | Fase 5 | ✅ **Done** | `app/modules/categoria/services.py`, `app/modules/categoria/routers.py` |
 | **5.4** | Refactorización de `producto` y relaciones N:M (`RN-06`, `RN-11`, `RN-12`, `RN-14`, `RN-19`..`RN-22`, `GET` inversos) | Fase 5 | ⏳ **Pendiente** | `app/modules/producto/schemas.py`, `app/modules/producto/services.py`, `app/modules/producto/routers.py` |
 | **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ⏳ **Pendiente** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
 | **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ⏳ **Pendiente** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
@@ -137,7 +136,7 @@
 | **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ⏳ **Pendiente** | Suite de pruebas backend y REST Client |
 | **7.2** | Compilación estática TypeScript (`tsc -b`) y Smoke Test E2E Full Stack en navegador | Fase 7 | ⏳ **Pendiente** | Verificación de build y flujo interactivo en SPA |
 | **7.3** | Sincronización de documentación (`README.md` raíz, backend y frontend) con las nuevas especificaciones | Fase 7 | ⏳ **Pendiente** | `README.md`, `unidad7_backend/README.md`, `unidad7_frontend/README.md` |
-| **7.4** | Re-empaquetado limpio de entregables `.zip` libres de artefactos transitorios | Fase 7 | ⏳ **Pendiente** | Scripts de purgado y generación de `.zip` oficiales |
+| **4.4** | Empaquetado limpio final de los dos entregables `.zip` (tras completar Fase 7) | Cierre | ⏳ **Pendiente** | Purgado de artefactos y compresión final |
 
 ---
 
@@ -441,8 +440,8 @@
 - **Reglas de Negocio asociadas:** RN-01.
 ---
 
-### FASE 4: Pruebas Integradas E2E, Verificación Estática y Empaquetado
-> **Estado:** 🔄 **EN PROGRESO**  
+### FASE 4: Pruebas Integradas E2E y Verificación Estática
+> **Estado:** ✅ **COMPLETADA**
 > **Criterio de Dependencia:** Nivel 3. Consolida la entrega completa y asegura el cumplimiento de la rúbrica de evaluación.
 
 #### Tarea 4.1: Smoke Test E2E de integración Full Stack
@@ -467,13 +466,6 @@
 - **Estado:** ✅ **Done**
 - **Reglas de Negocio asociadas:** RN-07.
 
-#### Tarea 4.4: Empaquetado para entrega según consigna
-- **Acción:**
-  - Generar los dos archivos comprimidos independientes:
-    - `Varela_Santiago_TPI_unidad7_frontend.zip` (eliminando estrictamente `node_modules/`).
-    - `Varela_Santiago_TPI_unidad7_backend.zip` (sin `.venv/` ni `__pycache__/`).
-- **Estado:** ⏳ **Pendiente**
-- **Reglas de Negocio asociadas:** RN-08.
 
 ---
 
@@ -645,9 +637,9 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
 
 | ID Tarea | Tarea | Fase | Estado | Componentes / Módulos Afectados |
 | :---: | :--- | :---: | :---: | :--- |
-| **5.1** | Modelos SQLModel y Seed de Catálogo (`UnidadMedida`, `Ingrediente`, `ProductoIngrediente`, `seed.py`) | Fase 5 | ⏳ **Pendiente** | `app/models/unidad_medida.py`, `app/models/ingrediente.py`, `app/models/producto.py`, `app/seed.py` |
-| **5.2** | Módulos completos `unidad_medida` (solo lectura) e `ingrediente` (CRUD con borrado lógico) | Fase 5 | ⏳ **Pendiente** | `app/modules/unidad_medida/`, `app/modules/ingrediente/` (schemas, services, routers) |
-| **5.3** | Adecuación de `categoria` a nuevas reglas (`RN-05` 409 al borrar con productos, query params estándar, `GET /{id}/productos`) | Fase 5 | ⏳ **Pendiente** | `app/modules/categoria/services.py`, `app/modules/categoria/routers.py` |
+| **5.1** | Modelos SQLModel y Seed de Catálogo (`UnidadMedida`, `Ingrediente`, `ProductoIngrediente`, `seed.py`) | Fase 5 | ✅ **Done** | `app/models/unidad_medida.py`, `app/models/ingrediente.py`, `app/models/producto.py`, `app/seed.py` |
+| **5.2** | Módulos completos `unidad_medida` (solo lectura) e `ingrediente` (CRUD con borrado lógico) | Fase 5 | ✅ **Done** | `app/modules/unidad_medida/`, `app/modules/ingrediente/` (schemas, services, routers) |
+| **5.3** | Adecuación de `categoria` a nuevas reglas (`RN-05` 409 al borrar con productos, query params estándar, `GET /{id}/productos`) | Fase 5 | ✅ **Done** | `app/modules/categoria/services.py`, `app/modules/categoria/routers.py` |
 | **5.4** | Refactorización de `producto` y relaciones N:M (`RN-06`, `RN-11`, `RN-12`, `RN-14`, `RN-19`..`RN-22`, `GET` inversos) | Fase 5 | ⏳ **Pendiente** | `app/modules/producto/schemas.py`, `app/modules/producto/services.py`, `app/modules/producto/routers.py` |
 | **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ⏳ **Pendiente** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
 | **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ⏳ **Pendiente** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
@@ -655,12 +647,12 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
 | **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ⏳ **Pendiente** | Suite de pruebas backend y REST Client |
 | **7.2** | Compilación estática TypeScript (`tsc -b`) y Smoke Test E2E Full Stack en navegador | Fase 7 | ⏳ **Pendiente** | Verificación de build y flujo interactivo en SPA |
 | **7.3** | Sincronización de documentación (`README.md` raíz, backend y frontend) con las nuevas especificaciones | Fase 7 | ⏳ **Pendiente** | `README.md`, `unidad7_backend/README.md`, `unidad7_frontend/README.md` |
-| **7.4** | Re-empaquetado limpio de entregables `.zip` libres de artefactos transitorios | Fase 7 | ⏳ **Pendiente** | Scripts de purgado y generación de `.zip` oficiales |
+| **4.4** | Empaquetado limpio final de los dos entregables `.zip` (tras completar Fase 7) | Cierre | ⏳ **Pendiente** | Purgado de artefactos y compresión final |
 
 ---
 
 ### FASE 5: Backend — Catálogo Extendido, Seed, Reglas RN-01..22 & Relaciones N:M
-> **Estado:** ⏳ **PENDIENTE**  
+> **Estado:** 🔄 **EN PROGRESO**  
 > **Criterio de Dependencia:** Nivel 4 (Construye sobre el backend base de la Fase 2 para cumplir al 100% la especificación del 18/10).
 
 #### Tarea 5.1: Modelos SQLModel y Seed de Catálogo
@@ -669,7 +661,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
   - Crear `app/models/ingrediente.py`: Definir modelo `Ingrediente` con `__tablename__ = "ingrediente"`, campos `id`, `nombre` (único), `descripcion`, `unidad_medida_id` (FK a `unidad_medida.id`), `activo`, marcas temporales de auditoría (`created_at`, `updated_at`, `deleted_at`).
   - Actualizar `app/models/producto.py`: Incorporar tabla intermedia `ProductoIngrediente` con clave primaria compuesta `(producto_id, ingrediente_id)`, campos `cantidad: float = Field(default=1.0, gt=0)` y `es_opcional: bool = Field(default=False)`.
   - Crear `app/seed.py`: Función `seed_unidades_medida(session: Session)` idempotente que verifique registros existentes e inserte las 7 unidades oficiales definidas por la cátedra (`kilogramo`, `gramo`, `litro`, `mililitro`, `pieza`, `docena`, `metro cuadrado`).
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-06, HU-07.
 - **Reglas de Negocio asociadas:** RN-15, RN-16, RN-20.
 
@@ -683,7 +675,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
     - `schemas.py`: `IngredienteBase`, `IngredienteCreate` (con validación de `nombre` y `unidad_medida_id`), `IngredienteUpdate`, `IngredienteRead` e `IngredientePaginatedResponse(total: int, items: List[IngredienteRead])`.
     - `services.py`: CRUD completo con filtrado dinámico (`nombre`, `incluir_inactivos`), conteo atómico SQL, validación de existencia de unidad de medida y chequeo de no duplicidad de nombre. Borrado lógico marcando `deleted_at` y `activo = False`. Bloqueo con excepción de conflicto si el ingrediente está vinculado a productos activos.
     - `routers.py`: `GET /ingredientes/`, `POST /ingredientes/` (`201`), `GET /ingredientes/{id}`, `PUT /ingredientes/{id}` y `DELETE /ingredientes/{id}` (`204`).
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-07.
 - **Reglas de Negocio asociadas:** RN-15, RN-16, RN-17.
 
@@ -694,7 +686,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
     - Incorporar endpoint de consulta inversa relacional: `GET /categorias/{id}/productos` (`HU-07`) retornando la lista de productos asociados a la categoría solicitada, o `404 Not Found` si la categoría no existe o está dada de baja.
   - En `app/modules/categoria/services.py`:
     - Modificar `delete_categoria` (`RN-05`): Verificar previamente si existen registros en `producto_categoria` asociados a la categoría; en caso afirmativo, abortar la baja y retornar un indicador de conflicto para que el router emita `409 Conflict`.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-04, HU-07.
 - **Reglas de Negocio asociadas:** RN-01, RN-02, RN-03, RN-04, RN-05.
 
@@ -778,8 +770,8 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
 
 ---
 
-### FASE 7: Verificación E2E Full Stack, Documentación Sincronizada & Re-empaquetado
-> **Estado:** ⏳ **PENDIENTE**  
+### FASE 7: Verificación E2E Full Stack & Documentación Sincronizada
+> **Estado:** 🔄 **EN PROGRESO**
 > **Criterio de Dependencia:** Nivel 6 (Consolida y verifica la totalidad de la aplicación actualizada).
 
 #### Tarea 7.1: Verificación de suite pytest y REST Client `productos.http`
@@ -808,15 +800,15 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
     - Los nuevos endpoints disponibles y las reglas de gestión N:M unificadas en `POST`/`PUT`.
     - El modal interactivo de productos en el frontend.
 - **Estado:** ⏳ **Pendiente**
-
-#### Tarea 7.4: Re-empaquetado limpio para entrega final
+#### Tarea 4.4: Empaquetado limpio final para entrega según consigna
 - **Acción:**
   - Purgar directorios y cachés temporales (`node_modules/`, `.venv/`, `.pytest_cache/`, `dist/`, `__pycache__/`).
-  - Generar los dos archivos `.zip` finales para entrega de la cátedra:
+  - Generar los dos archivos comprimidos independientes:
     - `Varela_Santiago_TPI_unidad7_frontend.zip`
     - `Varela_Santiago_TPI_unidad7_backend.zip`
 - **Estado:** ⏳ **Pendiente**
 - **Reglas de Negocio asociadas:** RN-08.
+
 
 ---
 

@@ -9,11 +9,14 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlmodel import Session
 
-from app.database import create_db_and_tables
+from app.database import create_db_and_tables, engine
 from app.modules.categoria.routers import router as categoria_router
+from app.modules.ingrediente.routers import router as ingrediente_router
 from app.modules.producto.routers import router as producto_router
-
+from app.modules.unidad_medida.routers import router as unidad_medida_router
+from app.seed import seed_unidades_medida
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
@@ -24,6 +27,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     al iniciar el servidor antes de recibir peticiones.
     """
     create_db_and_tables()
+    with Session(engine) as session:
+        seed_unidades_medida(session)
     yield
 
 
@@ -55,6 +60,8 @@ app.add_middleware(
 # Montaje de routers modulares
 app.include_router(categoria_router)
 app.include_router(producto_router)
+app.include_router(unidad_medida_router)
+app.include_router(ingrediente_router)
 
 
 @app.get("/", tags=["Health"], summary="Comprobación de salud de la API")

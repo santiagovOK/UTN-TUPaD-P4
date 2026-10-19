@@ -5,11 +5,14 @@
 """
 
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import Column, JSON
 from sqlmodel import Field, Relationship, SQLModel
 
+if TYPE_CHECKING:
+    from .categoria import Categoria
+    from .ingrediente import Ingrediente
 
 def _utc_now() -> datetime:
     """Retorna la fecha y hora UTC actual para los campos de auditoría."""
@@ -35,6 +38,26 @@ class ProductoCategoria(SQLModel, table=True):
     created_at: datetime = Field(default_factory=_utc_now, nullable=False)
 
 
+
+# [Consigna TP7 - Relación N:M enriquecida entre productos e ingredientes]
+# [Diagrama UML - Entidad asociativa PRODUCTO_INGREDIENTE]
+class ProductoIngrediente(SQLModel, table=True):
+    __tablename__ = "producto_ingrediente"
+
+    producto_id: Optional[int] = Field(
+        default=None,
+        foreign_key="producto.id",
+        primary_key=True,
+    )
+    ingrediente_id: Optional[int] = Field(
+        default=None,
+        foreign_key="ingrediente.id",
+        primary_key=True,
+    )
+    cantidad: float = Field(default=1.0, gt=0, nullable=False)
+    es_opcional: bool = Field(default=False, nullable=False)
+    created_at: datetime = Field(default_factory=_utc_now, nullable=False)
+
 # [Consigna TP7 - Datos comunes de productos]
 # [Diagrama UML - PRODUCTO excluye stock por SRP; pertenece al dominio INVENTARIO]
 class ProductoBase(SQLModel):
@@ -57,4 +80,8 @@ class Producto(ProductoBase, table=True):
     categorias: List["Categoria"] = Relationship(
         back_populates="productos",
         link_model=ProductoCategoria,
+    )
+    ingredientes: List["Ingrediente"] = Relationship(
+        back_populates="productos",
+        link_model=ProductoIngrediente,
     )
