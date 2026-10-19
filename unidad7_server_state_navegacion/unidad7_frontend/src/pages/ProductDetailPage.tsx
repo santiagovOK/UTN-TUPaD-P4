@@ -224,6 +224,51 @@ export function ProductDetailPage() {
             )}
           </section>
 
+          {/* Ingredientes asociados (si existen) */}
+          {producto.ingredientes && producto.ingredientes.length > 0 && (
+            <section
+              aria-labelledby="ingredientes-seccion-titulo"
+              className="space-y-3 pt-2 border-t border-slate-100"
+            >
+              <h2
+                id="ingredientes-seccion-titulo"
+                className="text-sm font-semibold uppercase tracking-wider text-slate-500"
+              >
+                Ingredientes asociados
+              </h2>
+              <ul
+                aria-labelledby="ingredientes-seccion-titulo"
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 list-none p-0 m-0"
+              >
+                {producto.ingredientes.map((ing) => (
+                  <li
+                    key={ing.id}
+                    className="p-3.5 rounded-xl border border-emerald-100 bg-emerald-50/50 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-sm text-emerald-950">
+                          {ing.nombre}
+                        </span>
+                        <span
+                          className="text-[10px] font-mono text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded"
+                          aria-label={`Identificador de ingrediente: ${ing.id}`}
+                        >
+                          Ing #{ing.id}
+                        </span>
+                      </div>
+                      {ing.descripcion && (
+                        <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                          {ing.descripcion}
+                        </p>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           {/* Galería de imágenes (si existen URLs) */}
           {producto.imagenes_url && producto.imagenes_url.length > 0 && (
             <section

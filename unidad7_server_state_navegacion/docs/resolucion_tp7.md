@@ -37,6 +37,11 @@
   * Dominio **Ventas & Transacciones**: `FormaPago`, `EstadoPedido`, `Pedido`, `DetallePedido`, `HistorialEstadoPedido`.
   * Dominio **Inventario / Stock**: Excluido de `Producto` por principio de responsabilidad única (anotación explícita del UML: *"stock excluido: dominio INVENTARIO (SRP)"*).
 
+### 1.4. Decisión de alcance: contratos de ingredientes en el frontend
+* **Contexto:** La consigna refinada de TP7 incorpora `Ingrediente`, `UnidadMedida` y `ProductoIngrediente` en el backend, aunque no exige una interfaz frontend para administrar ingredientes ni unidades de medida.
+* **Decisión Adoptada:** Se añadieron tipos TypeScript para ingredientes y sus asociaciones con productos, y se muestra en el detalle del producto la lista de ingredientes hidratados por el backend. No se incorporó un CRUD frontend de ingredientes ni una pantalla de unidades de medida dentro de TP7.
+* **Fundamento:** Mantener contratos frontend compatibles con el modelo y las respuestas del backend, y dejar preparada esa información para su posible uso en futuros trabajos prácticos que amplíen la interfaz. Esta previsión no implica que esa funcionalidad futura esté requerida ni implementada en TP7.
+
 ### 1.4. Invariantes Arquitectónicos y Prevención de Antipatrones (Guías Maestras)
 1. **Simetría y Conteo Atómico en SQL (`unidad7_guia_maestra.md` §1.2–1.3):**
    * Prohibido calcular el total en memoria Python mediante `len(session.exec(query).all())`.
@@ -131,8 +136,8 @@
 | **5.3** | Adecuación de `categoria` a nuevas reglas (`RN-05` 409 al borrar con productos, query params estándar, `GET /{id}/productos`) | Fase 5 | ✅ **Done** | `app/modules/categoria/services.py`, `app/modules/categoria/routers.py` |
 | **5.4** | Refactorización de `producto` y relaciones N:M (`RN-06`, `RN-11`, `RN-12`, `RN-14`, `RN-19`..`RN-22`, `GET` inversos) | Fase 5 | ✅ **Done** | `app/modules/producto/schemas.py`, `app/modules/producto/services.py`, `app/modules/producto/routers.py` |
 | **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ✅ **Done** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
-| **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ⏳ **Pendiente** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
-| **6.2** | Formulario CRUD de Productos (`ProductoModal.tsx`) e integración de mutaciones en `ProductsPage.tsx` | Fase 6 | ⏳ **Pendiente** | `src/components/ProductoModal.tsx`, `src/pages/ProductsPage.tsx` |
+| **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ✅ **Done** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
+| **6.2** | Formulario CRUD de Productos (`ProductoModal.tsx`) e integración de mutaciones en `ProductsPage.tsx` | Fase 6 | ✅ **Done** | `src/components/ProductoModal.tsx`, `src/pages/ProductsPage.tsx` |
 | **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ⏳ **Pendiente** | Suite de pruebas backend y REST Client |
 | **7.2** | Compilación estática TypeScript (`tsc -b`) y Smoke Test E2E Full Stack en navegador | Fase 7 | ⏳ **Pendiente** | Verificación de build y flujo interactivo en SPA |
 | **7.3** | Sincronización de documentación (`README.md` raíz, backend y frontend) con las nuevas especificaciones | Fase 7 | ⏳ **Pendiente** | `README.md`, `unidad7_backend/README.md`, `unidad7_frontend/README.md` |
@@ -642,8 +647,8 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
 | **5.3** | Adecuación de `categoria` a nuevas reglas (`RN-05` 409 al borrar con productos, query params estándar, `GET /{id}/productos`) | Fase 5 | ✅ **Done** | `app/modules/categoria/services.py`, `app/modules/categoria/routers.py` |
 | **5.4** | Refactorización de `producto` y relaciones N:M (`RN-06`, `RN-11`, `RN-12`, `RN-14`, `RN-19`..`RN-22`, `GET` inversos) | Fase 5 | ✅ **Done** | `app/modules/producto/schemas.py`, `app/modules/producto/services.py`, `app/modules/producto/routers.py` |
 | **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ✅ **Done** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
-| **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ⏳ **Pendiente** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
-| **6.2** | Formulario CRUD de Productos (`ProductoModal.tsx`) e integración de mutaciones en `ProductsPage.tsx` | Fase 6 | ⏳ **Pendiente** | `src/components/ProductoModal.tsx`, `src/pages/ProductsPage.tsx` |
+| **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ✅ **Done** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
+| **6.2** | Formulario CRUD de Productos (`ProductoModal.tsx`) e integración de mutaciones en `ProductsPage.tsx` | Fase 6 | ✅ **Done** | `src/components/ProductoModal.tsx`, `src/pages/ProductsPage.tsx` |
 | **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ⏳ **Pendiente** | Suite de pruebas backend y REST Client |
 | **7.2** | Compilación estática TypeScript (`tsc -b`) y Smoke Test E2E Full Stack en navegador | Fase 7 | ⏳ **Pendiente** | Verificación de build y flujo interactivo en SPA |
 | **7.3** | Sincronización de documentación (`README.md` raíz, backend y frontend) con las nuevas especificaciones | Fase 7 | ⏳ **Pendiente** | `README.md`, `unidad7_backend/README.md`, `unidad7_frontend/README.md` |
@@ -733,7 +738,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
 ---
 
 ### FASE 6: Frontend — Alineación de Servicios, PUT Total & Modal CRUD en `ProductsPage`
-> **Estado:** ⏳ **PENDIENTE**  
+> **Estado:** ✅ **COMPLETADA**  
 > **Criterio de Dependencia:** Nivel 5 (Consume los endpoints y esquemas actualizados en la Fase 5).
 
 #### Tarea 6.1: Tipado TypeScript extendido y servicios HTTP
@@ -747,7 +752,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
       - `createProducto(payload: ProductoCreate)`: `POST /productos/`.
       - `updateProducto({ id, data }: { id: number; data: ProductoUpdate })`: `PUT /productos/{id}`.
       - `deleteProducto(id: number)`: `DELETE /productos/{id}`.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-03, HU-06.
 - **Reglas de Negocio asociadas:** RN-01, RN-06, RN-07, RN-19.
 
@@ -764,7 +769,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
     - Integrar `useMutation` para creación (`createMutation`), edición (`updateMutation`) y baja con confirmación interactiva (`deleteMutation`).
     - Invalidar la caché de productos tras cada mutación exitosa: `queryClient.invalidateQueries({ queryKey: ["productos"] })`.
     - Agregar botones de *Editar* y *Eliminar* en cada tarjeta de producto.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-05, HU-06.
 - **Reglas de Negocio asociadas:** RN-06, RN-07, RN-08, RN-11, RN-12, RN-19.
 

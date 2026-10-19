@@ -12,7 +12,7 @@ import type {
   CategoriaUpdate,
   PaginatedResponse,
 } from "../types/categoria";
-
+import type { Producto } from "../types/producto";
 export const CATEGORIAS_ENDPOINT = `${API_BASE_URL}/categorias`;
 
 /**
@@ -22,7 +22,8 @@ export const CATEGORIAS_ENDPOINT = `${API_BASE_URL}/categorias`;
 export async function getCategorias(
   offset = 0,
   limit = 50,
-  search?: string
+  search?: string,
+  incluir_inactivos = false
 ): Promise<PaginatedResponse<Categoria>> {
   const params = new URLSearchParams({
     offset: String(offset),
@@ -30,7 +31,12 @@ export async function getCategorias(
   });
 
   if (search && search.trim() !== "") {
+    params.append("nombre", search.trim());
     params.append("search", search.trim());
+  }
+
+  if (incluir_inactivos) {
+    params.append("incluir_inactivos", "true");
   }
 
   const res = await fetch(`${CATEGORIAS_ENDPOINT}/?${params.toString()}`);
@@ -77,8 +83,8 @@ export async function createCategoria(
 }
 
 /**
- * Actualiza parcialmente los datos de una categoría existente mediante PATCH.
- * [Consigna TP7 - HU-03]: Modificación segura mediante exclude_unset en backend.
+ * Actualiza los datos de una categoría existente mediante PUT (reemplazo total).
+ * [Consigna TP7 - HU-03]: Al guardar se envía PUT /categorias/{id}, que responde 200 con la categoría actualizada.
  */
 export async function updateCategoria({
   id,
@@ -88,7 +94,7 @@ export async function updateCategoria({
   data: CategoriaUpdate;
 }): Promise<Categoria> {
   const res = await fetch(`${CATEGORIAS_ENDPOINT}/${id}`, {
-    method: "PATCH",
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
@@ -116,6 +122,21 @@ export async function deleteCategoria(id: number): Promise<void> {
 }
 
 /**
+ * Obtiene los productos asociados a una categoría específica.
+ * [Consigna TP7]: Endpoint relacional inverso GET /categorias/{id}/productos.
+ */
+export async function getProductosByCategoria(id: number): Promise<Producto[]> {
+  const res = await fetch(`${CATEGORIAS_ENDPOINT}/${id}/productos`);
+  if (!res.ok) {
+    return handleResponse<Producto[]>(
+      res,
+      `Error al obtener los productos de la categoría #${id}`
+    );
+  }
+  return res.json() as Promise<Producto[]>;
+}
+
+/**
  * Objeto agrupador para consumidores que prefieren importar el servicio completo como `categoriaService`.
  */
 export const categoriaService = {
@@ -124,4 +145,5 @@ export const categoriaService = {
   createCategoria,
   updateCategoria,
   deleteCategoria,
+  getProductosByCategoria,
 };

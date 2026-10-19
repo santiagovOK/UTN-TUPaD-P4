@@ -10,7 +10,8 @@
 //   - categorias  : CATEGORIA[]          -> Categoria[] (asociación N:N normalizada)
 //   - Campos de auditoría (created_at, updated_at, deleted_at) gestionados internamente por el backend.
 
-import { Categoria } from "./categoria";
+import type { Categoria } from "./categoria";
+import type { Ingrediente, IngredienteInput } from "./ingrediente";
 
 export interface Producto {
   id: number;
@@ -20,6 +21,7 @@ export interface Producto {
   imagenes_url?: string[];
   disponible: boolean;
   categorias: Categoria[];
+  ingredientes?: Ingrediente[];
 }
 
 export interface ProductoCreate {
@@ -28,6 +30,8 @@ export interface ProductoCreate {
   precio_base: number;
   imagenes_url?: string[];
   disponible?: boolean;
+  categoria_ids: number[];
+  ingredientes?: IngredienteInput[];
 }
 
 export interface ProductoUpdate {
@@ -36,12 +40,6 @@ export interface ProductoUpdate {
   precio_base?: number;
   imagenes_url?: string[];
   disponible?: boolean;
-}
-
-// [Consigna TP7 - Asignación de categorías en relación N:N]:
-// [Diagrama UML - PRODUCTO_CATEGORIA con clave compuesta y flag es_principal]:
-export interface ProductoCategoriaAssign {
-  producto_id: number;
-  categoria_id: number;
-  es_principal?: boolean;
+  categoria_ids?: number[];
+  ingredientes?: IngredienteInput[];
 }

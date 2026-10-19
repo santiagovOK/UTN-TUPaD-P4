@@ -4,6 +4,8 @@ Interfaz de usuario para el Trabajo Práctico de la **Unidad 7** de **Programaci
 
 Implementa una Single Page Application (SPA) modular con navegación por páginas (`/categorias`, `/productos`, `/productos/:id`), CRUD completo de **Categorías** gestionado mediante Server State reactivo con invalidación automática de caché, y catálogo de productos conectado al backend de FastAPI.
 
+> **Alcance de ingredientes en TP7:** Se incorporaron contratos TypeScript para ingredientes y asociaciones con productos, y el detalle del producto muestra los ingredientes que entrega el backend. Esto mantiene el frontend en concordancia con los modelos y respuestas del backend, y deja esa información preparada para su posible uso en próximos trabajos prácticos. TP7 no incluye aquí una pantalla de gestión (CRUD) de ingredientes ni una pantalla de unidades de medida.
+
 > **Nota sobre Modalidad de Entrega y Ejecución Unificada:**  
 > Según las pautas de evaluación de la Unidad 7, el frontend se entrega como un archivo comprimido independiente:  
 > **`Varela_Santiago_TPI_unidad7_frontend.zip`** (eliminando estrictamente la carpeta `node_modules/` y artefactos temporales antes de comprimir).  

@@ -10,18 +10,28 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { getProductos } from '../services/productos.service';
-import type { Producto } from '../types/producto';
-
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  getProductos,
+  createProducto,
+  updateProducto,
+  deleteProducto,
+} from '../services/productos.service';
+import { getCategorias } from '../services/categorias.service';
+import { ProductoModal } from '../components/ProductoModal';
+import type { Producto, ProductoCreate } from '../types/producto';
 export const PAGE_SIZE = 6;
 
 export function ProductsPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Client State
   const [page, setPage] = useState<number>(1);
   const [nombre, setNombre] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Cálculo de desplazamiento
   const offset = (page - 1) * PAGE_SIZE;
@@ -32,10 +42,89 @@ export function ProductsPage() {
     queryFn: () => getProductos(offset, PAGE_SIZE, nombre),
   });
 
+  const categoriasQuery = useQuery({
+    queryKey: ['categorias', { search: '' }],
+    queryFn: () => getCategorias(0, 100),
+  });
+
   const total = data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const items: Producto[] = data?.items ?? [];
 
+  // Mutaciones CRUD
+  const createMutation = useMutation({
+    mutationFn: (values: ProductoCreate) => createProducto(values),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['productos'] });
+      queryClient.invalidateQueries({ queryKey: ['categorias'] });
+      handleCloseModal();
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ProductoCreate }) =>
+      updateProducto({ id, data }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['productos'] });
+      queryClient.invalidateQueries({ queryKey: ['producto', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['categorias'] });
+      handleCloseModal();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteProducto(id),
+    onSuccess: () => {
+      setDeleteError(null);
+      queryClient.invalidateQueries({ queryKey: ['productos'] });
+      queryClient.invalidateQueries({ queryKey: ['categorias'] });
+      if (items.length <= 1 && page > 1) {
+        setPage((prev) => Math.max(1, prev - 1));
+      }
+    },
+    onError: (err: Error) => {
+      setDeleteError(err.message || 'No se pudo eliminar el producto');
+    },
+  });
+
+  const handleOpenCreate = () => {
+    setEditingProducto(null);
+    createMutation.reset();
+    updateMutation.reset();
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (prod: Producto) => {
+    setEditingProducto(prod);
+    createMutation.reset();
+    updateMutation.reset();
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingProducto(null);
+    createMutation.reset();
+    updateMutation.reset();
+  };
+
+  const handleModalSubmit = (values: ProductoCreate) => {
+    if (editingProducto !== null) {
+      updateMutation.mutate({ id: editingProducto.id, data: values });
+    } else {
+      createMutation.mutate(values);
+    }
+  };
+
+  const handleDelete = (prod: Producto) => {
+    if (window.confirm(`¿Está seguro de que desea eliminar el producto "${prod.nombre}"?`)) {
+      setDeleteError(null);
+      deleteMutation.mutate(prod.id);
+    }
+  };
+
+  const activeModalError =
+    createMutation.error?.message || updateMutation.error?.message || null;
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNombre(e.target.value);
     setPage(1);
@@ -70,8 +159,33 @@ export function ProductsPage() {
             Mostrando {items.length} de {total} productos
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={handleOpenCreate}
+          className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors cursor-pointer"
+        >
+          + Nuevo Producto
+        </button>
       </div>
 
+      {/* Alerta de error en eliminación */}
+      {deleteError && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center justify-between"
+        >
+          <span>{deleteError}</span>
+          <button
+            type="button"
+            onClick={() => setDeleteError(null)}
+            className="text-rose-600 hover:text-rose-800 font-medium ml-4 cursor-pointer"
+          >
+            Cerrar
+          </button>
+        </div>
+      )}
       {/* Barra de herramientas / Búsqueda */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
         <label htmlFor="search-producto" className="sr-only">
@@ -234,15 +348,38 @@ export function ProductsPage() {
                   </div>
                 </div>
 
-                {/* Botón de Navegación Programática */}
-                <button
-                  type="button"
-                  onClick={() => navigate(`/productos/${prod.id}`)}
-                  aria-label={`Ver detalle de ${prod.nombre}`}
-                  className="mt-4 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded self-end cursor-pointer"
-                >
-                  Ver detalle →
-                </button>
+                {/* Acciones de la tarjeta */}
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEdit(prod)}
+                      aria-label={`Editar ${prod.nombre}`}
+                      className="text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors cursor-pointer"
+                    >
+                      Editar
+                    </button>
+                    <span className="text-slate-300">|</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(prod)}
+                      disabled={deleteMutation.isPending}
+                      aria-label={`Eliminar ${prod.nombre}`}
+                      className="text-xs font-semibold text-rose-600 hover:text-rose-800 disabled:opacity-50 transition-colors cursor-pointer"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/productos/${prod.id}`)}
+                    aria-label={`Ver detalle de ${prod.nombre}`}
+                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded cursor-pointer"
+                  >
+                    Ver detalle →
+                  </button>
+                </div>
               </article>
             ))}
           </div>
@@ -281,6 +418,18 @@ export function ProductsPage() {
           </div>
         </nav>
       )}
+
+      {/* Modal de Creación y Edición de Producto */}
+      <ProductoModal
+        isOpen={isModalOpen}
+        initialData={editingProducto}
+        categoriasDisponibles={categoriasQuery.data?.items ?? []}
+        isLoadingCategorias={categoriasQuery.isLoading}
+        isSubmitting={createMutation.isPending || updateMutation.isPending}
+        errorMessage={activeModalError}
+        onClose={handleCloseModal}
+        onSubmit={handleModalSubmit}
+      />
     </div>
   );
 }

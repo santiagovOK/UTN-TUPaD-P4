@@ -7,9 +7,14 @@
 // [Diagrama UML - Entidad PRODUCTO y relación N:N con CATEGORIA (docs/UML_FOOD_STORE.svg)]:
 //   - Consulta de productos con categorías anidadas mediante relación asociativa normalizada.
 
-import { API_BASE_URL, handleResponse } from "./api";
-import type { PaginatedResponse } from "../types/categoria";
-import type { Producto } from "../types/producto";
+import { API_BASE_URL, handleResponse, handleVoidResponse } from "./api";
+import type { Categoria, PaginatedResponse } from "../types/categoria";
+import type { Ingrediente } from "../types/ingrediente";
+import type {
+  Producto,
+  ProductoCreate,
+  ProductoUpdate,
+} from "../types/producto";
 
 export const PRODUCTOS_ENDPOINT = `${API_BASE_URL}/productos`;
 
@@ -22,7 +27,8 @@ export async function getProductos(
   limit = 6,
   nombre?: string,
   disponible?: boolean,
-  categoria_id?: number
+  categoria_id?: number,
+  incluir_inactivos = false
 ): Promise<PaginatedResponse<Producto>> {
   const params = new URLSearchParams({
     offset: String(offset),
@@ -39,6 +45,10 @@ export async function getProductos(
 
   if (categoria_id !== undefined && categoria_id > 0) {
     params.append("categoria_id", String(categoria_id));
+  }
+
+  if (incluir_inactivos) {
+    params.append("incluir_inactivos", "true");
   }
 
   const res = await fetch(`${PRODUCTOS_ENDPOINT}/?${params.toString()}`);
@@ -64,9 +74,101 @@ export async function getProductoById(id: number): Promise<Producto> {
 }
 
 /**
+ * Crea un nuevo producto con categorías asociadas y opcionalmente ingredientes.
+ * [Consigna TP7 - RN-19, RN-20]: Requiere al menos una categoría válida.
+ */
+export async function createProducto(
+  payload: ProductoCreate
+): Promise<Producto> {
+  const res = await fetch(`${PRODUCTOS_ENDPOINT}/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    return handleResponse<Producto>(res, "No se pudo crear el producto");
+  }
+  return res.json() as Promise<Producto>;
+}
+
+/**
+ * Actualiza un producto existente mediante PUT.
+ * [Consigna TP7 - RN-12, RN-20, RN-21]: Reemplazo total de asociaciones en el backend.
+ */
+export async function updateProducto({
+  id,
+  data,
+}: {
+  id: number;
+  data: ProductoUpdate;
+}): Promise<Producto> {
+  const res = await fetch(`${PRODUCTOS_ENDPOINT}/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    return handleResponse<Producto>(res, "No se pudo actualizar el producto");
+  }
+  return res.json() as Promise<Producto>;
+}
+
+/**
+ * Elimina un producto mediante baja lógica en el backend.
+ * [Consigna TP7 - RN-10]: Responde HTTP 204 No Content.
+ */
+export async function deleteProducto(id: number): Promise<void> {
+  const res = await fetch(`${PRODUCTOS_ENDPOINT}/${id}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    return handleVoidResponse(res, "No se pudo eliminar el producto");
+  }
+}
+
+/**
+ * Obtiene las categorías asociadas a un producto específico.
+ * [Consigna TP7]: Endpoint relacional inverso GET /productos/{id}/categorias.
+ */
+export async function getCategoriasByProducto(
+  id: number
+): Promise<Categoria[]> {
+  const res = await fetch(`${PRODUCTOS_ENDPOINT}/${id}/categorias`);
+  if (!res.ok) {
+    return handleResponse<Categoria[]>(
+      res,
+      `Error al obtener las categorías del producto #${id}`
+    );
+  }
+  return res.json() as Promise<Categoria[]>;
+}
+
+/**
+ * Obtiene los ingredientes asociados a un producto específico.
+ * [Consigna TP7]: Endpoint relacional inverso GET /productos/{id}/ingredientes.
+ */
+export async function getIngredientesByProducto(
+  id: number
+): Promise<Ingrediente[]> {
+  const res = await fetch(`${PRODUCTOS_ENDPOINT}/${id}/ingredientes`);
+  if (!res.ok) {
+    return handleResponse<Ingrediente[]>(
+      res,
+      `Error al obtener los ingredientes del producto #${id}`
+    );
+  }
+  return res.json() as Promise<Ingrediente[]>;
+}
+
+/**
  * Objeto agrupador para consumidores que prefieren importar el servicio completo como `productoService`.
  */
 export const productoService = {
   getProductos,
   getProductoById,
+  createProducto,
+  updateProducto,
+  deleteProducto,
+  getCategoriasByProducto,
+  getIngredientesByProducto,
 };
