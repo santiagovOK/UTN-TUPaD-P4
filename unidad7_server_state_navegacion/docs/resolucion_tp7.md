@@ -129,8 +129,8 @@
 | **5.1** | Modelos SQLModel y Seed de Catálogo (`UnidadMedida`, `Ingrediente`, `ProductoIngrediente`, `seed.py`) | Fase 5 | ✅ **Done** | `app/models/unidad_medida.py`, `app/models/ingrediente.py`, `app/models/producto.py`, `app/seed.py` |
 | **5.2** | Módulos completos `unidad_medida` (solo lectura) e `ingrediente` (CRUD con borrado lógico) | Fase 5 | ✅ **Done** | `app/modules/unidad_medida/`, `app/modules/ingrediente/` (schemas, services, routers) |
 | **5.3** | Adecuación de `categoria` a nuevas reglas (`RN-05` 409 al borrar con productos, query params estándar, `GET /{id}/productos`) | Fase 5 | ✅ **Done** | `app/modules/categoria/services.py`, `app/modules/categoria/routers.py` |
-| **5.4** | Refactorización de `producto` y relaciones N:M (`RN-06`, `RN-11`, `RN-12`, `RN-14`, `RN-19`..`RN-22`, `GET` inversos) | Fase 5 | ⏳ **Pendiente** | `app/modules/producto/schemas.py`, `app/modules/producto/services.py`, `app/modules/producto/routers.py` |
-| **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ⏳ **Pendiente** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
+| **5.4** | Refactorización de `producto` y relaciones N:M (`RN-06`, `RN-11`, `RN-12`, `RN-14`, `RN-19`..`RN-22`, `GET` inversos) | Fase 5 | ✅ **Done** | `app/modules/producto/schemas.py`, `app/modules/producto/services.py`, `app/modules/producto/routers.py` |
+| **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ✅ **Done** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
 | **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ⏳ **Pendiente** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
 | **6.2** | Formulario CRUD de Productos (`ProductoModal.tsx`) e integración de mutaciones en `ProductsPage.tsx` | Fase 6 | ⏳ **Pendiente** | `src/components/ProductoModal.tsx`, `src/pages/ProductsPage.tsx` |
 | **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ⏳ **Pendiente** | Suite de pruebas backend y REST Client |
@@ -640,8 +640,8 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
 | **5.1** | Modelos SQLModel y Seed de Catálogo (`UnidadMedida`, `Ingrediente`, `ProductoIngrediente`, `seed.py`) | Fase 5 | ✅ **Done** | `app/models/unidad_medida.py`, `app/models/ingrediente.py`, `app/models/producto.py`, `app/seed.py` |
 | **5.2** | Módulos completos `unidad_medida` (solo lectura) e `ingrediente` (CRUD con borrado lógico) | Fase 5 | ✅ **Done** | `app/modules/unidad_medida/`, `app/modules/ingrediente/` (schemas, services, routers) |
 | **5.3** | Adecuación de `categoria` a nuevas reglas (`RN-05` 409 al borrar con productos, query params estándar, `GET /{id}/productos`) | Fase 5 | ✅ **Done** | `app/modules/categoria/services.py`, `app/modules/categoria/routers.py` |
-| **5.4** | Refactorización de `producto` y relaciones N:M (`RN-06`, `RN-11`, `RN-12`, `RN-14`, `RN-19`..`RN-22`, `GET` inversos) | Fase 5 | ⏳ **Pendiente** | `app/modules/producto/schemas.py`, `app/modules/producto/services.py`, `app/modules/producto/routers.py` |
-| **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ⏳ **Pendiente** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
+| **5.4** | Refactorización de `producto` y relaciones N:M (`RN-06`, `RN-11`, `RN-12`, `RN-14`, `RN-19`..`RN-22`, `GET` inversos) | Fase 5 | ✅ **Done** | `app/modules/producto/schemas.py`, `app/modules/producto/services.py`, `app/modules/producto/routers.py` |
+| **5.5** | Endpoints de salud (`/health/`, `/health/db`), integración de seed en `lifespan` y actualización de `productos.http` + suite pytest | Fase 5 | ✅ **Done** | `app/main.py`, `unidad7_backend/productos.http`, `tests/test_productos_http.py` |
 | **6.1** | Tipado TypeScript extendido y servicios frontend (`PUT /categorias/{id}`, DTOs de ingredientes y productos) | Fase 6 | ⏳ **Pendiente** | `src/types/ingrediente.ts`, `src/types/producto.ts`, `src/services/categorias.service.ts`, `src/services/productos.service.ts` |
 | **6.2** | Formulario CRUD de Productos (`ProductoModal.tsx`) e integración de mutaciones en `ProductsPage.tsx` | Fase 6 | ⏳ **Pendiente** | `src/components/ProductoModal.tsx`, `src/pages/ProductsPage.tsx` |
 | **7.1** | Verificación integral de endpoints con `pytest` y ejecución demostrativa de `productos.http` | Fase 7 | ⏳ **Pendiente** | Suite de pruebas backend y REST Client |
@@ -652,7 +652,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
 ---
 
 ### FASE 5: Backend — Catálogo Extendido, Seed, Reglas RN-01..22 & Relaciones N:M
-> **Estado:** 🔄 **EN PROGRESO**  
+> **Estado:** ✅ **COMPLETADA**
 > **Criterio de Dependencia:** Nivel 4 (Construye sobre el backend base de la Fase 2 para cumplir al 100% la especificación del 18/10).
 
 #### Tarea 5.1: Modelos SQLModel y Seed de Catálogo
@@ -706,7 +706,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
     - Eliminar los endpoints dedicados `POST /productos/categorias/asignar`, `POST /productos/{id}/categorias/{categoria_id}` y `DELETE /productos/{id}/categorias/{categoria_id}` (`RN-22`).
     - Ajustar parámetros en `GET /productos/`: `offset: int = Query(0, ge=0)`, `limit: int = Query(10, ge=1, le=100)`, `nombre: Optional[str] = None`, `incluir_inactivos: bool = False`.
     - Agregar endpoints de consulta inversa: `GET /productos/{id}/categorias` y `GET /productos/{id}/ingredientes` (`HU-07`).
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-06, HU-07.
 - **Reglas de Negocio asociadas:** RN-06, RN-07, RN-08, RN-09, RN-10, RN-11, RN-12, RN-13, RN-14, RN-19, RN-20, RN-21, RN-22.
 
@@ -726,7 +726,7 @@ Para absorber estos cambios de forma determinista y sin desestabilizar el códig
       6. Consultas relacionales inversas N:M (`GET /productos/{id}/categorias`, `GET /productos/{id}/ingredientes`, `GET /categorias/{id}/productos`).
       7. Comprobación de borrado en cascada de vínculos al eliminar producto (`RN-14`).
   - Actualizar `tests/test_productos_http.py` para asegurar que la suite automatizada cubra todas las nuevas rutas y aserciones.
-- **Estado:** ⏳ **Pendiente**
+- **Estado:** ✅ **Done**
 - **Historias de Usuario asociadas:** HU-06, HU-07.
 - **Reglas de Negocio asociadas:** RN-05, RN-06, RN-11..14, RN-19..22.
 

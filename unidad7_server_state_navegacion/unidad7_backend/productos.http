@@ -1,399 +1,182 @@
-### ==============================================================================
-### FOOD STORE API — SUITE INTEGRAL DE SOLICITUDES HTTP (REST CLIENT)
-### Trabajo Práctico 7 — Integración Frontend-Backend y Estado del Servidor
-### Compatible con: VS Code REST Client, Cursor HTTP Client, JetBrains HTTP Client
-### ==============================================================================
-
+### FOOD STORE API — SUITE INTEGRAL REST CLIENT (TP7)
 @baseUrl = http://localhost:8000
 @contentType = application/json
 
-### 0. Health Check de la API
-# @name healthCheck
+### SECCIÓN 0: HEALTH, UNIDADES DE MEDIDA E INGREDIENTES
 GET {{baseUrl}}/
-Accept: {{contentType}}
+GET {{baseUrl}}/health/
+GET {{baseUrl}}/health/db
+GET {{baseUrl}}/unidades-medida/
+GET {{baseUrl}}/unidades-medida/1
+POST {{baseUrl}}/ingredientes/
+Content-Type: {{contentType}}
 
+{"nombre":"Carne vacuna","descripcion":"Medallón","unidad_medida_id":1}
+### Segundo ingrediente requerido por payload mixto
+POST {{baseUrl}}/ingredientes/
+Content-Type: {{contentType}}
 
-### ==============================================================================
+{"nombre":"Queso cheddar","descripcion":"Queso","unidad_medida_id":1}
+### Obtener ingrediente creado
+GET {{baseUrl}}/ingredientes/1
+### Listar ingredientes
+GET {{baseUrl}}/ingredientes/?offset=0&limit=10
+### Editar ingrediente
+PUT {{baseUrl}}/ingredientes/1
+Content-Type: {{contentType}}
+
+{"nombre":"Carne vacuna","descripcion":"Carne seleccionada","unidad_medida_id":1}
+### Ingrediente inexistente
+GET {{baseUrl}}/ingredientes/9999
+
 ### SECCIÓN 1: CRUD Y BÚSQUEDA PAGINADA DE CATEGORÍAS
-### ==============================================================================
-
-### 1.1 Alta de Categoría 1: "Hamburguesas" (201 Created)
-# @name createCategoria1
 POST {{baseUrl}}/categorias/
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Hamburguesas",
-  "descripcion": "Hamburguesas artesanales gourmet con medallón casero"
-}
-
-### 1.2 Alta de Categoría 2: "Bebidas" (201 Created)
-# @name createCategoria2
+{"nombre":"Hamburguesas","descripcion":"Hamburguesas artesanales"}
+### Alta categoría 2
 POST {{baseUrl}}/categorias/
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Bebidas",
-  "descripcion": "Cervezas artesanales, gaseosas y bebidas refrescantes"
-}
-
-### 1.3 Alta de Categoría 3: "Postres" (201 Created)
-# @name createCategoria3
+{"nombre":"Bebidas","descripcion":"Bebidas refrescantes"}
+### Alta categoría 3
 POST {{baseUrl}}/categorias/
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Postres",
-  "descripcion": "Postres artesanales, tortas y helados"
-}
-
-### 1.4 Alta de Categoría Temporal 4: "Categoría Temporal" (201 Created)
-# @name createCategoriaTemporal
+{"nombre":"Postres","descripcion":"Postres artesanales"}
+### Alta categoría temporal 4
 POST {{baseUrl}}/categorias/
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Categoría Temporal",
-  "descripcion": "Categoría para demostración de borrado físico permanente"
-}
-
-### 1.5 Listado paginado general de Categorías (200 OK con { total, items })
-# @name listCategoriasPaginadas
+{"nombre":"Temporal","descripcion":"Borrado físico"}
+### Listado paginado
 GET {{baseUrl}}/categorias/?offset=0&limit=10
-Accept: {{contentType}}
-
-### 1.6 Búsqueda dinámica parcial por nombre (200 OK)
-# @name searchCategoriasPorNombre
-GET {{baseUrl}}/categorias/?search=Ham
-Accept: {{contentType}}
-
-### 1.7 Consulta de detalle de Categoría por ID (200 OK)
-# @name getCategoriaPorId
+### Búsqueda por nombre
+GET {{baseUrl}}/categorias/?nombre=Ham
+### Detalle
 GET {{baseUrl}}/categorias/1
-Accept: {{contentType}}
-
-### 1.8 Actualización total (PUT) de Categoría (200 OK)
-# @name updateCategoriaPut
+### Actualización PUT
 PUT {{baseUrl}}/categorias/1
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Hamburguesas Gourmet",
-  "descripcion": "Hamburguesas artesanales con panes brioche y carnes maduradas"
-}
-
-### 1.9 Actualización parcial (PATCH) con exclude_unset (200 OK)
-# @name updateCategoriaPatch
+{"nombre":"Hamburguesas Gourmet","descripcion":"Selección gourmet"}
+### Actualización PATCH
 PATCH {{baseUrl}}/categorias/1
 Content-Type: {{contentType}}
 
-{
-  "descripcion": "Selección premium de hamburguesas caseras y combinaciones gourmet"
-}
-
-### 1.10 Baja lógica (soft delete por defecto) de Categoría 3 (204 No Content)
-# @name softDeleteCategoria
+{"descripcion":"Hamburguesas artesanales premium"}
+### Baja lógica de categoría 3
 DELETE {{baseUrl}}/categorias/3
-
-### 1.11 Verificación de baja lógica: categoría 3 no disponible para consultas activas (404 Not Found)
-# @name verifySoftDeleteCategoria
-GET {{baseUrl}}/categorias/3
-Accept: {{contentType}}
-
-### 1.12 Borrado físico permanente (hard delete) de Categoría 4 (204 No Content)
-# @name hardDeleteCategoria
+### Listar inactivas
+GET {{baseUrl}}/categorias/?incluir_inactivos=true
+### Borrado físico de categoría 4
 DELETE {{baseUrl}}/categorias/4?hard=true
 
-### 1.13 Verificación de borrado físico: categoría 4 no existe en la base de datos (404 Not Found)
-# @name verifyHardDeleteCategoria
-GET {{baseUrl}}/categorias/4
-Accept: {{contentType}}
-
-
-### ==============================================================================
-### SECCIÓN 2: CRUD Y FILTRADO DINÁMICO DE PRODUCTOS
-### ==============================================================================
-
-### 2.1 Alta de Producto 1: "Hamburguesa Doble Cheddar" (201 Created)
-# @name createProducto1
+### SECCIÓN 2: CRUD Y FILTRADO DINÁMICO DE PRODUCTOS CON RELACIONES N:M
 POST {{baseUrl}}/productos/
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Hamburguesa Doble Cheddar",
-  "descripcion": "Doble medallón de carne 120g, queso cheddar fundido y panceta ahumada",
-  "precio_base": 12500.0,
-  "imagenes_url": [
-    "https://images.unsplash.com/photo-1568901346375-23c9450c58cd"
-  ],
-  "disponible": true
-}
-
-### 2.2 Alta de Producto 2: "Pinta Cerveza IPA" (201 Created)
-# @name createProducto2
+{"nombre":"Hamburguesa Doble Cheddar","descripcion":"Doble medallón","precio_base":12500,"imagenes_url":[],"disponible":true,"categoria_ids":[1,2],"ingredientes":[{"ingrediente_id":1,"cantidad":200,"es_opcional":false},2]}
+### Producto 2
 POST {{baseUrl}}/productos/
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Pinta Cerveza IPA",
-  "descripcion": "Cerveza artesanal India Pale Ale de 500cc",
-  "precio_base": 4500.0,
-  "imagenes_url": [
-    "https://images.unsplash.com/photo-1535958636474-b021ee887b13"
-  ],
-  "disponible": true
-}
-
-### 2.3 Alta de Producto 3: "Cheesecake de Frutos Rojos" (201 Created)
-# @name createProducto3
+{"nombre":"Pinta Cerveza IPA","precio_base":4500,"categoria_ids":[2]}
+### Mismo nombre admitido (RN-06)
 POST {{baseUrl}}/productos/
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Cheesecake de Frutos Rojos",
-  "descripcion": "Clásico pastel de queso",
-  "precio_base": 5800.0,
-  "imagenes_url": [
-    "https://images.unsplash.com/photo-1533134242443-d4fd215305ad"
-  ],
-  "disponible": true
-}
-
-### 2.4 Alta de Producto Temporal 4: "Producto Temporal" (201 Created)
-# @name createProductoTemporal
+{"nombre":"Hamburguesa Doble Cheddar","precio_base":13000,"categoria_ids":[1]}
+### Producto temporal 4
 POST {{baseUrl}}/productos/
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Producto Temporal",
-  "descripcion": "Producto destinado a demostrar borrado físico permanente",
-  "precio_base": 1000.0,
-  "imagenes_url": [],
-  "disponible": true
-}
-
-### 2.5 Listado paginado general de Productos (200 OK con { total, items })
-# @name listProductosPaginados
+{"nombre":"Temporal","precio_base":1000,"categoria_ids":[1]}
+### Listado
 GET {{baseUrl}}/productos/?offset=0&limit=10
-Accept: {{contentType}}
-
-### 2.6 Filtro dinámico de Productos por nombre parcial (200 OK)
-# @name filterProductosPorNombre
+### Filtro nombre
 GET {{baseUrl}}/productos/?nombre=Cheddar
-Accept: {{contentType}}
-
-### 2.7 Filtro dinámico de Productos por disponibilidad (200 OK)
-# @name filterProductosPorDisponibilidad
+### Filtro disponibilidad
 GET {{baseUrl}}/productos/?disponible=true
-Accept: {{contentType}}
-
-### 2.8 Detalle de Producto por ID con categorías anidadas vía selectinload (200 OK)
-# @name getProductoPorId
+### Incluir inactivos
+GET {{baseUrl}}/productos/?incluir_inactivos=true
+### Detalle
 GET {{baseUrl}}/productos/1
-Accept: {{contentType}}
-
-### 2.9 Actualización total (PUT) de Producto (200 OK)
-# @name updateProductoPut
+### Reemplazo integral de relaciones en PUT
 PUT {{baseUrl}}/productos/1
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Hamburguesa Doble Cheddar Premium",
-  "descripcion": "Doble medallón 150g, triple queso cheddar, panceta crocante y salsa barbacoa",
-  "precio_base": 13900.0,
-  "imagenes_url": [
-    "https://images.unsplash.com/photo-1568901346375-23c9450c58cd",
-    "https://images.unsplash.com/photo-1586190848861-99aa4a171e90"
-  ],
-  "disponible": true
-}
-
-### 2.10 Actualización parcial (PATCH) con exclude_unset (200 OK)
-# @name updateProductoPatch
+{"nombre":"Hamburguesa Doble Cheddar","precio_base":13900,"categoria_ids":[1],"ingredientes":[{"ingrediente_id":1,"cantidad":250,"es_opcional":false}]}
+### PATCH producto
 PATCH {{baseUrl}}/productos/1
 Content-Type: {{contentType}}
 
-{
-  "precio_base": 14500.0
-}
-
-### 2.11 Borrado físico permanente (hard delete) de Producto Temporal 4 (204 No Content)
-# @name hardDeleteProducto
+{"precio_base":14500}
+### Borrado físico del temporal
 DELETE {{baseUrl}}/productos/4?hard=true
 
-### 2.12 Verificación de borrado físico: producto 4 no existe (404 Not Found)
-# @name verifyHardDeleteProducto
-GET {{baseUrl}}/productos/4
-Accept: {{contentType}}
-
-
-### ==============================================================================
-### SECCIÓN 3: GESTIÓN DE LA RELACIÓN MUCHOS A MUCHOS (N:N) PRODUCTO-CATEGORÍA
-### ==============================================================================
-
-### 3.1 Asignar Categoría 1 a Producto 1 como principal (es_principal: true) (201 Created)
-# @name assignCategoriaPrincipal
-POST {{baseUrl}}/productos/categorias/asignar
-Content-Type: {{contentType}}
-
-{
-  "producto_id": 1,
-  "categoria_id": 1,
-  "es_principal": true
-}
-
-### 3.2 Asignar Categoría 2 a Producto 1 como secundaria (es_principal: false) (201 Created)
-# Demuestra que 1 producto puede pertenecer a múltiples categorías simultáneamente
-# @name assignCategoriaSecundaria
-POST {{baseUrl}}/productos/categorias/asignar
-Content-Type: {{contentType}}
-
-{
-  "producto_id": 1,
-  "categoria_id": 2,
-  "es_principal": false
-}
-
-### 3.3 Asignar Categoría 2 a Producto 2 mediante alias RESTful (201 Created)
-# Demuestra que 1 categoría puede contener múltiples productos
-# @name assignCategoriaAliasRestful
-POST {{baseUrl}}/productos/2/categorias/2?es_principal=true
-Accept: {{contentType}}
-
-### 3.4 Verificación de Producto 1 con categorías anidadas cargadas vía selectinload (200 OK)
-# @name getProducto1ConCategorias
-GET {{baseUrl}}/productos/1
-Accept: {{contentType}}
-
-### 3.5 Filtrar productos pertenecientes a la Categoría 1 (200 OK)
-# @name filterProductosPorCategoria1
+### SECCIÓN 3: CONSULTAS RELACIONALES INVERSAS N:M
+GET {{baseUrl}}/productos/1/categorias
+GET {{baseUrl}}/productos/1/ingredientes
+GET {{baseUrl}}/categorias/1/productos
+GET {{baseUrl}}/categorias/2/productos
 GET {{baseUrl}}/productos/?categoria_id=1
-Accept: {{contentType}}
+### Categoria con vínculo activo no se elimina
+DELETE {{baseUrl}}/categorias/2
+### Baja lógica de producto 2 purga relaciones (RN-14)
+DELETE {{baseUrl}}/productos/2
+### Ahora se libera la categoría
+DELETE {{baseUrl}}/categorias/2
 
-### 3.6 Filtrar productos pertenecientes a la Categoría 2 (200 OK)
-# @name filterProductosPorCategoria2
-GET {{baseUrl}}/productos/?categoria_id=2
-Accept: {{contentType}}
-
-### 3.7 Desasociar Categoría 2 de Producto 1 (204 No Content)
-# @name removeCategoriaFromProducto
-DELETE {{baseUrl}}/productos/1/categorias/2
-
-### 3.8 Verificación de desvinculación: Producto 1 mantiene únicamente Categoría 1 (200 OK)
-# @name verifyProductoDesvinculado
-GET {{baseUrl}}/productos/1
-Accept: {{contentType}}
-
-
-### ==============================================================================
-### SECCIÓN 4: BAJA LÓGICA DE PRODUCTO (SOFT DELETE)
-### ==============================================================================
-
-### 4.1 Baja lógica por defecto de Producto 3 (204 No Content)
-# @name softDeleteProducto3
-DELETE {{baseUrl}}/productos/3
-
-### 4.2 Verificación de baja lógica: Producto 3 no disponible en consulta directa (404 Not Found)
-# @name verifySoftDeleteProducto3
-GET {{baseUrl}}/productos/3
-Accept: {{contentType}}
-
-### 4.3 Verificación de listado: Producto 3 excluido del catálogo y del total atómico (200 OK)
-# @name verifyProductoExcluidoDelListado
-GET {{baseUrl}}/productos/?offset=0&limit=10
-Accept: {{contentType}}
-
-
-### ==============================================================================
-### SECCIÓN 5: CASOS DE ERROR SEMÁNTICOS Y REGLAS DE NEGOCIO (404, 409, 422)
-### ==============================================================================
-
-### 5.1 Error 404 Not Found — Consulta de producto inexistente
-# @name error404ProductoInexistente
+### SECCIÓN 4: ERRORES SEMÁNTICOS Y REGLAS DE NEGOCIO (404, 409, 422)
 GET {{baseUrl}}/productos/9999
-Accept: {{contentType}}
-
-### 5.2 Error 404 Not Found — Consulta de categoría inexistente
-# @name error404CategoriaInexistente
 GET {{baseUrl}}/categorias/9999
-Accept: {{contentType}}
-
-### 5.3 Error 404 Not Found — Asignar vínculo N:N con categoría inexistente
-# @name error404AsignarCategoriaInexistente
-POST {{baseUrl}}/productos/categorias/asignar
-Content-Type: {{contentType}}
-
-{
-  "producto_id": 1,
-  "categoria_id": 9999,
-  "es_principal": false
-}
-
-### 5.4 Error 404 Not Found — Asignar vínculo N:N con producto inexistente
-# @name error404AsignarProductoInexistente
-POST {{baseUrl}}/productos/categorias/asignar
-Content-Type: {{contentType}}
-
-{
-  "producto_id": 9999,
-  "categoria_id": 1,
-  "es_principal": false
-}
-
-### 5.5 Error 404 Not Found — Desvincular relación N:N inexistente
-# @name error404DesvincularRelacionInexistente
-DELETE {{baseUrl}}/productos/1/categorias/9999
-
-### 5.6 Error 409 Conflict — Nombre de categoría duplicado (RN-02 / RN-06)
-# @name error409CategoriaDuplicada
-POST {{baseUrl}}/categorias/
-Content-Type: {{contentType}}
-
-{
-  "nombre": "Hamburguesas Gourmet",
-  "descripcion": "Intento de alta duplicada de categoría"
-}
-
-### 5.7 Error 409 Conflict — Nombre de producto duplicado (RN-01 / RN-06)
-# @name error409ProductoDuplicado
+GET {{baseUrl}}/unidades-medida/9999
+GET {{baseUrl}}/ingredientes/9999
+GET {{baseUrl}}/productos/9999/categorias
+GET {{baseUrl}}/productos/9999/ingredientes
+GET {{baseUrl}}/categorias/9999/productos
+### Categoría referenciada inexistente
 POST {{baseUrl}}/productos/
 Content-Type: {{contentType}}
 
-{
-  "nombre": "Pinta Cerveza IPA",
-  "descripcion": "Intento de alta duplicada de producto",
-  "precio_base": 5000.0,
-  "imagenes_url": [],
-  "disponible": true
-}
-
-### 5.8 Error 422 Unprocessable Entity — Validación de Producto (nombre vacío / precio negativo)
-# @name error422ProductoNombreVacio
+{"nombre":"Inválido","precio_base":1,"categoria_ids":[9999]}
+### Ingrediente referenciado inexistente
 POST {{baseUrl}}/productos/
 Content-Type: {{contentType}}
 
-{
-  "nombre": "   ",
-  "precio_base": -50.0,
-  "imagenes_url": [],
-  "disponible": true
-}
+{"nombre":"Inválido","precio_base":1,"categoria_ids":[1],"ingredientes":[9999]}
+### Actualización con categoría inexistente
+PUT {{baseUrl}}/productos/1
+Content-Type: {{contentType}}
 
-### 5.9 Error 422 Unprocessable Entity — Validación de Categoría (nombre vacío)
-# @name error422CategoriaNombreVacio
+{"categoria_ids":[9999]}
+### Categoría duplicada
 POST {{baseUrl}}/categorias/
 Content-Type: {{contentType}}
 
-{
-  "nombre": ""
-}
+{"nombre":"Hamburguesas Gourmet"}
+### Ingrediente duplicado
+POST {{baseUrl}}/ingredientes/
+Content-Type: {{contentType}}
 
-### 5.10 Error 422 Unprocessable Entity — Parámetro limit fuera de rango (ge=1, le=100)
-# @name error422LimitFueraDeRango
+{"nombre":"Carne vacuna","unidad_medida_id":1}
+### Producto sin categoría obligatoria
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Sin categoría","precio_base":1}
+### Producto con categoría vacía
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Sin categoría","precio_base":1,"categoria_ids":[]}
+### Producto con nombre vacío y precio negativo
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"   ","precio_base":-50,"categoria_ids":[1]}
+### Paginación inválida
 GET {{baseUrl}}/productos/?limit=0
-Accept: {{contentType}}
-
-### 5.11 Error 422 Unprocessable Entity — Parámetro de ruta no positivo (gt=0)
-# @name error422RutaIdNoPositivo
+### Ruta con ID inválido
 GET {{baseUrl}}/categorias/0
-Accept: {{contentType}}

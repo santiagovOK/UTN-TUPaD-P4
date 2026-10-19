@@ -7,17 +7,18 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 
-from app.database import create_db_and_tables, engine
+from app.database import create_db_and_tables, engine, get_session
 from app.modules.categoria.routers import router as categoria_router
 from app.modules.ingrediente.routers import router as ingrediente_router
 from app.modules.producto.routers import router as producto_router
 from app.modules.unidad_medida.routers import router as unidad_medida_router
 from app.seed import seed_unidades_medida
 
+from sqlalchemy import text
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Ciclo de vida de la aplicación.
@@ -73,3 +74,16 @@ def health_check() -> dict:
         "version": "1.0.0",
         "unit": "Unidad 7 — Integración Frontend-Backend y Estado del Servidor",
     }
+
+
+@app.get("/health/", tags=["Health"], summary="Comprobación de salud del servicio")
+def health_service() -> dict:
+    """Verifica que la aplicación FastAPI está activa."""
+    return {"status": "ok"}
+
+
+@app.get("/health/db", tags=["Health"], summary="Comprobación de salud de la base de datos")
+def health_database(session: Session = Depends(get_session)) -> dict:
+    """Verifica la conectividad real ejecutando SELECT 1."""
+    session.exec(text("SELECT 1"))
+    return {"status": "ok", "database": "connected"}
