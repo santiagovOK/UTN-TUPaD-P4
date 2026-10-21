@@ -1,0 +1,168 @@
+### FOOD STORE API — SUITE INTEGRAL REST CLIENT (TP8)
+@baseUrl = http://localhost:8000
+@contentType = application/json
+
+### SECCIÓN 0: HEALTH, UNIDADES DE MEDIDA E INGREDIENTES
+GET {{baseUrl}}/
+GET {{baseUrl}}/health/
+GET {{baseUrl}}/health/db
+GET {{baseUrl}}/unidades-medida/
+GET {{baseUrl}}/unidades-medida/1
+POST {{baseUrl}}/ingredientes/
+Content-Type: {{contentType}}
+
+{"nombre":"Carne vacuna","descripcion":"Medallón","unidad_medida_id":1}
+### Segundo ingrediente requerido por payload mixto
+POST {{baseUrl}}/ingredientes/
+Content-Type: {{contentType}}
+
+{"nombre":"Queso cheddar","descripcion":"Queso","unidad_medida_id":1}
+### Obtener ingrediente creado
+GET {{baseUrl}}/ingredientes/1
+### Listar ingredientes
+GET {{baseUrl}}/ingredientes/?offset=0&limit=10
+### Editar ingrediente
+PUT {{baseUrl}}/ingredientes/1
+Content-Type: {{contentType}}
+
+{"nombre":"Carne vacuna","descripcion":"Carne seleccionada","unidad_medida_id":1}
+### Ingrediente inexistente
+GET {{baseUrl}}/ingredientes/9999
+
+### SECCIÓN 1: CRUD Y BÚSQUEDA PAGINADA DE CATEGORÍAS
+POST {{baseUrl}}/categorias/
+Content-Type: {{contentType}}
+
+{"nombre":"Hamburguesas","descripcion":"Hamburguesas artesanales"}
+### Alta categoría 2
+POST {{baseUrl}}/categorias/
+Content-Type: {{contentType}}
+
+{"nombre":"Bebidas","descripcion":"Bebidas refrescantes"}
+### Alta categoría 3
+POST {{baseUrl}}/categorias/
+Content-Type: {{contentType}}
+
+{"nombre":"Postres","descripcion":"Postres artesanales"}
+### Listado paginado
+GET {{baseUrl}}/categorias/?offset=0&limit=10
+### Búsqueda por nombre
+GET {{baseUrl}}/categorias/?nombre=Ham
+### Detalle
+GET {{baseUrl}}/categorias/1
+### Actualización PUT
+PUT {{baseUrl}}/categorias/1
+Content-Type: {{contentType}}
+
+{"nombre":"Hamburguesas Gourmet","descripcion":"Selección gourmet"}
+### Actualización PATCH
+PATCH {{baseUrl}}/categorias/1
+Content-Type: {{contentType}}
+
+{"descripcion":"Hamburguesas artesanales premium"}
+### Baja lógica de categoría 3
+DELETE {{baseUrl}}/categorias/3
+### Listar inactivas
+GET {{baseUrl}}/categorias/?incluir_inactivos=true
+
+### SECCIÓN 2: CRUD Y FILTRADO DINÁMICO DE PRODUCTOS CON RELACIONES N:M
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Hamburguesa Doble Cheddar","descripcion":"Doble medallón","precio_base":12500,"imagenes_url":[],"disponible":true,"categoria_ids":[1,2],"ingredientes":[{"ingrediente_id":1,"cantidad":200,"es_opcional":false},2]}
+### Producto 2
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Pinta Cerveza IPA","precio_base":4500,"categoria_ids":[2]}
+### Mismo nombre admitido [Catálogo heredado del TP7]
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Hamburguesa Doble Cheddar","precio_base":13000,"categoria_ids":[1]}
+### Listado
+GET {{baseUrl}}/productos/?offset=0&limit=10
+### Filtro nombre
+GET {{baseUrl}}/productos/?nombre=Cheddar
+### Filtro disponibilidad
+GET {{baseUrl}}/productos/?disponible=true
+### Incluir inactivos
+GET {{baseUrl}}/productos/?incluir_inactivos=true
+### Detalle
+GET {{baseUrl}}/productos/1
+### Reemplazo integral de relaciones en PUT
+PUT {{baseUrl}}/productos/1
+Content-Type: {{contentType}}
+
+{"nombre":"Hamburguesa Doble Cheddar","precio_base":13900,"categoria_ids":[1],"ingredientes":[{"ingrediente_id":1,"cantidad":250,"es_opcional":false}]}
+### PATCH producto
+PATCH {{baseUrl}}/productos/1
+Content-Type: {{contentType}}
+
+{"precio_base":14500}
+
+### SECCIÓN 3: CONSULTAS RELACIONALES INVERSAS N:M
+GET {{baseUrl}}/productos/1/categorias
+GET {{baseUrl}}/productos/1/ingredientes
+GET {{baseUrl}}/categorias/1/productos
+GET {{baseUrl}}/categorias/2/productos
+GET {{baseUrl}}/productos/?categoria_id=1
+### Categoria con vínculo activo no se elimina
+DELETE {{baseUrl}}/categorias/2
+### Baja lógica de producto 2 purga relaciones [Catálogo heredado del TP7]
+DELETE {{baseUrl}}/productos/2
+### Ahora se libera la categoría
+DELETE {{baseUrl}}/categorias/2
+
+### SECCIÓN 4: ERRORES SEMÁNTICOS Y REGLAS DE NEGOCIO (404, 409, 422)
+GET {{baseUrl}}/productos/9999
+GET {{baseUrl}}/categorias/9999
+GET {{baseUrl}}/unidades-medida/9999
+GET {{baseUrl}}/ingredientes/9999
+GET {{baseUrl}}/productos/9999/categorias
+GET {{baseUrl}}/productos/9999/ingredientes
+GET {{baseUrl}}/categorias/9999/productos
+### Categoría referenciada inexistente
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Inválido","precio_base":1,"categoria_ids":[9999]}
+### Ingrediente referenciado inexistente
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Inválido","precio_base":1,"categoria_ids":[1],"ingredientes":[9999]}
+### Actualización con categoría inexistente
+PUT {{baseUrl}}/productos/1
+Content-Type: {{contentType}}
+
+{"categoria_ids":[9999]}
+### Categoría duplicada
+POST {{baseUrl}}/categorias/
+Content-Type: {{contentType}}
+
+{"nombre":"Hamburguesas Gourmet"}
+### Ingrediente duplicado
+POST {{baseUrl}}/ingredientes/
+Content-Type: {{contentType}}
+
+{"nombre":"Carne vacuna","unidad_medida_id":1}
+### Producto sin categoría obligatoria
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Sin categoría","precio_base":1}
+### Producto con categoría vacía
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Sin categoría","precio_base":1,"categoria_ids":[]}
+### Producto con nombre vacío y precio negativo
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"   ","precio_base":-50,"categoria_ids":[1]}
+### Paginación inválida
+GET {{baseUrl}}/productos/?limit=0
+### Ruta con ID inválido
+GET {{baseUrl}}/categorias/0

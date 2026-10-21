@@ -1,0 +1,20 @@
+{
+  "name": "unidad8-formularios-tablas",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm run dev:all",
+    "dev:front": "pnpm --dir unidad8_frontend dev",
+    "dev:back": "cd unidad8_backend && (fastapi dev app/main.py || python -m fastapi dev app/main.py || uvicorn app.main:app --reload --port 8000)",
+    "dev:all": "concurrently -k -n \"front,back\" -c \"cyan,green\" \"pnpm --dir unidad8_frontend dev\" \"pnpm run dev:back\"",
+    "dev:stop": "npx kill-port 5173 8000",
+    "stop": "pnpm run dev:stop",
+    "build:front": "pnpm --dir unidad8_frontend build",
+    "test:back": "cd unidad8_backend && pytest"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "kill-port": "^2.0.1"
+  }
+}
