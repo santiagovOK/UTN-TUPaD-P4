@@ -42,9 +42,6 @@ Conforme a las pautas de evaluación de la cátedra para la Unidad 8, la entrega
 - **Capa Frontend (local):** [unidad8_frontend/](unidad8_frontend/README.md)
 - **Antecedente Histórico:** [Directorio Unidad 7 en GitHub](https://github.com/santiagovOK/UTN-TUPaD-P4/tree/main/unidad7_server_state_navegacion) *(mantenido solo como referencia de versiones previas)*.
 
-> **Aviso sobre Automatizaciones Externas (`sync_kanban.js`):**  
-> El archivo `docs/sync_kanban.js` corresponde a una herramienta histórica de sincronización con un tablero externo utilizada exclusivamente durante la Unidad 7. **No debe ejecutarse para la Unidad 8**, ya que contiene credenciales e IDs obsoletos y realiza escrituras remotas. La planificación operativa de la Unidad 8 se gestiona exclusivamente a través del documento local [docs/resolucion_tp8.md](docs/resolucion_tp8.md).
-
 ---
 
 ## 🚀 Inicialización y Puesta en Marcha
@@ -129,7 +126,6 @@ utn-paradigmas4-tp8-formularios-tablas/
 │   ├── consigna.md                 # Especificación evaluativa del TP8
 │   ├── resolucion_tp8.md           # Plan rector, matrices HU/RN y tablero de épicas
 │   ├── UML_FOOD_STORE.svg          # Diagrama UML de clases del dominio
-│   ├── sync_kanban.js              # Script histórico TP7 (inactivo, no ejecutar)
 │   └── guidelines/                 # Referencia conceptual local; excluida de ZIP
 │       ├── unidad8_guia_maestra.md # Criterio normativo Unidad 8 (UoW, Form, Table)
 │       ├── clean_code.md           # Principios Clean Code y refactorización

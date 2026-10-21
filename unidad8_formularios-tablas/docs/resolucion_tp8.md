@@ -522,4 +522,4 @@ Al finalizar el desarrollo y tras la verificación completa de la Épica 5, se g
 2. **Aprobación Previa de Pasos Críticos:**  
    La autorización del presente plan no constituye aprobación para crear commits; cualquier consolidación en el historial requerirá una instrucción explícita del usuario tras auditar las modificaciones.
 3. **Tablero Markdown como Fuente Única de Verdad:**  
-   El presente documento (`docs/resolucion_tp8.md`) y los READMEs sincronizados constituyen el único registro operativo de avance. El script histórico `docs/sync_kanban.js` queda inactivo y no debe ejecutarse, protegiendo las credenciales y el estado del repositorio.
+   El presente documento (`docs/resolucion_tp8.md`) y los READMEs sincronizados constituyen el único registro operativo de avance y seguimiento de las épicas y tareas del proyecto.
