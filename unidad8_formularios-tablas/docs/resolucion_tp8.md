@@ -207,7 +207,7 @@ graph TD
 |---|---|---|---|---|---|---|:---:|
 | **E0.1** | Renombrado de directorios y actualización de consumidores directos | Soporte local: identidad/rutas; sin inciso académico obligatorio propio. | Ninguna | `unidad8_backend/`, `unidad8_frontend/`, `package.json`, `app/main.py`, `Navbar.tsx`, `index.html` | Identidad | Scripts raíz operativos; cero directorios `unidad7_`; títulos de frontend y backend actualizados a TP8. | ✅ **Completada** |
 | **E0.2** | Redacción y sincronización documental integral, trazabilidad y procedencia TP7 | Soporte local: resolución y documentación; sin inciso académico obligatorio propio. | E0.1 | `docs/resolucion_tp8.md`, `README.md`, `unidad8_backend/README.md`, `unidad8_frontend/README.md`, código heredado | Documentación | Tablero TP8 con 19 tareas, mapeo a `consigna.md`, exclusión de guidelines de ZIPs, procedencia TP7 explicitada en comentarios y 3 READMEs sincronizados. | ✅ **Completada** |
-| **E1.1** | Instalación y fijación de dependencias TanStack Form y Table | [Ejercicio 2, introducción](consigna.md): instalación de TanStack Form y TanStack Table v8. | E0.2 | `unidad8_frontend/package.json`, `pnpm-lock.yaml` | Infraestructura | Instalación de `@tanstack/react-form` y `@tanstack/react-table` v8 sin romper React 19 ni Tailwind 4. `pnpm build:front` compila. | ⏳ **Pendiente** |
+| **E1.1** | Instalación y fijación de dependencias TanStack Form y Table | [Ejercicio 2, introducción](consigna.md): instalación de TanStack Form y TanStack Table v8. | E0.2 | `unidad8_frontend/package.json`, `pnpm-lock.yaml` | Infraestructura | Instalación de `@tanstack/react-form` y `@tanstack/react-table` v8 sin romper React 19 ni Tailwind 4. `pnpm build:front` compila. | ✅ **Completada** |
 | **E1.3** | Consolidación y tipado de contratos TypeScript | [Ejercicio 2.a, interfaces en src/types/](consigna.md), y [Conclusiones esperadas, Tipado TypeScript](consigna.md). Reutilizar contratos; retirar `pedido.ts` frontend. | E1.1 | `src/types/categoria.ts`, `producto.ts`, `ingrediente.ts`, `index.ts` | HU-01..06 | Interfaces estrictas para entidades de catálogo y payloads de mutación. Props tipados sin `any`. `pedido.ts` excluido de frontend. | ⏳ **Pendiente** |
 | **E1.2** | Implementación de helper `fetchAllPages` para carga tabular | Soporte local para [Ejercicio 2.a Páginas](consigna.md) y HU-01/HU-05/HU-06: reunir datos para orden/paginación locales. | E1.3 | `unidad8_frontend/src/services/pagination.ts` | HU-01, HU-05, HU-06 | Función secuencial que acumula lotes paginados hasta totalizar la colección. Falla ante inconsistencias y retorna array plano. | ⏳ **Pendiente** |
 | **E2.1** | Modelos y Schemas de Pedido y DetallePedido | [Ejercicio 1.b, Definición de models y schemas de Pedido y DetallePedido](consigna.md). | E0.2 | `app/modules/pedidos/models.py`, `app/modules/pedidos/schemas.py` | HU-07, RN-12, RN-14 | Tablas `pedido` y `detalle_pedido`. PK compuesta `(pedido_id, producto_id)`. Schemas con validación de no repetidos y cantidad >= 1. | ⏳ **Pendiente** |
@@ -257,14 +257,13 @@ graph TD
 
 ##### Ficha E1.1: Instalación y fijación de dependencias TanStack Form y Table
 * **Acción:** Instalación y fijación estricta de `@tanstack/react-form` y `@tanstack/react-table` v8 en `unidad8_frontend/package.json`.
-* **Estado:** Pendiente.
+* **Estado:** Completada (verificada).
 * **Dependencias:** E0.2.
 * **Archivos y símbolos críticos:** `unidad8_frontend/package.json`, `pnpm-lock.yaml`.
 * **Consigna resuelta / soporte:** [Ejercicio 2, introducción](consigna.md): instalación de TanStack Form y TanStack Table v8.
 * **HU / RN:** Infraestructura técnica para HU-01, HU-02, HU-03, HU-05 y HU-06.
 * **Criterio de aceptación verificable:** Dependencias agregadas en versiones estables y compatibles con React 19 y Tailwind CSS v4; lockfile consistente; `pnpm build:front` compila sin advertencias críticas de resolución de paquetes.
-* **Verificación rápida prevista:** Compilación real con `pnpm build:front` inmediatamente tras la instalación en esa futura tarea.  
-  *Implementación y verificación: no realizadas; evidencia pendiente.*
+* **Verificación rápida prevista / ejecutada:** Instalación de `@tanstack/react-form` (^1.33.5) y `@tanstack/react-table` (^8.21.3) vía `pnpm --dir unidad8_frontend add @tanstack/react-form @tanstack/react-table@8`; lockfile actualizado y compilación exitosa con `pnpm run build:front` (`tsc -b && vite build` finalizado con código de salida 0 sin advertencias ni conflictos con React 19 o Tailwind CSS v4).
 
 ##### Ficha E1.3: Consolidación y tipado de contratos TypeScript
 * **Acción:** Consolidación de interfaces de datos en TypeScript para Categoría, Producto e Ingrediente, tipado de props de componentes y contratos de mutación. Se retira `pedido.ts` de la planificación frontend al ser Pedidos un módulo puramente REST sin interfaz gráfica en la consigna.
