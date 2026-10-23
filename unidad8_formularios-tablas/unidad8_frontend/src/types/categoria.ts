@@ -5,13 +5,13 @@
 // [Diagrama UML - Entidad CATEGORIA (docs/UML_FOOD_STORE.svg)]:
 //   - id          : INTEGER {PK, NN, AI}        -> number
 //   - nombre      : VARCHAR(100) {UNIQUE, NN}   -> string
-//   - descripcion : TEXT (opcional / Decisión A)-> string | undefined
+//   - descripcion : TEXT (opcional / Decisión A)-> string (normalizada por backend)
 //   - Campos de auditoría (created_at, updated_at, deleted_at) gestionados internamente por el backend.
 
 export interface Categoria {
   id: number;
   nombre: string;
-  descripcion?: string;
+  descripcion: string;
 }
 
 export interface CategoriaCreate {

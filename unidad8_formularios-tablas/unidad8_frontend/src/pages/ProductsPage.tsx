@@ -20,7 +20,7 @@ import {
 } from '../services/productos.service';
 import { getCategorias } from '../services/categorias.service';
 import { ProductoModal } from '../components/ProductoModal';
-import type { Producto, ProductoCreate } from '../types/producto';
+import type { Producto, ProductoCreate, ProductoUpdate } from '../types/producto';
 export const PAGE_SIZE = 6;
 
 export function ProductsPage() {
@@ -63,7 +63,7 @@ export function ProductsPage() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: ProductoCreate }) =>
+    mutationFn: ({ id, data }: { id: number; data: ProductoUpdate }) =>
       updateProducto({ id, data }),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['productos'] });

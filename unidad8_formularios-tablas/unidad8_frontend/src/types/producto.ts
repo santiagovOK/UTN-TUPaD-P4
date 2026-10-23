@@ -19,10 +19,10 @@ export interface Producto {
   nombre: string;
   descripcion: string | null;
   precio_base: number;
-  imagenes_url?: string[];
+  imagenes_url: string[];
   disponible: boolean;
   categorias: Categoria[];
-  ingredientes?: Ingrediente[];
+  ingredientes: Ingrediente[];
 }
 
 export interface ProductoCreate {

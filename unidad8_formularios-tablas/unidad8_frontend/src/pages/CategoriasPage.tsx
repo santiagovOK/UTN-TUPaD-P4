@@ -16,7 +16,7 @@ import {
 } from '../services/categorias.service';
 import { CategoriaList } from '../components/CategoriaList';
 import { CategoriaModal } from '../components/CategoriaModal';
-import type { Categoria, CategoriaCreate } from '../types/categoria';
+import type { Categoria, CategoriaCreate, CategoriaUpdate } from '../types/categoria';
 
 export function CategoriasPage() {
   // Client State
@@ -45,7 +45,7 @@ export function CategoriasPage() {
 
   // Mutación de Modificación
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: CategoriaCreate }) =>
+    mutationFn: ({ id, data }: { id: number; data: CategoriaUpdate }) =>
       updateCategoria({ id, data }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categorias'] });

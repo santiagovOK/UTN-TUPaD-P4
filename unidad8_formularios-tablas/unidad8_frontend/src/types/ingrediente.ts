@@ -20,7 +20,7 @@ export interface UnidadMedidaListResponse {
 export interface Ingrediente {
   id: number;
   nombre: string;
-  descripcion?: string;
+  descripcion: string;
   unidad_medida_id: number;
   activo: boolean;
 }
