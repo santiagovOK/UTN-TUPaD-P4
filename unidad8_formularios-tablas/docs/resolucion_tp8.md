@@ -21,10 +21,10 @@ El presente documento constituye el marco rector de ingeniería, especificación
    [Consigna del Trabajo Práctico 8](consigna.md) (`docs/consigna.md`). Define las Historias de Usuario (HU-01 a HU-07), las Reglas de Negocio evaluables (RN-01 a RN-16), la rúbrica de evaluación oficial (100 puntos distribuidos en 8 criterios) y las restricciones de entrega.
 2. **Criterio Técnico y Buenas Prácticas:**  
    [Guía Maestra Unidad 8](guidelines/unidad8_guia_maestra.md) (`docs/guidelines/unidad8_guia_maestra.md`). Establece los patrones de diseño normativos:
-   * **Backend (§§1–8):** Arquitectura por capas (*Models–Schemas–Repository–Unit of Work–Service–Router*), manejo transaccional atómico, aislamiento de excepciones de negocio y separación de sesiones.
-   * **Formularios (§§9–16):** Estado unificado en `@tanstack/react-form`, validación al blur/submit con tipos estrictos, `form.Subscribe` para feedback reactivo y prevención de envíos concurrentes.
-   * **Tablas (§§18–25):** `@tanstack/react-table` v8 con `createColumnHelper`, ordenamiento (`getSortedRowModel`), filtrado (`getFilteredRowModel`) y paginación local (`getPaginationRowModel`) sobre el conjunto de datos completo.
-   * **Accesibilidad y UI (§§26–34):** Componentes semánticos, Tailwind CSS v4, roles ARIA, feedback de carga/vacío/error sin parpadeo y diálogos modales accesibles por teclado.
+   * **Backend (Secciones 1–8):** Arquitectura por capas (*Models–Schemas–Repository–Unit of Work–Service–Router*), manejo transaccional atómico, aislamiento de excepciones de negocio y separación de sesiones.
+   * **Formularios (Secciones 9–16):** Estado unificado en `@tanstack/react-form`, validación al blur/submit con tipos estrictos, `form.Subscribe` para feedback reactivo y prevención de envíos concurrentes.
+   * **Tablas (Secciones 18–25):** `@tanstack/react-table` v8 con `createColumnHelper`, ordenamiento (`getSortedRowModel`), filtrado (`getFilteredRowModel`) y paginación local (`getPaginationRowModel`) sobre el conjunto de datos completo.
+   * **Accesibilidad y UI (Secciones 26–34):** Componentes semánticos, Tailwind CSS v4, roles ARIA, feedback de carga/vacío/error sin parpadeo y diálogos modales accesibles por teclado.
 3. **Calidad de Código y Python Idiomático:**  
    * [Clean Code](guidelines/clean_code.md) (`docs/guidelines/clean_code.md`): Principio de Responsabilidad Única (SRP), nombres intencionales, funciones compactas y tipado estricto.
    * [Guía Anti-Javaismos](guidelines/javaismos_guia.md) (`docs/guidelines/javaismos_guia.md`): Rechazo expreso a getters/setters artificiales, interfaces abstractas vacías, jerarquías de herencia innecesarias y conteos en memoria con Python `len()`.
@@ -59,7 +59,7 @@ El diagnóstico se fundamenta en un relevamiento estático exhaustivo del códig
 Conforme al alcance consensuado y las especificaciones académicas, se adoptan las siguientes decisiones de diseño:
 
 ### 3.1. Arquitectura Híbrida Justificada en Backend
-* **Pedidos (Nueva Arquitectura UoW):** El módulo `pedidos` implementará de forma obligatoria y estricta la arquitectura *Models–Schemas–Repository–Unit of Work–Service–Router* conforme a la Actividad 1 y §§1–8 de la guía maestra.
+* **Pedidos (Nueva Arquitectura UoW):** El módulo `pedidos` implementará de forma obligatoria y estricta la arquitectura *Models–Schemas–Repository–Unit of Work–Service–Router* conforme a la Actividad 1 y Secciones 1–8 de la guía maestra.
 * **Catálogo de Alimentos (Arquitectura Heredada Preservada):** Los módulos de `categoria`, `producto`, `ingrediente` y `unidad_medida` mantienen su arquitectura *Models–Schemas–Service–Router* consolidada en el TP7. No se refactorizan innecesariamente a Repository/UoW, minimizando riesgo de regresión y sobreingeniería.
 * **Integración sin Acoplamiento Peligroso:** Para verificar la existencia y el precio de productos al crear un pedido, el Unit of Work expondrá un repositorio de lectura (`ProductoRepository`) vinculado a la **misma sesión transaccional** del UoW. Se prohíbe taxativamente invocar servicios heredados que ejecuten `session.commit()` internamente, preservando la atomicidad absoluta de la transacción.
 
@@ -70,7 +70,7 @@ Conforme al alcance consensuado y las especificaciones académicas, se adoptan l
 
 ### 3.3. Contratos de Paginación y Respuestas de Catálogo
 * El catálogo backend continúa respondiendo la estructura `{ total: number, items: T[] }` con paginación determinista (`offset`, `limit`, `order_by(Model.id)`).
-* El frontend mantendrá compatibilidad con este contrato y empleará un helper secuencial (`fetchAllPages`, planificado en E1.2) para alimentar las tablas cliente con el conjunto total de datos, satisfaciendo los requisitos de ordenamiento y filtrado global exigidos por la rúbrica.
+* El frontend consume este contrato directamente: cada página pide `offset=0` y `limit=100` (máximo `le=100` del backend) con `useQuery` y entrega `data.items` a `useReactTable`; el ordenamiento (`getSortedRowModel`) y la paginación en pantalla (`getPaginationRowModel`) operan localmente sobre esa colección. Límite conocido: hasta 100 registros por entidad. No se agrega helper de acumulación de lotes porque la consigna no lo pide.
 
 ---
 
@@ -125,7 +125,7 @@ La siguiente tabla refleja exactamente las 16 reglas de negocio normadas en la c
 
 En cumplimiento de los principios de diseño establecidos en la guía maestra de la Unidad 8 y los estándares de ingeniería del proyecto:
 
-### 6.1. Backend Transaccional y Unit of Work (§§1–8)
+### 6.1. Backend Transaccional y Unit of Work (Secciones 1–8)
 1. **Ciclo de Vida de la Sesión:** El Unit of Work es el único propietario de la sesión de base de datos (`Session(engine)`). Se instancia una sesión nueva por cada caso de uso.
 2. **Protocolo de Commit / Rollback:**
    * El servicio orquesta los repositorios emitiendo `add()` y `flush()` para sincronizar IDs autogenerados.
@@ -134,19 +134,19 @@ En cumplimiento de los principios de diseño establecidos en la guía maestra de
    * El cierre de sesión se garantiza en un bloque `finally`, evitando fugas de conexiones en el pool.
 3. **Desacoplamiento de Excepciones:** Los repositorios y servicios lanzan excepciones de dominio (`PedidoNoEncontrado`, `ProductoNoEncontrado`, `DetalleInvalidoError`). El router es la única capa autorizada a traducir dichas excepciones a códigos HTTP (`404`, `422`, `409`), manteniendo la lógica de negocio pura y libre de dependencias hacia FastAPI.
 
-### 6.2. Formularios Tipados con TanStack Form (§§9–16)
+### 6.2. Formularios Tipados con TanStack Form (Secciones 9–16)
 1. **Estado Centralizado en Form:** El formulario (`useForm`) es la única fuente de verdad para los valores de entrada y los errores de validación. Queda prohibido sincronizar cada input con variables `useState` independientes.
 2. **Validación Temprana y Normalización:** Validación en tiempo real (`onBlur`) y obligatoria al enviar (`onSubmit`). Aplicación estricta de `.trim()` sobre campos de texto antes de la validación.
 3. **Tratamiento del Precio:** En el formulario, el precio se manipula como cadena de texto editable para permitir al usuario borrar y escribir con naturalidad. Se valida que no sea vacío, sea numérico finito y mayor o igual a cero (`>= 0`), transformándose a `number` únicamente al generar el payload de la mutación.
 4. **Flujo de Mutación Asíncrona:** El submit aguarda la resolución de `mutateAsync`. Ante un error de red o HTTP (por ejemplo 409), el modal **permanece abierto** con los valores ingresados intactos y muestra el mensaje de error. Solo se cierra tras confirmación exitosa de la API o cancelación voluntaria.
 5. **Control de Envío Reactivo:** Uso de `form.Subscribe` para monitorear `canSubmit` e `isSubmitting`, deshabilitando el botón de acción principal y previniendo doble envío accidental.
 
-### 6.3. Tablas Dinámicas con TanStack Table v8 (§§18–25)
+### 6.3. Tablas Dinámicas con TanStack Table v8 (Secciones 18–25)
 1. **Modelo de Filas y Acceso Seguro:** Configuración mediante `createColumnHelper<T>` con `accessorKey` tipado e identificadores de fila estables vinculados al dominio (`getRowId: (row) => String(row.id)`).
-2. **Operaciones sobre el Conjunto Total:** La tabla procesa ordenamiento (`getSortedRowModel`), filtrado local (`getFilteredRowModel`) y paginación en pantalla (`getPaginationRowModel`) sobre el lote completo consultado mediante el helper `fetchAllPages`. Esto garantiza que ordenar por descripción o buscar por nombre afecte a todos los registros del sistema y no solo a una página remota aislada.
+2. **Operaciones sobre la colección cargada:** La tabla procesa ordenamiento (`getSortedRowModel`), filtrado local (`getFilteredRowModel`, opcional según la consigna) y paginación en pantalla (`getPaginationRowModel`) sobre `data.items` obtenido con `limit=100`. Ordenar por descripción afecta a todos los registros cargados y no solo a los 10 de la página visible.
 3. **Accesibilidad Tabular:** Renderizado semántico con `<caption>`, encabezados `<th>` con `scope="col"`, atributos dinámicos `aria-sort` en columnas ordenables y controles de paginación implementados como botones nativos (`<button type="button">`).
 
-### 6.4. Interfaz de Usuario y Accesibilidad (§§26–34)
+### 6.4. Interfaz de Usuario y Accesibilidad (Secciones 26–34)
 1. **Preservación de Línea Visual:** Continuidad estilística sobre Tailwind CSS v4, garantizando contraste adecuado, foco visual perceptible (`focus-visible:ring-2`) y diseño responsive para dispositivos móviles y escritorio.
 2. **Tratamiento de Estados Asíncronos:** Componentes dedicados para carga inicial (skeletons), estado vacío informativo con llamado a la acción y mensajes de error con opción de reintento. Diferenciación visual entre carga inicial y refetching en segundo plano (sin desmontar la tabla).
 3. **Diálogos Modales Accesibles:** Trampa de foco en modales, cierre con tecla `Escape`, bloqueo de scroll de fondo y atributos `role="dialog"`, `aria-modal="true"` y `aria-labelledby`.
@@ -175,7 +175,7 @@ La ejecución del proyecto sigue una estrategia estricta de **Bottom-Up + Walkin
 5. **Datos de Prueba Tempranos:**
    * Los datos de prueba se preparan al cerrar E1 o antes del primer incremento que consulte datos, utilizando exclusivamente almacenamiento de prueba aislado (SQLite en memoria / base temporal).
    * Se reutiliza el catálogo semilla de unidades de medida oficial existente (`seed_unidades_medida`); las categorías y productos se crean mediante operaciones reales de la API en el almacenamiento de pruebas.
-   * Para el escenario de carga de más de 100 registros en categorías (verificación de tabla completa), la colección de 101 filas se genera programáticamente solo dentro del entorno de pruebas, sin contaminar la base de datos personal. No se aplican fixtures de Pedidos antes de existir el módulo.
+   * Para el escenario de tabla con más de una página visible (verificación de orden y paginación locales), una colección de 25 categorías se crea mediante la API solo dentro del entorno de pruebas, sin contaminar la base de datos personal. No se aplican fixtures de Pedidos antes de existir el módulo.
 6. **Gobierno Kanban y Definiciones DoR / DoD:**
    * **Estados del ciclo de vida:** `Pendiente → En Progreso → En Verificación → Completada`, más `Bloqueada` con registro de causa.
    * **WIP = 1:** Se procesa una sola tarea a la vez en esta planificación, garantizando foco y trazabilidad observable. La independencia técnica entre ramas (por ejemplo E2 backend frente a E3 frontend) no implica promesas de ejecución paralela no verificada.
@@ -209,7 +209,7 @@ graph TD
 | **E0.2** | Redacción y sincronización documental integral, trazabilidad y procedencia TP7 | Soporte local: resolución y documentación; sin inciso académico obligatorio propio. | E0.1 | `docs/resolucion_tp8.md`, `README.md`, `unidad8_backend/README.md`, `unidad8_frontend/README.md`, código heredado | Documentación | Tablero TP8 con 19 tareas, mapeo a `consigna.md`, exclusión de guidelines de ZIPs, procedencia TP7 explicitada en comentarios y 3 READMEs sincronizados. | ✅ **Completada** |
 | **E1.1** | Instalación y fijación de dependencias TanStack Form y Table | [Ejercicio 2, introducción](consigna.md): instalación de TanStack Form y TanStack Table v8. | E0.2 | `unidad8_frontend/package.json`, `pnpm-lock.yaml` | Infraestructura | Instalación de `@tanstack/react-form` y `@tanstack/react-table` v8 sin romper React 19 ni Tailwind 4. `pnpm build:front` compila. | ✅ **Completada** |
 | **E1.3** | Consolidación y tipado de contratos TypeScript | [Ejercicio 2.a, interfaces en src/types/](consigna.md), y [Conclusiones esperadas, Tipado TypeScript](consigna.md). Reutilizar contratos; retirar `pedido.ts` frontend. | E1.1 | `src/types/categoria.ts`, `producto.ts`, `ingrediente.ts`, `index.ts` | HU-01..06 | Interfaces estrictas para entidades de catálogo y payloads de mutación. Props tipados sin `any`. `pedido.ts` excluido de frontend. | ⏳ **Pendiente** |
-| **E1.2** | Implementación de helper `fetchAllPages` para carga tabular | Soporte local para [Ejercicio 2.a Páginas](consigna.md) y HU-01/HU-05/HU-06: reunir datos para orden/paginación locales. | E1.3 | `unidad8_frontend/src/services/pagination.ts` | HU-01, HU-05, HU-06 | Función secuencial que acumula lotes paginados hasta totalizar la colección. Falla ante inconsistencias y retorna array plano. | ⏳ **Pendiente** |
+| **E1.2** | Carga tabular directa sin helper de paginación | [Ejercicio 2.a Páginas](consigna.md) y HU-01/HU-05/HU-06: `useQuery` + `useReactTable` con orden y paginación locales sobre `data.items`. | E1.1 | Sin archivos nuevos (se retira `src/services/pagination.ts`; las páginas usan `getCategorias`, `getProductos` e `getIngredientes` con `limit=100`) | HU-01, HU-05, HU-06 | `pagination.ts` y su export en `services/index.ts` no existen; contrato documentado: `offset=0`, `limit=100` y `data.items` directo a `useReactTable`. | ✅ **Completada** |
 | **E2.1** | Modelos y Schemas de Pedido y DetallePedido | [Ejercicio 1.b, Definición de models y schemas de Pedido y DetallePedido](consigna.md). | E0.2 | `app/modules/pedidos/models.py`, `app/modules/pedidos/schemas.py` | HU-07, RN-12, RN-14 | Tablas `pedido` y `detalle_pedido`. PK compuesta `(pedido_id, producto_id)`. Schemas con validación de no repetidos y cantidad >= 1. | ⏳ **Pendiente** |
 | **E2.2** | Repositorios base y Unit of Work transaccional | [Ejercicio 1.c, Repository y Unit of Work](consigna.md). | E2.1 | `app/core/repository.py`, `unit_of_work.py`, `app/modules/pedidos/repository.py`, `unit_of_work.py` | HU-07, RN-15, RN-16 | `PedidoUnitOfWork` administra sesión única, expone repositorios y asegura rollback ante excepciones sin commit prematuro. | ⏳ **Pendiente** |
 | **E2.3** | Capa de servicio de Pedidos y orquestación | [Ejercicio 1.c, Service y casos de uso del agregado](consigna.md). | E2.2 | `app/modules/pedidos/service.py` | HU-07, RN-12, RN-15 | `PedidoService` implementa listar, obtener, crear (atómica con captura de precio congelado), actualizar estado y baja lógica. | ⏳ **Pendiente** |
@@ -217,11 +217,11 @@ graph TD
 | **E2.5** | Suite REST Client de Pedidos (`pedidos.http`) | [Ejercicio 1.c, demostración con pedidos.http](consigna.md), incluyendo 404 y 422; HU-07. | E2.4 | `unidad8_backend/pedidos.http` | HU-07, RN-12, RN-13, RN-16 | Suite ejecutable con flujo completo: alta válida, captura de precios, modificación de estado, baja lógica, posteriores 404 y rechazos 422. | ⏳ **Pendiente** |
 | **E3.1** | Adaptación de Categorías a TanStack Form y Table | [Ejercicio 2.a, CategoriasPage](consigna.md): hooks, lista, modal y botón; HU-01..HU-04. | E1.2 | `CategoriasPage.tsx`, `CategoriaModal.tsx`, `CategoriaList.tsx`, `CategoriaCard.tsx` | HU-01..04, RN-01..05 | `CategoriasPage` integra `useReactTable` y `useForm`. Modal controlado con `useState`. Ruta actualizada de inmediato. | ⏳ **Pendiente** |
 | **E3.2** | Adaptación de Productos a TanStack Form y Table | [Ejercicio 2.a, ProductsPage](consigna.md): CRUD, hooks, modal, Form/Table; HU-06. | E1.2 | `ProductsPage.tsx`, `ProductoModal.tsx`, `ProductDetailPage.tsx` | HU-06, RN-06..09 | `ProductsPage` reemplaza grilla por tabla dinámica. Modal valida precio >= 0 y categorías obligatorias. Preserva detalle. | ⏳ **Pendiente** |
-| **E3.3** | Componentes comunes de UI y accesibilidad | [HU-01](consigna.md), componentes reutilizables; [Conclusiones esperadas](consigna.md); rúbrica Estructura y buenas prácticas. | E3.1, E3.2 | `src/components/ui/` (`LoadingState`, `EmptyState`, `ErrorState`, `FormField`) | Calidad UI, HU-01, HU-06 | Extracción de patrones de UI comunes ya repetidos para estados de carga/vacío/error y campos accesibles sin parpadeo. | ⏳ **Pendiente** |
-| **E4.1** | Capa de servicios HTTP de Ingredientes y Unidades | Soporte de consumo para [Ejercicio 1.d](consigna.md) y [Ejercicio 2.a IngredientesPage](consigna.md); unidades es contrato heredado. | E1.2 | `src/services/ingredientes.service.ts`, `src/services/unidades.service.ts` | HU-05 | Clientes HTTP tipados con manejo de errores para `/ingredientes/` y catálogo de `/unidades-medida/`. Integración con `fetchAllPages`. | ⏳ **Pendiente** |
+| **E3.3** | Componentes comunes de estados de carga, vacío y error | [HU-01](consigna.md): estados de carga, vacío y error como componentes reutilizables con Tailwind CSS; rúbrica Estructura y buenas prácticas. | E3.1, E3.2 | `src/components/` (`LoadingState.tsx`, `EmptyState.tsx`, `ErrorState.tsx`) | Calidad UI, HU-01, HU-06 | Extracción de los patrones de carga/vacío/error ya repetidos en componentes planos de `src/components/`, sin subcarpeta `ui/` ni componente de campo de formulario. | ⏳ **Pendiente** |
+| **E4.1** | Capa de servicios HTTP de Ingredientes | Soporte de consumo para [Ejercicio 1.d](consigna.md) y [Ejercicio 2.a IngredientesPage](consigna.md). | E1.2 | `src/services/ingredientes.service.ts` (incluye `getUnidadesMedida`) | HU-05 | Cliente HTTP tipado con manejo de errores para `/ingredientes/` y lectura de `/unidades-medida/` en el mismo archivo. Listado con `limit=100`. | ⏳ **Pendiente** |
 | **E4.2** | Interfaz completa CRUD de Ingredientes y montaje | [Ejercicio 2.a IngredientesPage](consigna.md) y [Ejercicio 2.b–c](consigna.md) para su montaje inmediato; HU-05. | E4.1, E3.3 | `src/pages/IngredientesPage.tsx`, `IngredienteModal.tsx`, `IngredienteList.tsx`, `App.tsx`, `Navbar.tsx` | HU-05, RN-10..11 | Página CRUD con TanStack Table + TanStack Form + selector de unidades. Montaje directo de ruta y Navbar en la misma tarea. | ⏳ **Pendiente** |
 | **E4.3** | Verificación de navegación y desacoplamiento de App | Verificación de [Ejercicio 2.b Navegación](consigna.md), [2.c App.tsx](consigna.md) y [Comportamiento esperado](consigna.md). | E4.2 | `src/App.tsx`, `src/components/Navbar.tsx` | HU-05, Navegación | Navegación fluida por todas las rutas integradas. Discriminación activa en Navbar. `App.tsx` sin datos ni llamadas a APIs. | ⏳ **Pendiente** |
-| **E5.1** | Pruebas automatizadas de integración y regresión | Soporte de verificación de [Ejercicio 1.c](consigna.md), HU-07 y RN-15/RN-16; regresión de [Ejercicio 1.d](consigna.md). | E2.5, E3.3, E4.3 | `unidad8_backend/tests/` | Regresión, HU-07, RN-15..16 | Pruebas de rollback de UoW en SQLite en memoria; validación de no regresión en catálogo heredado. | ⏳ **Pendiente** |
+| **E5.1** | Regresión del catálogo y verificación de atomicidad de Pedidos | Soporte de verificación de [Ejercicio 1.c](consigna.md), HU-07 y RN-15/RN-16; regresión de [Ejercicio 1.d](consigna.md). | E2.5, E3.3, E4.3 | `unidad8_backend/tests/test_productos_http.py` (existente, sin cambios), `unidad8_backend/pedidos.http` | Regresión, HU-07, RN-15..16 | `pnpm test:back` pasa al 100%; el caso 404 de `pedidos.http` con un primer detalle válido no deja pedido persistido. Sin archivos de test nuevos. | ⏳ **Pendiente** |
 | **E5.2** | Demostración integral E2E Full Stack | Evidencia de [Ejercicio 1.c–e](consigna.md), [Ejercicio 2.a–c](consigna.md) y [Conclusiones esperadas](consigna.md). | E5.1 | Todo el sistema (Frontend Vite + Backend FastAPI) | Aceptación TP8, HU-01..07 | Verificación en vivo de flujos de catálogo, formularios, tablas, pedidos REST y persistencia en base de pruebas aislada. | ⏳ **Pendiente** |
 | **E5.3** | Auditoría final contra rúbrica de consigna | [Criterios de evaluación (los ocho, 100 puntos)](consigna.md) y [Formato de entrega](consigna.md); cotejo. | E5.2 | Rúbrica oficial (100 pts) y checklist de entrega | Rúbrica académica | Cotejo formal de los 8 criterios de evaluación contra evidencia real. Validación de checklist de exclusión de guidelines en ZIPs. | ⏳ **Pendiente** |
 
@@ -248,7 +248,7 @@ graph TD
 * **Archivos y símbolos críticos:** `docs/resolucion_tp8.md`, `README.md`, `unidad8_backend/README.md`, `unidad8_frontend/README.md`, 24 archivos de backend y 20 archivos de frontend intervenidos en comentarios.
 * **Consigna resuelta / soporte:** Soporte local: resolución y documentación; sin inciso académico obligatorio propio.
 * **HU / RN:** Documentación técnica, trazabilidad académica y procedencia histórica.
-* **Criterio de aceptación verificable:** Tablero con 19 tareas únicas vinculadas a consigna; exclusión expresa de `guidelines/` normada en §1 y §8.4; ausencia de nomenclatura `F` en documentos de planificación; procedencia del TP7 rotulada en comentarios/docstrings preservando descripciones OpenAPI en `schemas.py`; sincronización coherente de los tres READMEs.
+* **Criterio de aceptación verificable:** Tablero con 19 tareas únicas vinculadas a consigna; exclusión expresa de `guidelines/` normada en Sección 1 y Sección 8.4; ausencia de nomenclatura `F` en documentos de planificación; procedencia del TP7 rotulada en comentarios/docstrings preservando descripciones OpenAPI en `schemas.py`; sincronización coherente de los tres READMEs.
 * **Verificación rápida prevista / ejecutada:** Verificación de igualdad de AST en Python descartando docstrings; comprobación de que en TSX/CSS/HTTP solo se agregaron comentarios; validación `grep` de ausencia de `F` operativo; resolución de enlaces Markdown locales en memoria; ejecución de `pnpm build:front` y `pnpm test:back`.
 
 ---
@@ -276,16 +276,15 @@ graph TD
 * **Verificación rápida prevista:** Comprobación de tipos con compilador TypeScript (`pnpm typecheck` o `tsc -b`) confirmando compatibilidad con los tipos existentes sin errores de compilación.  
   *Implementación y verificación: no realizadas; evidencia pendiente.*
 
-##### Ficha E1.2: Implementación de helper `fetchAllPages` para carga tabular
-* **Acción:** Implementación de la función utilitaria `fetchAllPages` en `unidad8_frontend/src/services/pagination.ts` para acumular secuencialmente todas las páginas de un endpoint del catálogo y entregar un array plano a TanStack Table.
-* **Estado:** Pendiente.
-* **Dependencias:** E1.3 (consume los contratos y tipos del catálogo).
-* **Archivos y símbolos críticos:** `unidad8_frontend/src/services/pagination.ts`.
-* **Consigna resuelta / soporte:** Soporte local para [Ejercicio 2.a Páginas](consigna.md) y HU-01/HU-05/HU-06: reunir datos para orden/paginación locales. El helper no está impuesto literalmente por la consigna.
-* **HU / RN:** HU-01, HU-05, HU-06; soporte a los requisitos de ordenamiento y filtrado global sobre la colección total.
-* **Criterio de aceptación verificable:** Paginación determinista en bucle que acumula lotes respetando el contrato `{ total, items }`; detención ante colección completa; fallo rápido con excepción explícita si la API devuelve un lote vacío prematuro o si el total muta durante la recolección, evitando colecciones parciales corruptas.
-* **Verificación rápida prevista:** Prueba unitaria o throwaway con 3 escenarios: 1) `total=0, items=[]` retorna `[]`; 2) 101 filas simuladas en dos lotes retornan el conjunto íntegro de 101 elementos; 3) lote vacío prematuro o total cambiante arroja error inmediato sin devolver datos parciales.  
-  *Implementación y verificación: no realizadas; evidencia pendiente.*
+##### Ficha E1.2: Carga tabular directa sin helper de paginación
+* **Acción:** Decisión de diseño: no crear un helper de acumulación de lotes. Cada página (`CategoriasPage`, `ProductsPage`, `IngredientesPage`) llama a su servicio con `offset=0` y `limit=100` mediante `useQuery` y pasa `data.items` a `useReactTable`, como indica la consigna. Se retiran `unidad8_frontend/src/services/pagination.ts` y su re-export en `src/services/index.ts`, creados antes y no exigidos por `docs/consigna.md`.
+* **Estado:** Completada (verificada).
+* **Dependencias:** E1.1.
+* **Archivos y símbolos críticos:** Ningún archivo nuevo. Retirados: `unidad8_frontend/src/services/pagination.ts` y la línea de export en `unidad8_frontend/src/services/index.ts`.
+* **Consigna resuelta / soporte:** [Ejercicio 2.a Páginas](consigna.md) y HU-01/HU-05/HU-06: `useQuery` + TanStack Table con `getSortedRowModel` y `getPaginationRowModel` sobre los datos cargados. La consigna no pide un helper de paginación.
+* **HU / RN:** HU-01, HU-05, HU-06.
+* **Criterio de aceptación verificable:** La búsqueda de `fetchAllPages` y `pagination.ts` en el repositorio (sin `node_modules` ni `dist`) no arroja coincidencias; `pnpm run build:front` compila. El contrato de carga queda documentado en las Secciones 3.3 y 6.3. Límite conocido: `limit` máximo 100 del backend (`le=100`), por lo que cada tabla muestra hasta 100 registros por entidad.
+* **Verificación rápida prevista / ejecutada:** Archivo y export retirados; `grep` sin coincidencias; `pnpm run build:front` finalizado con código 0.
 
 ---
 
@@ -299,7 +298,7 @@ graph TD
 * **Consigna resuelta / soporte:** [Ejercicio 1.b, Definición de models y schemas de Pedido y DetallePedido](consigna.md).
 * **HU / RN:** HU-07, RN-12, RN-14.
 * **Criterio de aceptación verificable:** Tablas `pedido` y `detalle_pedido` mapeadas; clave primaria compuesta `(pedido_id, producto_id)` en detalle; atributos requeridos presentes (`total`, `estado`, `fecha`, `cantidad`, `precio_unitario`); schemas Pydantic que validan al menos un detalle (`min_items=1`), cantidad entera >= 1 por ítem y unicidad de `producto_id` dentro del pedido.
-* **Verificación rápida prevista:** Suite de pruebas unitarias de validación Pydantic: rechazo de payload con lista de detalles vacía (HTTP 422), rechazo de `producto_id` duplicados en el mismo pedido, rechazo de cantidad 0 y aceptación de cantidad 1 o superior.  
+* **Verificación rápida prevista:** Verificación throwaway (script fuera del repositorio, sin agregar archivos de test) de validación Pydantic: rechazo de payload con lista de detalles vacía (HTTP 422), rechazo de `producto_id` duplicados en el mismo pedido, rechazo de cantidad 0 y aceptación de cantidad 1 o superior.  
   *Implementación y verificación: no realizadas; evidencia pendiente.*
 
 ##### Ficha E2.2: Repositorios base y Unit of Work transaccional
@@ -310,7 +309,7 @@ graph TD
 * **Consigna resuelta / soporte:** [Ejercicio 1.c, Repository y Unit of Work](consigna.md).
 * **HU / RN:** HU-07, RN-15, RN-16.
 * **Criterio de aceptación verificable:** `PedidoUnitOfWork` es dueño de una sesión única (`Session(engine)`); expone `PedidoRepository` y `ProductoRepository` (lectura); orquesta repositorios con `add()` y `flush()`; ejecuta `commit()` solo al finalizar con éxito; garantiza `rollback()` en bloque `except` y cierre de sesión en `finally`.
-* **Verificación rápida prevista:** Test automatizado de aislamiento: inserción de cabecera con `flush()`, simulación de excepción en el segundo detalle y verificación mediante nueva sesión de que no se persistió ninguna fila en `pedido` ni en `detalle_pedido`.  
+* **Verificación rápida prevista:** Verificación throwaway (script fuera del repositorio) de aislamiento: inserción de cabecera con `flush()`, simulación de excepción en el segundo detalle y verificación mediante nueva sesión de que no se persistió ninguna fila en `pedido` ni en `detalle_pedido`.  
   *Implementación y verificación: no realizadas; evidencia pendiente.*
 
 ##### Ficha E2.3: Capa de servicio de Pedidos y orquestación
@@ -332,7 +331,7 @@ graph TD
 * **Consigna resuelta / soporte:** [Ejercicio 1.c, Router y cinco endpoints](consigna.md); [Ejercicio 1.e](consigna.md) para integración/ejecución y CORS conservado.
 * **HU / RN:** HU-07, RN-13, RN-16.
 * **Criterio de aceptación verificable:** Endpoints `GET /pedidos/` (200), `GET /pedidos/{id}` (200/404), `POST /pedidos/` (201/404/422), `PUT /pedidos/{id}` (200/404/422) y `DELETE /pedidos/{id}` (204/404). Traducción limpia de excepciones de dominio a códigos HTTP estándar. Tablas creadas en el arranque e integración con CORS verificada.
-* **Verificación rápida prevista:** Smoke test con `TestClient`: llamada a `POST` retorna 201, `GET /{id}` retorna 200 con detalles, `PUT` modifica estado a `CONFIRMADO`, `DELETE` retorna 204 y posterior `GET /{id}` retorna 404.  
+* **Verificación rápida prevista:** Smoke test throwaway con `TestClient` (script fuera del repositorio): llamada a `POST` retorna 201, `GET /{id}` retorna 200 con detalles, `PUT` modifica estado a `CONFIRMADO`, `DELETE` retorna 204 y posterior `GET /{id}` retorna 404.  
   *Implementación y verificación: no realizadas; evidencia pendiente.*
 
 ##### Ficha E2.5: Suite REST Client de Pedidos (`pedidos.http`)
@@ -357,7 +356,7 @@ graph TD
 * **Archivos y símbolos críticos:** `unidad8_frontend/src/pages/CategoriasPage.tsx`, `src/components/CategoriaModal.tsx`, `src/components/CategoriaList.tsx`, `src/components/CategoriaCard.tsx`.
 * **Consigna resuelta / soporte:** [Ejercicio 2.a, CategoriasPage](consigna.md): hooks, lista, modal y botón; HU-01..HU-04.
 * **HU / RN:** HU-01, HU-02, HU-03, HU-04, RN-01 a RN-05.
-* **Criterio de aceptación verificable:** `CategoriasPage` integra `useReactTable` sobre datos de `fetchAllPages` soportando ordenamiento por columnas (nombre, descripción) y paginación local; modal controlado por `useState` que gestiona formulario con `useForm`; validación de nombre obligatorio tras trim; botón de envío bloqueado durante submit; error 409 muestra mensaje en modal sin cerrarlo ni perder datos; confirmación previa al eliminar; ruta operativa actualizada.
+* **Criterio de aceptación verificable:** `CategoriasPage` integra `useReactTable` sobre `data.items` obtenido con `limit=100` soportando ordenamiento por columnas (nombre, descripción) y paginación local; modal controlado por `useState` que gestiona formulario con `useForm`; validación de nombre obligatorio tras trim; botón de envío bloqueado durante submit; error 409 muestra mensaje en modal sin cerrarlo ni perder datos; confirmación previa al eliminar; ruta operativa actualizada.
 * **Verificación rápida prevista:** Categorías ordenables por nombre y descripción en la tabla dinámica; modal de creación rechaza campo vacío al blur/submit y cierra tras mutación exitosa; edición precarga valores; baja pide confirmación.  
   *Implementación y verificación: no realizadas; evidencia pendiente.*
 
@@ -372,14 +371,14 @@ graph TD
 * **Verificación rápida prevista:** Guardado de producto con precio base 0 aceptado; precio negativo bloqueado en formulario; tabla permite ordenar y paginar; navegación hacia `/productos/:id` conserva la ficha de detalle sin alteraciones.  
   *Implementación y verificación: no realizadas; evidencia pendiente.*
 
-##### Ficha E3.3: Componentes comunes de UI y accesibilidad
-* **Acción:** Extracción de componentes comunes de presentación para estados asíncronos (`LoadingState`, `EmptyState`, `ErrorState`) y campos de formulario accesibles (`FormField`), consolidando patrones ya utilizados en Categorías y Productos.
+##### Ficha E3.3: Componentes comunes de estados de carga, vacío y error
+* **Acción:** Extracción de componentes comunes de presentación para los estados asíncronos (`LoadingState`, `EmptyState`, `ErrorState`), consolidando patrones ya utilizados en Categorías y Productos.
 * **Estado:** Pendiente.
 * **Dependencias:** E3.1, E3.2 (extrae patrones ya repetidos en lugar de abstracciones preventivas tempranas).
-* **Archivos y símbolos críticos:** `unidad8_frontend/src/components/ui/LoadingState.tsx`, `EmptyState.tsx`, `ErrorState.tsx`, `FormField.tsx`.
-* **Consigna resuelta / soporte:** [HU-01](consigna.md), componentes reutilizables de carga/vacío/error; [Conclusiones esperadas, Hooks aplicados correctamente](consigna.md); rúbrica [Estructura y buenas prácticas](consigna.md). No presentar nombres concretos de componentes como imposición académica.
+* **Archivos y símbolos críticos:** `unidad8_frontend/src/components/LoadingState.tsx`, `EmptyState.tsx`, `ErrorState.tsx`.
+* **Consigna resuelta / soporte:** [HU-01](consigna.md): los estados de carga, vacío y error se implementan como componentes reutilizables con Tailwind CSS; rúbrica [Estructura y buenas prácticas](consigna.md). Los nombres concretos no son una imposición académica; `FormField` y la subcarpeta `ui/` se descartan por no estar en la consigna.
 * **HU / RN:** Calidad visual, accesibilidad semántica, HU-01, HU-06.
-* **Criterio de aceptación verificable:** Componentes reutilizables con Tailwind CSS v4; `LoadingState` con skeletons no parpadeantes; `EmptyState` con mensaje informativo y acción sugerida; `ErrorState` con opción de reintento; refetch en segundo plano no desmonta la tabla visual; campos de formulario con etiquetas asociadas `htmlFor`/`id`.
+* **Criterio de aceptación verificable:** Componentes reutilizables con Tailwind CSS v4; `LoadingState` con skeletons no parpadeantes; `EmptyState` con mensaje informativo y acción sugerida; `ErrorState` con opción de reintento; refetch en segundo plano no desmonta la tabla visual. Las etiquetas `htmlFor`/`id` de los campos se resuelven directamente en cada modal.
 * **Verificación rápida prevista:** Renderizado y reutilización de estados de carga, vacío y error en Categorías y Productos sin retirar datos visuales ante fallo de refetch en segundo plano.  
   *Implementación y verificación: no realizadas; evidencia pendiente.*
 
@@ -387,14 +386,14 @@ graph TD
 
 #### Épica 4: Ingredientes Frontend
 
-##### Ficha E4.1: Capa de servicios HTTP de Ingredientes y Unidades
-* **Acción:** Implementación de los servicios HTTP tipados para la gestión de ingredientes y la lectura del catálogo inmutable de unidades de medida.
+##### Ficha E4.1: Capa de servicios HTTP de Ingredientes
+* **Acción:** Implementación del servicio HTTP tipado de ingredientes y de la función `getUnidadesMedida` (lectura del catálogo inmutable), ambos en `ingredientes.service.ts`.
 * **Estado:** Pendiente.
 * **Dependencias:** E1.2.
-* **Archivos y símbolos críticos:** `unidad8_frontend/src/services/ingredientes.service.ts`, `src/services/unidades.service.ts`.
-* **Consigna resuelta / soporte:** Soporte de consumo para [Ejercicio 1.d](consigna.md) y [Ejercicio 2.a IngredientesPage](consigna.md); unidades de medida es contrato ampliado heredado del TP7, no obligación del modelo mínimo.
+* **Archivos y símbolos críticos:** `unidad8_frontend/src/services/ingredientes.service.ts`.
+* **Consigna resuelta / soporte:** Soporte de consumo para [Ejercicio 1.d](consigna.md) y [Ejercicio 2.a IngredientesPage](consigna.md). `getUnidadesMedida` no tiene archivo propio: el backend heredado exige `unidad_medida_id` (`gt=0`) en `IngredienteCreate`, por lo que el alta necesita leer `/unidades-medida/`.
 * **HU / RN:** HU-05.
-* **Criterio de aceptación verificable:** Funciones tipadas para consultar listado, detalle, crear, actualizar y eliminar ingredientes; función para consultar unidades de medida; manejo estricto de errores con `if (!res.ok) throw new Error(...)`; integración con `fetchAllPages`.
+* **Criterio de aceptación verificable:** Funciones tipadas para consultar listado (`offset=0`, `limit=100`), detalle, crear, actualizar y eliminar ingredientes; `getUnidadesMedida`; manejo estricto de errores con `if (!res.ok) throw new Error(...)`.
 * **Verificación rápida prevista:** Consulta real tipada de ingredientes y unidades; comprobación de que el error 404/409 arroja `Error` capturable por TanStack Query.  
   *Implementación y verificación: no realizadas; evidencia pendiente.*
 
@@ -424,15 +423,15 @@ graph TD
 
 #### Épica 5: Aceptación y Evidencia Integral
 
-##### Ficha E5.1: Pruebas automatizadas de integración y regresión
-* **Acción:** Implementación y ejecución de la suite de pruebas automatizadas en `unidad8_backend/tests/` cubriendo la atomicidad del UoW en SQLite en memoria y la no regresión del catálogo heredado.
+##### Ficha E5.1: Regresión del catálogo y verificación de atomicidad de Pedidos
+* **Acción:** Ejecución de la suite heredada `unidad8_backend/tests/test_productos_http.py` y verificación de la atomicidad del alta de pedidos con `pedidos.http`, sin crear archivos de test nuevos.
 * **Estado:** Pendiente.
 * **Dependencias:** E2.5, E3.3, E4.3.
-* **Archivos y símbolos críticos:** `unidad8_backend/tests/test_pedidos_uow.py`, `unidad8_backend/tests/test_productos_http.py`.
-* **Consigna resuelta / soporte:** Soporte de verificación de [Ejercicio 1.c](consigna.md), HU-07 y RN-15/RN-16; regresión de [Ejercicio 1.d](consigna.md). La suite automatizada es decisión técnica local.
+* **Archivos y símbolos críticos:** `unidad8_backend/tests/test_productos_http.py` (existente) y `unidad8_backend/pedidos.http`.
+* **Consigna resuelta / soporte:** Soporte de verificación de [Ejercicio 1.c](consigna.md), HU-07 y RN-15/RN-16; regresión de [Ejercicio 1.d](consigna.md). La consigna demuestra el backend con `pedidos.http`; no pide una suite automatizada nueva.
 * **HU / RN:** HU-07, RN-15, RN-16, regresión de catálogo.
-* **Criterio de aceptación verificable:** Tests automatizados que validan rollback completo de transacción ante excepciones en creación de pedido; comprobación de que el fallo de commit no persiste cabecera ni detalles; paso al 100% de la suite de regresión del catálogo heredado.
-* **Verificación rápida prevista:** Ejecución de `pytest` con reporte de rollback efectivo, fallo forzado de commit y paso al 100% de la suite de regresión del catálogo.  
+* **Criterio de aceptación verificable:** `pnpm test:back` pasa al 100% sobre el catálogo heredado; `POST /pedidos` con un primer detalle válido y un segundo `producto_id` inexistente responde 404 y `GET /pedidos` conserva la misma cantidad de pedidos que antes de la llamada (sin cabecera huérfana).
+* **Verificación rápida prevista:** Ejecución de `pnpm test:back` y del caso de atomicidad de `pedidos.http`, comparando el total de `GET /pedidos` antes y después.  
   *Implementación y verificación: no realizadas; evidencia pendiente.*
 
 ##### Ficha E5.2: Demostración integral E2E Full Stack
@@ -482,8 +481,8 @@ Estos escenarios representan las pruebas de comportamiento que deberán validars
   Envío de un pedido con un primer detalle válido y un segundo detalle que referencia un `producto_id` inexistente. Comprobación de respuesta HTTP 404 y verificación directa en la base de datos de que la transacción se revirtió por completo: no existe cabecera en `pedido` ni registro en `detalle_pedido`.
 * **Escenario de Validación de Formulario y Modal Resiliente:**  
   Intento de guardar un producto con precio negativo o nombre en blanco; validación en campo con bloqueo del submit. Provocación de un error 409 intencional; confirmación de que el modal permanece visible, no pierde los datos tipados y muestra el mensaje descriptivo del servidor.
-* **Escenario de Tabla Dinámica con Conjunto Completo:**  
-  Carga de más de 100 registros en categorías; comprobación de que el ordenamiento por nombre o descripción considera a todos los ítems del sistema y no únicamente a los 10 renderizados en la página visible. Comprobación de que la paginación avanza y retrocede limpiamente y resetea la página actual al aplicar un filtro.
+* **Escenario de Tabla Dinámica sobre la Colección Cargada:**  
+  Carga de al menos 25 registros en categorías (más que los 10 de una página visible); comprobación de que el ordenamiento por nombre o descripción considera todos los registros cargados (hasta el máximo de 100 por consulta del backend) y no únicamente los 10 renderizados en la página visible. Comprobación de que la paginación avanza y retrocede limpiamente y resetea la página actual al aplicar un filtro.
 * **Escenario de Accesibilidad y Operación por Teclado:**  
   Navegación completa por tabulación en modales y tablas, verificación de atributos `aria-sort`, etiquetas asociadas `htmlFor`/`id` en todos los inputs y cierre de diálogos mediante tecla `Escape`.
 
