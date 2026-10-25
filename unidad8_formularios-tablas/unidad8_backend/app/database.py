@@ -58,6 +58,7 @@ def create_db_and_tables():
     from app.models.categoria import Categoria  # noqa: F401
     from app.models.unidad_medida import UnidadMedida  # noqa: F401
     from app.models.ingrediente import Ingrediente  # noqa: F401
+    from app.modules.pedidos.models import DetallePedido, Pedido  # noqa: F401
 
     SQLModel.metadata.create_all(engine)
 

@@ -19,6 +19,13 @@ from app.modules.pedidos.schemas import (
     PedidoUpdate,
 )
 from app.modules.pedidos.unit_of_work import PedidoUnitOfWork
+from app.modules.pedidos.service import (
+    DetalleInvalidoError,
+    PedidoNoEncontrado,
+    PedidoService,
+    ProductoNoEncontrado,
+)
+from app.modules.pedidos.router import get_pedido_service, router
 
 __all__ = [
     "Pedido",
@@ -33,4 +40,10 @@ __all__ = [
     "DetallePedidoRepository",
     "ProductoRepository",
     "PedidoUnitOfWork",
+    "PedidoService",
+    "PedidoNoEncontrado",
+    "ProductoNoEncontrado",
+    "DetalleInvalidoError",
+    "router",
+    "get_pedido_service",
 ]

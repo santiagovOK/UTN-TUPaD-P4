@@ -16,6 +16,7 @@ from app.modules.categoria.routers import router as categoria_router
 from app.modules.ingrediente.routers import router as ingrediente_router
 from app.modules.producto.routers import router as producto_router
 from app.modules.unidad_medida.routers import router as unidad_medida_router
+from app.modules.pedidos.router import router as pedidos_router
 from app.seed import seed_unidades_medida
 
 from sqlalchemy import text
@@ -24,7 +25,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Ciclo de vida de la aplicación.
 
     Garantiza la materialización inicial de las tablas en la base de datos
-    (CATEGORIA, PRODUCTO, INGREDIENTE, UNIDAD_MEDIDA y tablas asociativas)
+    (catálogo, tablas asociativas y agregado transaccional de Pedidos)
     al iniciar el servidor antes de recibir peticiones.
     """
     create_db_and_tables()
@@ -37,8 +38,9 @@ app = FastAPI(
     title="Food Store API — Unidad 8",
     description=(
         "API REST modular optimizada para el catálogo de alimentos (Categorías, "
-        "Productos, Ingredientes y Unidades de Medida) con persistencia SQLModel, "
-        "paginación, filtros dinámicos y soporte CORS para frontend React."
+        "Productos, Ingredientes y Unidades de Medida) y gestión transaccional de "
+        "Pedidos con persistencia SQLModel, paginación, filtros dinámicos y soporte "
+        "CORS para frontend React."
     ),
     version="1.0.0",
     lifespan=lifespan,
@@ -63,6 +65,7 @@ app.include_router(categoria_router)
 app.include_router(producto_router)
 app.include_router(unidad_medida_router)
 app.include_router(ingrediente_router)
+app.include_router(pedidos_router)
 
 
 @app.get("/", tags=["Health"], summary="Comprobación de salud de la API")
