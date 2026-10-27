@@ -30,7 +30,7 @@ El frontend continúa la arquitectura desacoplada del catálogo e incorpora la p
 - **TypeScript (~5.7):** Tipado estático riguroso para interfaces de dominio (`Categoria`, `Producto`, `Ingrediente`), props de componentes y contratos de API.
 - **Tailwind CSS v4:** Motor de estilos utilitarios integrado nativamente a través de `@tailwindcss/vite`.
 - **Vite 6:** Bundler ultrarrápido con soporte de Hot Module Replacement (HMR).
-- **⏳ TanStack Form & TanStack Table v8:** Librerías normativas planificadas para las Épicas 1 y 3.
+- **TanStack Form & TanStack Table v8:** Librerías normativas integradas para validación y gestión de formularios y tablas interactivas (instaladas en E1.1, adaptadas en E3.1 y E3.2).
 
 ---
 
@@ -102,7 +102,7 @@ Ejecuta `tsc -b` (verificación de tipos de extremo a extremo sin emitir código
 |---|---|---|---|
 | `/` | `CategoriasPage` | ✅ Operativo con TanStack Table v8 y TanStack Form | Migración completada en tarea E3.1 |
 | `/categorias` | `CategoriasPage` | ✅ Operativo con TanStack Table v8 y TanStack Form | Migración completada en tarea E3.1 |
-| `/productos` | `ProductsPage` | Operativo con CRUD y modal | Migración a TanStack Table + TanStack Form (tarea E3.2) |
+| `/productos` | `ProductsPage` | ✅ Operativo con TanStack Table v8 y TanStack Form | Migración completada en tarea E3.2 |
 | `/productos/:id` | `ProductDetailPage` | Operativo con ficha y detalle | Preservar navegación e ingredientes hidratados |
 | `/ingredientes` | `IngredientesPage` | ⏳ No implementado | Creación completa de página CRUD, tabla y modal (tarea E4.2) |
 

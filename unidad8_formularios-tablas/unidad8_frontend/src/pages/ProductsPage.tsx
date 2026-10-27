@@ -1,17 +1,26 @@
 // Base heredada del TP7; identidad y documentación adaptadas al TP8.
-// [Catálogo Paginado de Productos]:
-//   - Client State con useState para paginación reactiva (page base 1) y búsqueda incremental por nombre.
-//   - Server State con TanStack Query (useQuery) con clave compuesta ['productos', { offset, limit, nombre }].
-//   - Server State vs Client State: Cero duplicación de data?.items en useState locales; renderizado declarativo.
-//   - Navegación programática hacia el detalle individual con useNavigate (/productos/:id).
-//   - Accesibilidad: Landmark <nav> para paginador, regiones vivas (role status/alert), <article> por tarjeta,
-//     listas semánticas (<ul>/<li>) y estilos de foco por teclado (focus-visible).
-// [Diagrama UML - Clúster Catálogo de Productos (docs/UML_FOOD_STORE.svg)]:
-//   - Visualización de atributos: nombre, descripción, precio_base formateado, disponibilidad y badges N:N de categorías.
+// [Catálogo Paginado de Productos con TanStack Query, TanStack Table v8 y TanStack Form v1]:
+//   - ProductsPage actúa como orquestadora central y propietaria exclusiva de los hooks
+//     (useQuery, useMutation, useForm, useReactTable, useState).
+//   - Carga inicial completa (offset=0, limit=100) para ordenamiento, filtrado y paginación en memoria.
+//   - ProductoModal es un componente presentacional puro conectado a ProductoFormApi.
+//   - Preservación de la navegación hacia el detalle individual (/productos/:id).
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+  type PaginationState,
+  type SortingState,
+} from '@tanstack/react-table';
+import { useForm } from '@tanstack/react-form';
 import {
   getProductos,
   createProducto,
@@ -20,39 +29,60 @@ import {
 } from '../services/productos.service';
 import { getCategorias } from '../services/categorias.service';
 import { ProductoModal } from '../components/ProductoModal';
-import type { Producto, ProductoCreate, ProductoUpdate } from '../types/producto';
-export const PAGE_SIZE = 6;
+import type {
+  Producto,
+  ProductoCreate,
+  ProductoUpdate,
+  ProductoFormValues,
+} from '../types/producto';
+import type { Categoria } from '../types/categoria';
+
+const EMPTY_PRODUCTOS: Producto[] = [];
+const EMPTY_CATEGORIAS: Categoria[] = [];
+
+const DEFAULT_PRODUCTO_FORM_VALUES: ProductoFormValues = {
+  nombre: '',
+  descripcion: '',
+  precio_base: '',
+  disponible: true,
+  categoria_ids: [],
+};
+
+const columnHelper = createColumnHelper<Producto>();
 
 export function ProductsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Client State
-  const [page, setPage] = useState<number>(1);
-  const [nombre, setNombre] = useState<string>('');
+  // Estado local UI y tabla
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingProducto, setEditingProducto] = useState<Producto | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [globalFilter, setGlobalFilter] = useState<string>('');
 
-  // Cálculo de desplazamiento
-  const offset = (page - 1) * PAGE_SIZE;
-
-  // Server State con TanStack Query (Sin useState intermedio para datos del servidor)
-  const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['productos', { offset, limit: PAGE_SIZE, nombre }],
-    queryFn: () => getProductos(offset, PAGE_SIZE, nombre),
+  // Lectura declarativa con TanStack Query (carga catálogo completo hasta limit=100)
+  const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
+    queryKey: ['productos'],
+    queryFn: () => getProductos(0, 100),
   });
 
+  const productos = data?.items ?? EMPTY_PRODUCTOS;
+
+  // Consulta de categorías disponibles para el modal
   const categoriasQuery = useQuery({
-    queryKey: ['categorias', { search: '' }],
+    queryKey: ['categorias'],
     queryFn: () => getCategorias(0, 100),
   });
 
-  const total = data?.total ?? 0;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const items: Producto[] = data?.items ?? [];
+  const categoriasDisponibles =
+    categoriasQuery.data?.items ?? EMPTY_CATEGORIAS;
 
-  // Mutaciones CRUD
+  // Mutación de Alta
   const createMutation = useMutation({
     mutationFn: (values: ProductoCreate) => createProducto(values),
     onSuccess: () => {
@@ -62,6 +92,7 @@ export function ProductsPage() {
     },
   });
 
+  // Mutación de Modificación (PUT /productos/{id})
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: ProductoUpdate }) =>
       updateProducto({ id, data }),
@@ -73,363 +104,701 @@ export function ProductsPage() {
     },
   });
 
+  // Mutación de Baja (DELETE /productos/{id})
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteProducto(id),
     onSuccess: () => {
       setDeleteError(null);
       queryClient.invalidateQueries({ queryKey: ['productos'] });
       queryClient.invalidateQueries({ queryKey: ['categorias'] });
-      if (items.length <= 1 && page > 1) {
-        setPage((prev) => Math.max(1, prev - 1));
-      }
     },
     onError: (err: Error) => {
-      setDeleteError(err.message || 'No se pudo eliminar el producto');
+      setDeleteError(
+        err.message || 'No se pudo eliminar el producto del catálogo.'
+      );
     },
   });
 
-  const handleOpenCreate = () => {
+  // Instancia de formulario con TanStack Form v1
+  const form = useForm({
+    defaultValues: {
+      nombre: editingProducto?.nombre ?? '',
+      descripcion: editingProducto?.descripcion ?? '',
+      precio_base: editingProducto ? String(editingProducto.precio_base) : '',
+      disponible: editingProducto?.disponible ?? true,
+      categoria_ids: editingProducto?.categorias?.map((c) => c.id) ?? [],
+    },
+    onSubmit: async ({ value }) => {
+      const trimmedNombre = value.nombre.trim();
+      const trimmedDescripcion = value.descripcion.trim();
+      const parsedPrecio = Number(value.precio_base.trim());
+
+      createMutation.reset();
+      updateMutation.reset();
+
+      try {
+        if (editingProducto !== null) {
+          await updateMutation.mutateAsync({
+            id: editingProducto.id,
+            data: {
+              nombre: trimmedNombre,
+              descripcion: trimmedDescripcion || null,
+              precio_base: parsedPrecio,
+              disponible: value.disponible,
+              categoria_ids: value.categoria_ids,
+            },
+          });
+        } else {
+          await createMutation.mutateAsync({
+            nombre: trimmedNombre,
+            descripcion: trimmedDescripcion || null,
+            precio_base: parsedPrecio,
+            disponible: value.disponible,
+            categoria_ids: value.categoria_ids,
+          });
+        }
+      } catch {
+        // Error de backend preservado en mutation.error, el modal permanece abierto con datos intactos
+      }
+    },
+  });
+
+  // Controladores del ciclo de vida del modal
+  const handleOpenCreate = useCallback(() => {
     setEditingProducto(null);
     createMutation.reset();
     updateMutation.reset();
+    form.reset(DEFAULT_PRODUCTO_FORM_VALUES);
     setIsModalOpen(true);
-  };
+  }, [createMutation, updateMutation, form]);
 
-  const handleOpenEdit = (prod: Producto) => {
-    setEditingProducto(prod);
-    createMutation.reset();
-    updateMutation.reset();
-    setIsModalOpen(true);
-  };
+  const handleOpenEdit = useCallback(
+    (producto: Producto) => {
+      setEditingProducto(producto);
+      createMutation.reset();
+      updateMutation.reset();
+      form.reset({
+        nombre: producto.nombre,
+        descripcion: producto.descripcion ?? '',
+        precio_base: String(producto.precio_base),
+        disponible: producto.disponible,
+        categoria_ids: producto.categorias?.map((c) => c.id) ?? [],
+      });
+      setIsModalOpen(true);
+    },
+    [createMutation, updateMutation, form]
+  );
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setEditingProducto(null);
     createMutation.reset();
     updateMutation.reset();
-  };
+    form.reset(DEFAULT_PRODUCTO_FORM_VALUES);
+  }, [createMutation, updateMutation, form]);
 
-  const handleModalSubmit = (values: ProductoCreate) => {
-    if (editingProducto !== null) {
-      updateMutation.mutate({ id: editingProducto.id, data: values });
-    } else {
-      createMutation.mutate(values);
-    }
-  };
+  const handleDelete = useCallback(
+    (producto: Producto) => {
+      if (
+        window.confirm(
+          `¿Está seguro de que desea eliminar el producto "${producto.nombre}"?`
+        )
+      ) {
+        setDeleteError(null);
+        deleteMutation.mutate(producto.id);
+      }
+    },
+    [deleteMutation]
+  );
 
-  const handleDelete = (prod: Producto) => {
-    if (window.confirm(`¿Está seguro de que desea eliminar el producto "${prod.nombre}"?`)) {
-      setDeleteError(null);
-      deleteMutation.mutate(prod.id);
-    }
-  };
+  const handleClearFilter = useCallback(() => {
+    setGlobalFilter('');
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  }, []);
+
+  // Bloqueo de scroll de fondo y atajo Escape accesible
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === 'Escape' &&
+        !createMutation.isPending &&
+        !updateMutation.isPending
+      ) {
+        handleCloseModal();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [
+    isModalOpen,
+    createMutation.isPending,
+    updateMutation.isPending,
+    handleCloseModal,
+  ]);
+
+  // Definición de columnas para TanStack Table
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor('id', {
+        header: 'NÚMERO',
+        cell: (info) => `#${info.getValue()}`,
+      }),
+      columnHelper.accessor('nombre', {
+        header: 'NOMBRE',
+        cell: (info) => (
+          <span className="font-medium text-slate-900">{info.getValue()}</span>
+        ),
+      }),
+      columnHelper.accessor('descripcion', {
+        header: 'DESCRIPCIÓN',
+        cell: (info) => {
+          const desc = info.getValue();
+          return desc ? (
+            <span className="line-clamp-2">{desc}</span>
+          ) : (
+            <span className="text-slate-400 italic">Sin descripción</span>
+          );
+        },
+      }),
+      columnHelper.accessor('precio_base', {
+        header: 'PRECIO BASE',
+        cell: (info) => {
+          const val = Number(info.getValue());
+          const formatted = val.toFixed(2);
+          return (
+            <span
+              className="font-semibold text-emerald-600"
+              aria-label={`Precio base: $${formatted}`}
+            >
+              ${formatted}
+            </span>
+          );
+        },
+      }),
+      columnHelper.accessor('disponible', {
+        header: 'ESTADO',
+        cell: (info) => {
+          const disp = info.getValue();
+          return disp ? (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+              Disponible
+            </span>
+          ) : (
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+              No disponible
+            </span>
+          );
+        },
+      }),
+      columnHelper.accessor('categorias', {
+        header: 'CATEGORÍAS',
+        enableSorting: false,
+        cell: ({ row }) => {
+          const cats = row.original.categorias;
+          if (!cats || cats.length === 0) {
+            return (
+              <span className="text-slate-400 italic">Sin categorías</span>
+            );
+          }
+          return (
+            <ul
+              aria-label={`Categorías de ${row.original.nombre}`}
+              className="flex flex-wrap gap-1.5"
+            >
+              {cats.map((cat) => (
+                <li
+                  key={cat.id}
+                  className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700"
+                >
+                  {cat.nombre}
+                </li>
+              ))}
+            </ul>
+          );
+        },
+      }),
+      columnHelper.display({
+        id: 'acciones',
+        header: 'ACCIONES',
+        enableSorting: false,
+        cell: ({ row }) => (
+          <div className="inline-flex items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => navigate(`/productos/${row.original.id}`)}
+              aria-label={`Ver detalle del producto "${row.original.nombre}"`}
+              className="text-slate-600 hover:text-slate-900 font-medium transition-colors focus-visible:outline-none focus-visible:underline cursor-pointer"
+            >
+              Ver detalle
+            </button>
+            <button
+              type="button"
+              onClick={() => handleOpenEdit(row.original)}
+              aria-label={`Editar producto "${row.original.nombre}"`}
+              className="text-blue-600 hover:text-blue-800 font-medium transition-colors focus-visible:outline-none focus-visible:underline cursor-pointer"
+            >
+              Editar
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDelete(row.original)}
+              aria-label={`Eliminar producto "${row.original.nombre}"`}
+              className="text-rose-600 hover:text-rose-800 font-medium transition-colors focus-visible:outline-none focus-visible:underline cursor-pointer"
+            >
+              Eliminar
+            </button>
+          </div>
+        ),
+      }),
+    ],
+    [navigate, handleOpenEdit, handleDelete]
+  );
+
+  // Instancia de tabla TanStack Table v8
+  const table = useReactTable({
+    data: productos,
+    columns,
+    getRowId: (row) => String(row.id),
+    state: {
+      sorting,
+      pagination,
+      globalFilter,
+    },
+    onSortingChange: setSorting,
+    onPaginationChange: setPagination,
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
 
   const activeModalError =
     createMutation.error?.message || updateMutation.error?.message || null;
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNombre(e.target.value);
-    setPage(1);
-  };
 
-  const handleClearSearch = () => {
-    setNombre('');
-    setPage(1);
-  };
-
-  const handlePrevPage = () => {
-    setPage((prev) => Math.max(1, prev - 1));
-  };
-
-  const handleNextPage = () => {
-    setPage((prev) => Math.min(totalPages, prev + 1));
-  };
+  const { pageIndex, pageSize } = table.getState().pagination;
+  const pageCount = table.getPageCount();
+  const rows = table.getRowModel().rows;
+  const filteredCount = table.getFilteredRowModel().rows.length;
 
   return (
     <div className="space-y-6">
-      {/* Encabezado y resumen del catálogo */}
+      {/* Encabezado y resumen */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Catálogo de Productos
-          </h1>
-          <p
-            className="text-sm text-slate-500 mt-1"
-            role="status"
-            aria-live="polite"
-          >
-            Mostrando {items.length} de {total} productos
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              Catálogo de Productos
+            </h1>
+            {isFetching && !isLoading && (
+              <span
+                role="status"
+                aria-live="polite"
+                className="inline-flex items-center gap-1.5 text-xs text-blue-600 font-medium"
+              >
+                <span
+                  className="inline-block w-2 h-2 rounded-full bg-blue-600 animate-ping"
+                  aria-hidden="true"
+                />
+                Actualizando catálogo...
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-slate-500 mt-1">
+            Total registrados: {data?.total ?? productos.length}
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleOpenCreate}
-          className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors cursor-pointer"
+          className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg shadow-xs transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
           + Nuevo Producto
         </button>
       </div>
 
-      {/* Alerta de error en eliminación */}
+      {/* Barra de herramientas / Búsqueda en memoria */}
+      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+        <div className="flex-1 max-w-md">
+          <label htmlFor="search-producto" className="sr-only">
+            Buscar producto por nombre o descripción
+          </label>
+          <div className="relative">
+            <input
+              type="search"
+              id="search-producto"
+              value={globalFilter}
+              onChange={(e) => {
+                setGlobalFilter(e.target.value);
+                setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+              }}
+              placeholder="Buscar producto por nombre o descripción..."
+              className="w-full pl-3.5 pr-10 py-2 border border-slate-300 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            />
+            {globalFilter && (
+              <button
+                type="button"
+                onClick={handleClearFilter}
+                aria-label="Limpiar búsqueda de productos"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600 font-medium px-1.5 py-0.5 rounded cursor-pointer"
+                title="Limpiar búsqueda"
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Feedback de error en eliminación */}
       {deleteError && (
         <div
           role="alert"
-          aria-live="assertive"
           className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm flex items-center justify-between"
         >
           <span>{deleteError}</span>
           <button
             type="button"
             onClick={() => setDeleteError(null)}
-            className="text-rose-600 hover:text-rose-800 font-medium ml-4 cursor-pointer"
+            aria-label="Descartar mensaje de error"
+            className="text-rose-600 hover:text-rose-800 font-medium text-xs ml-4 cursor-pointer"
           >
-            Cerrar
+            Descartar
           </button>
         </div>
       )}
-      {/* Barra de herramientas / Búsqueda */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
-        <label htmlFor="search-producto" className="sr-only">
-          Filtrar productos por nombre
-        </label>
-        <div className="relative flex items-center">
-          <input
-            type="search"
-            id="search-producto"
-            value={nombre}
-            onChange={handleSearchChange}
-            placeholder="Filtrar productos por nombre..."
-            className="w-full sm:max-w-md px-3.5 py-2 border border-slate-300 rounded-lg text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-          />
-          {nombre && (
-            <button
-              type="button"
-              onClick={handleClearSearch}
-              aria-label="Limpiar filtro de búsqueda"
-              className="ml-2 text-xs font-medium text-slate-500 hover:text-slate-800 underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded cursor-pointer"
-            >
-              Limpiar filtro
-            </button>
-          )}
-        </div>
-      </div>
 
-      {/* Estado de carga */}
-      {isLoading && (
+      {/* Aviso no destructivo si falla un refetch en segundo plano con datos previos */}
+      {isError && data !== undefined && (
         <div
           role="status"
           aria-live="polite"
-          className="flex justify-center items-center py-16 text-slate-500 text-sm bg-white rounded-xl border border-slate-100"
+          className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center justify-between"
         >
-          <span>Cargando productos...</span>
-        </div>
-      )}
-
-      {/* Estado de error */}
-      {isError && (
-        <div
-          role="alert"
-          aria-live="assertive"
-          className="p-8 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-center space-y-4"
-        >
-          <div>
-            <p className="font-semibold text-base">Error al cargar los productos</p>
-            <p className="text-sm text-rose-600 mt-1">
-              {(error as Error)?.message || 'Ocurrió un error inesperado al consultar el catálogo.'}
-            </p>
-          </div>
+          <span>
+            No se pudo sincronizar el catálogo en segundo plano:{' '}
+            {(error as Error)?.message || 'Error de conexión.'}
+          </span>
           <button
             type="button"
-            onClick={() => refetch()}
-            className="inline-flex items-center px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 cursor-pointer"
+            onClick={() => void refetch()}
+            className="text-amber-900 font-medium underline text-xs ml-4 cursor-pointer hover:text-amber-950"
           >
             Reintentar
           </button>
         </div>
       )}
 
-      {/* Estado vacío */}
-      {!isLoading && !isError && items.length === 0 && (
+      {/* Estado de carga inicial con Skeleton accesible */}
+      {isLoading && (
         <div
           role="status"
           aria-live="polite"
-          className="p-12 text-center bg-white rounded-xl border border-slate-200 space-y-3"
+          aria-busy="true"
+          className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 animate-pulse motion-reduce:animate-none"
         >
-          <p className="text-base font-medium text-slate-700">
-            No se encontraron productos coincidentes.
-          </p>
-          {nombre && (
-            <button
-              type="button"
-              onClick={handleClearSearch}
-              aria-label="Limpiar filtro de búsqueda"
-              className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded cursor-pointer"
-            >
-              Limpiar filtro de búsqueda
-            </button>
-          )}
+          <div className="flex justify-between items-center pb-4 border-b border-slate-100">
+            <div className="h-4 bg-slate-200 rounded w-1/4" />
+            <div className="h-4 bg-slate-200 rounded w-1/6" />
+          </div>
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-8 bg-slate-100 rounded" />
+            ))}
+          </div>
+          <span className="sr-only">Cargando productos...</span>
         </div>
       )}
 
-      {/* Grilla de tarjetas */}
-      {!isLoading && !isError && items.length > 0 && (
-        <section aria-label="Catálogo de productos disponibles">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {items.map((prod) => (
-              <article
-                key={prod.id}
-                aria-labelledby={`producto-titulo-${prod.id}`}
-                className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors"
-              >
-                <div className="space-y-3">
-                  {/* Cabecera de la tarjeta: Título y Precio */}
-                  <div className="flex items-start justify-between gap-2">
-                    <h2
-                      id={`producto-titulo-${prod.id}`}
-                      className="text-base font-semibold text-slate-900 leading-snug"
-                    >
-                      {prod.nombre}
-                    </h2>
-                    <span
-                      className="text-base font-bold text-emerald-600 shrink-0"
-                      aria-label={`Precio: $${Number(prod.precio_base).toFixed(2)}`}
-                    >
-                      ${Number(prod.precio_base).toFixed(2)}
-                    </span>
-                  </div>
-
-                  {/* Badge de Disponibilidad */}
-                  <div>
-                    {prod.disponible ? (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Disponible
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                        No disponible
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Descripción */}
-                  <p className="text-sm text-slate-600 line-clamp-3">
-                    {prod.descripcion ? (
-                      prod.descripcion
-                    ) : (
-                      <span className="text-slate-400 italic">Sin descripción</span>
-                    )}
-                  </p>
-
-                  {/* Badges de Categorías */}
-                  <div className="pt-2">
-                    <span
-                      id={`categorias-label-${prod.id}`}
-                      className="text-xs font-medium text-slate-500 mb-1.5 block"
-                    >
-                      Categorías:
-                    </span>
-                    {prod.categorias && prod.categorias.length > 0 ? (
-                      <ul
-                        aria-labelledby={`categorias-label-${prod.id}`}
-                        className="flex flex-wrap gap-1.5 list-none p-0 m-0"
-                      >
-                        {prod.categorias.map((cat) => (
-                          <li key={cat.id}>
-                            <span className="inline-block bg-indigo-50 text-indigo-700 text-xs px-2.5 py-0.5 rounded-full font-medium">
-                              {cat.nombre}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <span className="text-xs text-slate-400 italic">
-                        Sin categorías asignadas
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Acciones de la tarjeta */}
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEdit(prod)}
-                      aria-label={`Editar ${prod.nombre}`}
-                      className="text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors cursor-pointer"
-                    >
-                      Editar
-                    </button>
-                    <span className="text-slate-300">|</span>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(prod)}
-                      disabled={deleteMutation.isPending}
-                      aria-label={`Eliminar ${prod.nombre}`}
-                      className="text-xs font-semibold text-rose-600 hover:text-rose-800 disabled:opacity-50 transition-colors cursor-pointer"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/productos/${prod.id}`)}
-                    aria-label={`Ver detalle de ${prod.nombre}`}
-                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 rounded cursor-pointer"
-                  >
-                    Ver detalle →
-                  </button>
-                </div>
-              </article>
-            ))}
+      {/* Estado de error inicial sin datos previos */}
+      {isError && !data && (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="p-8 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-center space-y-4"
+        >
+          <div>
+            <p className="font-semibold text-base">
+              Error al cargar los productos
+            </p>
+            <p className="text-sm text-rose-600 mt-1">
+              {(error as Error)?.message ||
+                'Ocurrió un error inesperado al consultar el catálogo.'}
+            </p>
           </div>
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            className="inline-flex items-center px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      {/* Catálogo vacío */}
+      {!isLoading &&
+        (!isError || data !== undefined) &&
+        productos.length === 0 && (
+          <section
+            aria-label="Catálogo de productos"
+            className="text-center py-12 px-4 bg-white rounded-xl border border-dashed border-slate-300 space-y-3"
+          >
+            <p
+              role="status"
+              aria-live="polite"
+              className="text-slate-500 text-base"
+            >
+              No hay productos disponibles para mostrar.
+            </p>
+            <button
+              type="button"
+              onClick={handleOpenCreate}
+              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
+            >
+              + Crear primer producto
+            </button>
+          </section>
+        )}
+
+      {/* Tabla presentacional conectada a TanStack Table v8 */}
+      {!isLoading && (!isError || data !== undefined) && productos.length > 0 && (
+        <section aria-label="Catálogo de productos" className="space-y-4">
+          <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+              <caption className="sr-only">
+                Listado de productos del catálogo con ordenamiento y paginación
+                local
+              </caption>
+              <thead className="bg-slate-50">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      const canSort = header.column.getCanSort();
+                      const isSorted = header.column.getIsSorted();
+                      const ariaSort = canSort
+                        ? isSorted === 'asc'
+                          ? 'ascending'
+                          : isSorted === 'desc'
+                            ? 'descending'
+                            : 'none'
+                        : undefined;
+
+                      const isAcciones = header.column.id === 'acciones';
+
+                      return (
+                        <th
+                          key={header.id}
+                          colSpan={header.colSpan}
+                          scope="col"
+                          aria-sort={ariaSort}
+                          className={`py-3 text-xs font-semibold uppercase tracking-wider text-slate-500 ${
+                            isAcciones
+                              ? 'text-center pl-2 pr-6 min-w-[210px]'
+                              : 'text-left px-3'
+                          }`}
+                        >
+                          {header.isPlaceholder ? null : canSort ? (
+                            <button
+                              type="button"
+                              onClick={header.column.getToggleSortingHandler()}
+                              className={`inline-flex items-center gap-1.5 font-semibold text-xs uppercase tracking-wider text-slate-500 hover:text-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded px-1 -mx-1 cursor-pointer ${
+                                isAcciones ? 'justify-end' : ''
+                              }`}
+                            >
+                              <span>
+                                {flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                              </span>
+                              <span
+                                aria-hidden="true"
+                                className="text-slate-400 select-none"
+                              >
+                                {isSorted === 'asc'
+                                  ? '▲'
+                                  : isSorted === 'desc'
+                                    ? '▼'
+                                    : '↕'}
+                              </span>
+                              <span className="sr-only">
+                                {isSorted === 'asc'
+                                  ? '(orden ascendente, activar para descendente)'
+                                  : isSorted === 'desc'
+                                    ? '(orden descendente, activar para limpiar)'
+                                    : '(sin ordenar, activar para ascendente)'}
+                              </span>
+                            </button>
+                          ) : (
+                            <span>
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                            </span>
+                          )}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </thead>
+              <tbody>
+                {rows.length === 0 ? (
+                  <tr className="border-t border-slate-100">
+                    <td
+                      colSpan={table.getVisibleLeafColumns().length}
+                      role="status"
+                      aria-live="polite"
+                      className="px-6 py-10 text-center text-sm text-slate-500 space-y-2"
+                    >
+                      <p>
+                        No se encontraron productos que coincidan con la
+                        búsqueda.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handleClearFilter}
+                        className="text-blue-600 hover:text-blue-800 font-medium underline text-sm transition-colors cursor-pointer"
+                      >
+                        Limpiar búsqueda
+                      </button>
+                    </td>
+                  </tr>
+                ) : (
+                  rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="border-t border-slate-100 hover:bg-slate-50 transition-colors"
+                    >
+                      {row.getVisibleCells().map((cell) => {
+                        const colId = cell.column.id;
+                        const cellClassName =
+                          colId === 'acciones'
+                            ? 'pl-2 pr-6 py-3 text-sm text-center whitespace-nowrap min-w-[210px]'
+                            : colId === 'descripcion'
+                              ? 'px-3 py-3 text-sm text-slate-600 max-w-[180px]'
+                              : colId === 'nombre'
+                                ? 'px-3 py-3 text-sm font-medium text-slate-900 whitespace-nowrap'
+                                : colId === 'precio_base'
+                                  ? 'px-3 py-3 text-sm font-medium text-slate-900 whitespace-nowrap'
+                                  : colId === 'disponible'
+                                    ? 'px-3 py-3 text-sm whitespace-nowrap'
+                                    : colId === 'categorias'
+                                      ? 'px-3 py-3 text-sm max-w-[160px]'
+                                      : colId === 'id'
+                                        ? 'px-3 py-3 text-sm text-slate-700 whitespace-nowrap w-16'
+                                        : 'px-3 py-3 text-sm text-slate-700 whitespace-nowrap';
+
+                        return (
+                          <td key={cell.id} className={cellClassName}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+              </table>
+            </div>
+          </div>
+
+          <nav
+            aria-label="Paginación de productos"
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white px-6 py-3.5 rounded-xl border border-slate-200 shadow-xs text-sm text-slate-600"
+          >
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex items-center gap-4"
+            >
+              <span>
+                Página{' '}
+                <strong>
+                  {pageCount === 0 ? 0 : pageIndex + 1} de {pageCount}
+                </strong>
+              </span>
+              <span className="text-slate-300" aria-hidden="true">
+                |
+              </span>
+              <span>
+                Total: <strong>{filteredCount}</strong>{' '}
+                {filteredCount === 1 ? 'producto' : 'productos'}
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <label
+                  htmlFor="productos-page-size"
+                  className="text-xs text-slate-500"
+                >
+                  Filas por página:
+                </label>
+                <select
+                  id="productos-page-size"
+                  value={pageSize}
+                  onChange={(e) => table.setPageSize(Number(e.target.value))}
+                  className="px-2 py-1 border border-slate-300 rounded-md text-xs bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                >
+                  {[5, 10, 20, 50].map((size) => (
+                    <option key={size} value={size}>
+                      {size}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  aria-label="Página anterior"
+                  className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-colors cursor-pointer"
+                >
+                  Anterior
+                </button>
+                <button
+                  type="button"
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  aria-label="Página siguiente"
+                  className="px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 transition-colors cursor-pointer"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
+          </nav>
         </section>
       )}
 
-      {/* Barra de navegación de páginas (Paginador) */}
-      {!isLoading && !isError && total > 0 && (
-        <nav
-          aria-label="Paginación de productos"
-          className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4"
-        >
-          <p className="text-sm text-slate-600" aria-live="polite">
-            Página <span className="font-semibold text-slate-900">{page}</span> de{' '}
-            <span className="font-semibold text-slate-900">{totalPages}</span>
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              disabled={page <= 1 || isLoading}
-              onClick={handlePrevPage}
-              aria-label="Ir a la página anterior"
-              className="px-3.5 py-1.5 text-xs font-medium rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
-            >
-              ← Anterior
-            </button>
-            <button
-              type="button"
-              disabled={page >= totalPages || isLoading}
-              onClick={handleNextPage}
-              aria-label="Ir a la página siguiente"
-              className="px-3.5 py-1.5 text-xs font-medium rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
-            >
-              Siguiente →
-            </button>
-          </div>
-        </nav>
-      )}
-
-      {/* Modal de Creación y Edición de Producto */}
+      {/* Modal controlado de Creación / Edición con TanStack Form v1 */}
       <ProductoModal
         isOpen={isModalOpen}
+        isEditing={editingProducto !== null}
         initialData={editingProducto}
-        categoriasDisponibles={categoriasQuery.data?.items ?? []}
+        form={form}
+        categoriasDisponibles={categoriasDisponibles}
         isLoadingCategorias={categoriasQuery.isLoading}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
         errorMessage={activeModalError}
         onClose={handleCloseModal}
-        onSubmit={handleModalSubmit}
       />
     </div>
   );

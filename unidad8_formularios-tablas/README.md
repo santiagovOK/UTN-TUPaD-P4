@@ -19,8 +19,8 @@ El presente proyecto representa la continuidad directa del **Trabajo Práctico 7
 | Capa / Módulo | Estado en el Código | Planificación TP8 |
 |---|---|---|
 | **Identidad del Proyecto** | Renombrado a `unidad8_backend/`, `unidad8_frontend/` y sincronización documental completa. | ✅ Épica 0 completada |
-| **Categorías (Frontend)** | CRUD operativo con TanStack Query y modales HTML/useState. | ⏳ Planificado: migración a TanStack Form y Table (Épica 3) |
-| **Productos (Frontend)** | CRUD operativo con modales HTML, categorías obligatorias y ficha de detalle. | ⏳ Planificado: migración a TanStack Table y Form (Épica 3) |
+| **Categorías (Frontend)** | CRUD adaptado a TanStack Table v8 y TanStack Form v1. | ✅ Completado (Épica 3, E3.1) |
+| **Productos (Frontend)** | CRUD adaptado a TanStack Table v8 y TanStack Form v1 con ficha de detalle preservada. | ✅ Completado (Épica 3, E3.2) |
 | **Ingredientes (Frontend)** | Tipos TypeScript definidos; sin interfaz de gestión. | ⏳ Planificado: creación de servicio, página CRUD, modal y tabla (Épica 4) |
 | **Catálogo (Backend)** | Categorías, Productos, Ingredientes y Unidades de Medida con persistencia SQLModel. | ✅ Preservado: arquitectura probada, sin regresión |
 | **Pedidos (Backend)** | Inexistente en la base actual. | ⏳ Planificado: modelos, schemas, UoW transaccional, servicio y router REST (Épica 2) |

@@ -11,6 +11,12 @@
 //   - categorias  : CATEGORIA[]          -> Categoria[] (asociación N:N normalizada)
 //   - Campos de auditoría (created_at, updated_at, deleted_at) gestionados internamente por el backend.
 
+import type {
+  ReactFormExtendedApi,
+  FormValidateOrFn,
+  FormAsyncValidateOrFn,
+} from "@tanstack/react-form";
+
 import type { Categoria } from "./categoria";
 import type { Ingrediente, IngredienteInput } from "./ingrediente";
 
@@ -44,3 +50,26 @@ export interface ProductoUpdate {
   categoria_ids?: number[];
   ingredientes?: IngredienteInput[];
 }
+
+export interface ProductoFormValues {
+  nombre: string;
+  descripcion: string;
+  precio_base: string;
+  disponible: boolean;
+  categoria_ids: number[];
+}
+
+export type ProductoFormApi = ReactFormExtendedApi<
+  ProductoFormValues,
+  FormValidateOrFn<ProductoFormValues> | undefined,
+  FormValidateOrFn<ProductoFormValues> | undefined,
+  FormAsyncValidateOrFn<ProductoFormValues> | undefined,
+  FormValidateOrFn<ProductoFormValues> | undefined,
+  FormAsyncValidateOrFn<ProductoFormValues> | undefined,
+  FormValidateOrFn<ProductoFormValues> | undefined,
+  FormAsyncValidateOrFn<ProductoFormValues> | undefined,
+  FormValidateOrFn<ProductoFormValues> | undefined,
+  FormAsyncValidateOrFn<ProductoFormValues> | undefined,
+  FormAsyncValidateOrFn<ProductoFormValues> | undefined,
+  unknown
+>;

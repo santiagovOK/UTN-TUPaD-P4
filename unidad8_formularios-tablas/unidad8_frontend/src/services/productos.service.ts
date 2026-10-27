@@ -25,7 +25,7 @@ export const PRODUCTOS_ENDPOINT = `${API_BASE_URL}/productos`;
  */
 export async function getProductos(
   offset = 0,
-  limit = 6,
+  limit = 100,
   nombre?: string,
   disponible?: boolean,
   categoria_id?: number,
