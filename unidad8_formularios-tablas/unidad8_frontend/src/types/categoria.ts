@@ -1,3 +1,9 @@
+import type {
+  ReactFormExtendedApi,
+  FormValidateOrFn,
+  FormAsyncValidateOrFn,
+} from "@tanstack/react-form";
+
 // Base heredada del TP7; identidad y documentación adaptadas al TP8.
 // [Tipado con TypeScript & Catálogo de Categorías]:
 //   - Definición de interfaces para datos del dominio, props de componentes y respuestas de la API.
@@ -30,3 +36,23 @@ export interface PaginatedResponse<T> {
   total: number;
   items: T[];
 }
+
+export interface CategoriaFormValues {
+  nombre: string;
+  descripcion: string;
+}
+
+export type CategoriaFormApi = ReactFormExtendedApi<
+  CategoriaFormValues,
+  FormValidateOrFn<CategoriaFormValues> | undefined,
+  FormValidateOrFn<CategoriaFormValues> | undefined,
+  FormAsyncValidateOrFn<CategoriaFormValues> | undefined,
+  FormValidateOrFn<CategoriaFormValues> | undefined,
+  FormAsyncValidateOrFn<CategoriaFormValues> | undefined,
+  FormValidateOrFn<CategoriaFormValues> | undefined,
+  FormAsyncValidateOrFn<CategoriaFormValues> | undefined,
+  FormValidateOrFn<CategoriaFormValues> | undefined,
+  FormAsyncValidateOrFn<CategoriaFormValues> | undefined,
+  FormAsyncValidateOrFn<CategoriaFormValues> | undefined,
+  unknown
+>;

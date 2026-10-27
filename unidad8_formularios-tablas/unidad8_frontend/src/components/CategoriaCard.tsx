@@ -1,52 +1,33 @@
 // Base heredada del TP7; identidad y documentación adaptadas al TP8.
+import { flexRender, type Row } from '@tanstack/react-table';
 import type { Categoria } from '../types/categoria';
 
-// [CRUD de Categorías & Tipado TypeScript]: Componente presentacional de fila con props tipados (Categoria) y acciones de edición/eliminación.
-// [Diagrama UML - Entidad CATEGORIA]: Visualiza los atributos id (INTEGER PK), nombre (VARCHAR(100) UNIQUE NN) y descripcion (TEXT).
+// [CRUD de Categorías & Tipado TypeScript]:
+// Fila presentacional que renderiza las celdas visibles de Row<Categoria> mediante TanStack Table flexRender.
 export interface CategoriaCardProps {
-  categoria: Categoria;
-  onEdit?: (categoria: Categoria) => void;
-  onDelete?: (id: number) => void;
+  row: Row<Categoria>;
 }
 
-export function CategoriaCard({ categoria, onEdit, onDelete }: CategoriaCardProps) {
-  const { id, nombre, descripcion } = categoria;
-
+export function CategoriaCard({ row }: CategoriaCardProps) {
   return (
     <tr className="border-t border-slate-100 hover:bg-slate-50 transition-colors">
-      <td className="px-6 py-4 text-sm text-slate-700 whitespace-nowrap">
-        {id}
-      </td>
-      <td className="px-6 py-4 text-sm font-medium text-slate-900 whitespace-nowrap">
-        {nombre}
-      </td>
-      <td className="px-6 py-4 text-sm text-slate-600 max-w-md">
-        {descripcion ? (
-          <span className="line-clamp-2">{descripcion}</span>
-        ) : (
-          <span className="text-slate-400 italic">Sin descripción</span>
-        )}
-      </td>
-      <td className="px-6 py-4 text-sm text-right whitespace-nowrap">
-        <div className="inline-flex items-center justify-end gap-4">
-          <button
-            type="button"
-            onClick={() => onEdit?.(categoria)}
-            className="text-blue-600 hover:text-blue-800 font-medium transition-colors focus:outline-none focus:underline cursor-pointer"
-          >
-            Editar
-          </button>
-          {onDelete && (
-            <button
-              type="button"
-              onClick={() => onDelete(id)}
-              className="text-rose-600 hover:text-rose-800 font-medium transition-colors focus:outline-none focus:underline cursor-pointer"
-            >
-              Eliminar
-            </button>
-          )}
-        </div>
-      </td>
+      {row.getVisibleCells().map((cell) => {
+        const colId = cell.column.id;
+        const cellClassName =
+          colId === 'acciones'
+            ? 'px-6 py-4 text-sm text-right whitespace-nowrap'
+            : colId === 'descripcion'
+              ? 'px-6 py-4 text-sm text-slate-600 max-w-md'
+              : colId === 'nombre'
+                ? 'px-6 py-4 text-sm font-medium text-slate-900 whitespace-nowrap'
+                : 'px-6 py-4 text-sm text-slate-700 whitespace-nowrap';
+
+        return (
+          <td key={cell.id} className={cellClassName}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </td>
+        );
+      })}
     </tr>
   );
 }

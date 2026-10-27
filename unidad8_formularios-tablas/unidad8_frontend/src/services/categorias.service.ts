@@ -22,7 +22,7 @@ export const CATEGORIAS_ENDPOINT = `${API_BASE_URL}/categorias`;
  */
 export async function getCategorias(
   offset = 0,
-  limit = 50,
+  limit = 100,
   search?: string,
   incluir_inactivos = false
 ): Promise<PaginatedResponse<Categoria>> {

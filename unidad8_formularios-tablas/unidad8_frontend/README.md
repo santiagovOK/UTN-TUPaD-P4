@@ -100,8 +100,8 @@ Ejecuta `tsc -b` (verificación de tipos de extremo a extremo sin emitir código
 
 | Ruta | Componente / Página | Estado Actual | Planificación Unidad 8 |
 |---|---|---|---|
-| `/` | `CategoriasPage` | Operativo con Query y modal | Migración a TanStack Table + TanStack Form (tarea E3.1) |
-| `/categorias` | `CategoriasPage` | Operativo con Query y modal | Migración a TanStack Table + TanStack Form (tarea E3.1) |
+| `/` | `CategoriasPage` | ✅ Operativo con TanStack Table v8 y TanStack Form | Migración completada en tarea E3.1 |
+| `/categorias` | `CategoriasPage` | ✅ Operativo con TanStack Table v8 y TanStack Form | Migración completada en tarea E3.1 |
 | `/productos` | `ProductsPage` | Operativo con CRUD y modal | Migración a TanStack Table + TanStack Form (tarea E3.2) |
 | `/productos/:id` | `ProductDetailPage` | Operativo con ficha y detalle | Preservar navegación e ingredientes hidratados |
 | `/ingredientes` | `IngredientesPage` | ⏳ No implementado | Creación completa de página CRUD, tabla y modal (tarea E4.2) |
