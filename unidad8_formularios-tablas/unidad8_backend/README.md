@@ -31,9 +31,43 @@ El backend combina la arquitectura probada del catálogo de alimentos con la pla
 
 ---
 
-## 🚀 Inicialización y Ejecución Local
+## Inicialización y Ejecución Local
 
-### 1. Entorno Virtual y Dependencias
+### 0. Aprovisionamiento Automatizado desde la Raíz (`../setup.sh`)
+
+El proyecto dispone de un script agnóstico e idempotente en la raíz (`setup.sh`) que automatiza de punta a punta la preparación del backend y frontend:
+
+```bash
+# Desde la raíz del repositorio:
+./setup.sh
+
+# O bien, para instalar e iniciar ambos servidores de desarrollo directamente:
+./setup.sh --start
+```
+
+**Beneficios y automatizaciones para Backend:**
+- **Python `>= 3.11`:** Detecta el intérprete adecuado en el sistema.
+- **Entorno Virtual Canónico:** Crea `.venv` en la raíz y genera el enlace simbólico relativo `unidad8_backend/.venv`.
+- **Instalación de Dependencias:** Instala `requirements.txt` en el entorno virtual, aprovisionando compiladores nativos (`gcc`, `libpq-dev`) si alguna rueda binaria lo precisa.
+- **Configuración de `.env` y Fallback de Base de Datos:** Comprueba la disponibilidad de PostgreSQL local (`tp8_formularios-tablas`); si no responde, conmuta automáticamente a SQLite (`sqlite:///./dev.db`) garantizando que la aplicación inicie sin errores manuales.
+- **Verificación Automatizada:** Ejecuta la suite de pruebas unitarias con `pytest`.
+
+**Opciones CLI relevantes:**
+- `-y`, `--yes`: Modo desatendido sin pausas interactivas.
+- `-s`, `--start`, `--run`: Levanta el backend (FastAPI) y frontend (Vite) concurrentemente al terminar.
+- `--db-mode <auto|postgres|sqlite|memory>`: Fuerza un motor de persistencia específico.
+- `--recreate-venv`: Recrea el entorno virtual desde cero.
+- `--skip-checks`: Omite la ejecución de `pytest`.
+- `--no-system-install`: Omite invocaciones a `sudo`/gestores del sistema, ejecutando en espacio de usuario.
+- `--backend-dir <ruta>`, `--pg-db <nombre>`: Sobrescribe carpetas y nombres de base de datos.
+- `-h`, `--help`: Muestra la ayuda y diagnóstico del entorno.
+
+---
+
+### Instalación Manual Paso a Paso
+
+Si prefiere configurar el entorno de forma manual e individual:
+#### 1. Entorno Virtual y Dependencias
 
 Desde la carpeta `unidad8_backend/`:
 
@@ -49,7 +83,7 @@ source .venv/bin/activate       # Linux / macOS
 pip install -r requirements.txt
 ```
 
-### 2. Configuración de Base de Datos (`.env`)
+#### 2. Configuración de Base de Datos (`.env`)
 
 Copiar el archivo de variables de entorno de ejemplo:
 
@@ -74,7 +108,7 @@ Editar el archivo `.env` para especificar la variable `DATABASE_URL`.
   DATABASE_URL=sqlite:///:memory:
   ```
 
-### 3. Iniciar el Servidor de Desarrollo
+#### 3. Iniciar el Servidor de Desarrollo
 
 ```bash
 fastapi dev app/main.py

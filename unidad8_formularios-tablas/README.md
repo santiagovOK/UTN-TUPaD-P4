@@ -7,7 +7,7 @@
 
 ---
 
-## 🎯 Objetivo de la Unidad 8 y Continuidad con TP7
+## Objetivo de la Unidad 8 y Continuidad con TP7
 
 El presente proyecto representa la continuidad directa del **Trabajo Práctico 7** para dar cumplimiento a los requerimientos de la **Unidad 8**. Sobre la base del catálogo de alimentos y la navegación desacoplada previa, el trabajo se enfoca en dos grandes ejes de ingeniería:
 
@@ -44,9 +44,49 @@ Conforme a las pautas de evaluación de la cátedra para la Unidad 8, la entrega
 
 ---
 
-## 🚀 Inicialización y Puesta en Marcha
+## Inicialización y Puesta en Marcha
 
-### 1. Backend (Python + FastAPI)
+### Opción A (Recomendada): Instalación y Arranque Automatizado (`./setup.sh`)
+
+El repositorio incluye el script agnóstico, integral e idempotente `./setup.sh` en la raíz. Este script aprovisiona de punta a punta todo el entorno Full Stack sin necesidad de configuración manual previa:
+- **Python & Entorno Virtual:** Detecta o instala Python `>= 3.11`, crea y sincroniza el entorno canónico `.venv` en la raíz y enlaza `unidad8_backend/.venv` mediante symlink relativo.
+- **Dependencias Backend:** Instala `requirements.txt` en el entorno virtual, aprovisionando compiladores nativos (`gcc`, `libpq-dev`) si alguna rueda binaria lo requiere.
+- **Base de Datos & `.env`:** Genera `unidad8_backend/.env` a partir de `.env.example` y comprueba la conectividad a PostgreSQL; si PostgreSQL local no está activo o configurado, conmuta automáticamente a SQLite (`sqlite:///./dev.db`) garantizando arranque inmediato sin fallos.
+- **Node.js & pnpm:** Detecta o aprovisiona Node.js `>= 18.18` (mediante `nvm`, `fnm`, `volta`, `asdf`, `mise` o binario local) y `pnpm`.
+- **Dependencias Frontend & Permisos:** Instala dependencias en raíz y `unidad8_frontend/` preservando lockfiles, y sanea preventivamente los permisos ejecutables (`chmod +x`) y finales de línea CRLF en scripts y binarios de `node_modules/.bin`.
+- **Validaciones de Humo:** Ejecuta la suite de pruebas `pytest` y la compilación `pnpm run build` de Vite/TypeScript.
+
+#### Opciones CLI de `setup.sh`:
+| Opción | Descripción |
+|---|---|
+| `-y`, `--yes`, `--non-interactive` | Modo desatendido; asume confirmación afirmativa en todas las solicitudes (ideal para CI). |
+| `-s`, `--start`, `--run` | Inicia automáticamente los servidores de desarrollo (Frontend y Backend) al completar el setup. |
+| `--db-mode <modo>` | Fuerza el modo de base de datos (`auto`, `postgres`, `sqlite`, `memory`). Por defecto `auto`. |
+| `--recreate-venv` | Elimina y recrea desde cero el entorno virtual Python (`.venv`). |
+| `--skip-checks` | Omite las pruebas de humo finales (`pytest` y `pnpm run build`). |
+| `--no-system-install` | Omite invocaciones a gestores del sistema (`sudo`/`apt`/`dnf`/`pacman`/`brew`), operando solo en espacio de usuario. |
+| `--backend-dir <ruta>` | Sobrescribe la ruta del directorio de backend auto-detectada. |
+| `--frontend-dir <ruta>` | Sobrescribe la ruta del directorio de frontend auto-detectada. |
+| `--pg-db <nombre>` | Especifica el nombre de la base de datos PostgreSQL por defecto. |
+| `-h`, `--help` | Muestra la configuración detectada y la ayuda completa de opciones. |
+
+```bash
+# Instalación estándar auto-detectada
+./setup.sh
+
+# Aprovisionamiento y arranque inmediato de Frontend y Backend
+./setup.sh --start
+
+# Aprovisionamiento desatendido rápido
+./setup.sh --yes --skip-checks --start
+
+# Forzar SQLite local directamente
+./setup.sh --db-mode sqlite
+```
+
+### Opción B: Instalación Manual Paso a Paso
+
+#### 1. Backend (Python + FastAPI)
 
 Desde el directorio `unidad8_backend/`:
 
@@ -69,7 +109,7 @@ cp .env.example .env
 cd ..
 ```
 
-### 2. Frontend y Orquestador Raíz (Node + pnpm)
+#### 2. Frontend y Orquestador Raíz (Node + pnpm)
 
 Desde la raíz del proyecto:
 
@@ -80,7 +120,6 @@ pnpm install
 # Instalar dependencias de la aplicación React
 cd unidad8_frontend && pnpm install && cd ..
 ```
-
 ---
 
 ## 🖥️ Comandos de Ejecución (`package.json` raíz)
@@ -130,6 +169,7 @@ utn-paradigmas4-tp8-formularios-tablas/
 │       ├── unidad8_guia_maestra.md # Criterio normativo Unidad 8 (UoW, Form, Table)
 │       ├── clean_code.md           # Principios Clean Code y refactorización
 │       └── javaismos_guia.md       # Buenas prácticas en Python idiomático
+├── setup.sh                        # Script automatizado e idempotente de aprovisionamiento y arranque
 ├── package.json                    # Orquestador de scripts concurrentes
 ├── pnpm-lock.yaml                  # Lockfile del orquestador raíz
 ├── .gitignore                      # Exclusiones de Git

@@ -1,0 +1,161 @@
+### FOOD STORE API — SUITE INTEGRAL REST CLIENT DE PEDIDOS (TP8)
+@baseUrl = http://localhost:8000
+@contentType = application/json
+
+### SECCIÓN 0: PREPARACIÓN DE CATÁLOGO BASE Y ESTADO INICIAL DE PEDIDOS
+GET {{baseUrl}}/health/
+### Verificar conectividad de base de datos
+GET {{baseUrl}}/health/db
+### Listado inicial de pedidos activos (vacío al iniciar)
+GET {{baseUrl}}/pedidos
+### Crear categoría base para productos de prueba
+POST {{baseUrl}}/categorias/
+Content-Type: {{contentType}}
+
+{"nombre":"Menú Principal","descripcion":"Platos y bebidas para pruebas de pedidos"}
+### Crear Producto 1 (precio inicial 10.0)
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Hamburguesa Clásica","descripcion":"Medallón de carne con queso","precio_base":10.0,"imagenes_url":[],"disponible":true,"categoria_ids":[1]}
+### Crear Producto 2 (precio inicial 2.5)
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Gaseosa Cola 500ml","descripcion":"Bebida fría línea cola","precio_base":2.5,"imagenes_url":[],"disponible":true,"categoria_ids":[1]}
+### Crear Producto 3 (para dar de baja lógica y probar RN-09 en pedidos)
+POST {{baseUrl}}/productos/
+Content-Type: {{contentType}}
+
+{"nombre":"Papas Fritas Rústicas","descripcion":"Porción mediana","precio_base":5.0,"imagenes_url":[],"disponible":true,"categoria_ids":[1]}
+### Baja lógica del Producto 3 (RN-09: no operar sobre producto eliminado)
+DELETE {{baseUrl}}/productos/3
+
+### SECCIÓN 1: ALTA TRANSACCIONAL DE PEDIDOS Y CONGELAMIENTO DE PRECIOS HISTÓRICOS (HU-07, RN-14, RN-15)
+POST {{baseUrl}}/pedidos
+Content-Type: {{contentType}}
+
+{"detalles":[{"producto_id":1,"cantidad":2},{"producto_id":2,"cantidad":3}]}
+### Listar pedidos activos (incluye Pedido 1 con total 27.5 y estado PENDIENTE)
+GET {{baseUrl}}/pedidos
+### Listar pedidos activos con paginación explícita
+GET {{baseUrl}}/pedidos?offset=0&limit=10
+### Obtener detalle del Pedido 1 (verifica 2 ítems con precio_unitario 10.0 y 2.5)
+GET {{baseUrl}}/pedidos/1
+### Actualizar precio_base del Producto 1 en catálogo (de 10.0 a 15.0)
+PATCH {{baseUrl}}/productos/1
+Content-Type: {{contentType}}
+
+{"precio_base":15.0}
+### Actualizar precio_base del Producto 2 en catálogo (de 2.5 a 4.0)
+PATCH {{baseUrl}}/productos/2
+Content-Type: {{contentType}}
+
+{"precio_base":4.0}
+### Consultar Pedido 1 tras cambio de catálogo (verifica congelamiento histórico: total 27.5, precios 10.0 y 2.5)
+GET {{baseUrl}}/pedidos/1
+### Crear Pedido 2 capturando el nuevo precio vigente del Producto 1 (total 15.0)
+POST {{baseUrl}}/pedidos
+Content-Type: {{contentType}}
+
+{"detalles":[{"producto_id":1,"cantidad":1}]}
+### Obtener detalle del Pedido 2 (verifica precio_unitario congelado en 15.0)
+GET {{baseUrl}}/pedidos/2
+
+### SECCIÓN 2: RECHAZOS DE VALIDACIÓN 422 UNPROCESSABLE ENTITY (RN-12, RN-14, RN-16)
+POST {{baseUrl}}/pedidos
+Content-Type: {{contentType}}
+
+{}
+### Pedido con lista de detalles vacía (RN-12: min_length=1 -> 422)
+POST {{baseUrl}}/pedidos
+Content-Type: {{contentType}}
+
+{"detalles":[]}
+### Pedido con producto_id repetido en dos detalles (RN-12: evita colisión de PK compuesta -> 422)
+POST {{baseUrl}}/pedidos
+Content-Type: {{contentType}}
+
+{"detalles":[{"producto_id":1,"cantidad":2},{"producto_id":1,"cantidad":1}]}
+### Pedido con cantidad igual a cero (RN-12: cantidad >= 1 -> 422)
+POST {{baseUrl}}/pedidos
+Content-Type: {{contentType}}
+
+{"detalles":[{"producto_id":1,"cantidad":0}]}
+### Pedido con cantidad negativa (RN-12: cantidad >= 1 -> 422)
+POST {{baseUrl}}/pedidos
+Content-Type: {{contentType}}
+
+{"detalles":[{"producto_id":1,"cantidad":-2}]}
+### Pedido con cantidad fraccionaria no entera (strict=True -> 422)
+POST {{baseUrl}}/pedidos
+Content-Type: {{contentType}}
+
+{"detalles":[{"producto_id":1,"cantidad":1.5}]}
+### Actualización de estado con valor fuera de los permitidos (422)
+PUT {{baseUrl}}/pedidos/1
+Content-Type: {{contentType}}
+
+{"estado":"EN_CAMINO"}
+### Actualización de estado sin cuerpo válido (422)
+PUT {{baseUrl}}/pedidos/1
+Content-Type: {{contentType}}
+
+{}
+### Parámetro de ruta inválido en detalle de pedido (gt=0 -> 422)
+GET {{baseUrl}}/pedidos/0
+### Parámetro de paginación inválido en listado de pedidos (limit >= 1 -> 422)
+GET {{baseUrl}}/pedidos?limit=0
+
+### SECCIÓN 3: ATOMICIDAD TRANSACCIONAL (ROLLBACK UOW) Y ERRORES 404 POR PRODUCTO INEXISTENTE O ELIMINADO (HU-07, RN-09, RN-15, RN-16)
+GET {{baseUrl}}/pedidos
+### Alta con primer detalle válido y segundo con producto_id inexistente (404 y rollback total del UoW)
+POST {{baseUrl}}/pedidos
+Content-Type: {{contentType}}
+
+{"detalles":[{"producto_id":1,"cantidad":2},{"producto_id":9999,"cantidad":1}]}
+### Alta con primer detalle válido y segundo con producto dado de baja lógica (RN-09 -> 404 y rollback total del UoW)
+POST {{baseUrl}}/pedidos
+Content-Type: {{contentType}}
+
+{"detalles":[{"producto_id":1,"cantidad":1},{"producto_id":3,"cantidad":1}]}
+### Verificar que el listado de pedidos activos sigue intacto (exactamente 2 pedidos, sin cabeceras huérfanas)
+GET {{baseUrl}}/pedidos
+
+### SECCIÓN 4: ACTUALIZACIÓN DE ESTADOS, BAJA LÓGICA Y ERRORES 404 SOBRE PEDIDOS INEXISTENTES O ELIMINADOS (HU-07, RN-13, RN-16)
+PUT {{baseUrl}}/pedidos/1
+Content-Type: {{contentType}}
+
+{"estado":"CONFIRMADO"}
+### Transición del Pedido 1 a estado ENTREGADO (200 OK)
+PUT {{baseUrl}}/pedidos/1
+Content-Type: {{contentType}}
+
+{"estado":"ENTREGADO"}
+### Transición del Pedido 2 a estado CANCELADO (200 OK)
+PUT {{baseUrl}}/pedidos/2
+Content-Type: {{contentType}}
+
+{"estado":"CANCELADO"}
+### Baja lógica del Pedido 2 (204 No Content, asigna deleted_at)
+DELETE {{baseUrl}}/pedidos/2
+### Verificar que el Pedido 2 eliminado ya no aparece en el listado activo (solo queda Pedido 1)
+GET {{baseUrl}}/pedidos
+### Consultar pedido dado de baja lógica responde 404 (RN-13)
+GET {{baseUrl}}/pedidos/2
+### Actualizar estado de pedido dado de baja lógica responde 404 (RN-13)
+PUT {{baseUrl}}/pedidos/2
+Content-Type: {{contentType}}
+
+{"estado":"CONFIRMADO"}
+### Eliminar nuevamente un pedido ya dado de baja lógica responde 404 (RN-13)
+DELETE {{baseUrl}}/pedidos/2
+### Consultar pedido con ID inexistente responde 404 (RN-13)
+GET {{baseUrl}}/pedidos/9999
+### Actualizar estado de pedido con ID inexistente responde 404 (RN-13)
+PUT {{baseUrl}}/pedidos/9999
+Content-Type: {{contentType}}
+
+{"estado":"CONFIRMADO"}
+### Eliminar pedido con ID inexistente responde 404 (RN-13)
+DELETE {{baseUrl}}/pedidos/9999

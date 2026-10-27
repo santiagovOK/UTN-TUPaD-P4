@@ -34,17 +34,50 @@ El frontend continúa la arquitectura desacoplada del catálogo e incorpora la p
 
 ---
 
-## 🚀 Inicialización y Ejecución Local
+## Inicialización y Ejecución Local
 
-### 1. Instalación de Dependencias
+### 0. Aprovisionamiento Automatizado desde la Raíz (`../setup.sh`)
 
+El proyecto dispone de un script agnóstico e idempotente en la raíz (`setup.sh`) que automatiza de punta a punta la preparación del frontend y backend:
+
+```bash
+# Desde la raíz del repositorio:
+./setup.sh
+
+# O bien, para instalar e iniciar ambos servidores de desarrollo directamente:
+./setup.sh --start
+```
+
+**Beneficios y automatizaciones para Frontend:**
+- **Node.js `>= 18.18`:** Detección e hidratación transparente mediante versionadores activos (`nvm`, `fnm`, `volta`, `asdf`, `mise`) o instalación en espacio de usuario si faltara en el sistema.
+- **Aprovisionamiento de `pnpm`:** Garantiza la presencia de `pnpm` en el entorno.
+- **Instalación y Resolución de Dependencias:** Instala dependencias tanto en el orquestador raíz como en `unidad8_frontend/` preservando lockfiles.
+- **Saneamiento Preventivo de Permisos y CRLF:** Repara permisos de ejecución (`chmod +x`) en `node_modules/.bin/` (vital cuando el proyecto se descomprime desde un ZIP) y normaliza retornos de carro CRLF.
+- **Chequeo Dinámico de Binarios Nativos:** Valida la salud de `tsc` y `vite`; si detecta librerías nativas incompatibles o desalineadas, reinstala limpiamente.
+- **Validación de Humo:** Compila el bundle de producción (`tsc -b && vite build`) garantizando tipado estricto sin errores.
+
+**Opciones CLI relevantes:**
+- `-y`, `--yes`: Modo desatendido sin confirmaciones interactivas.
+- `-s`, `--start`, `--run`: Inicia concurrentemente Vite en el puerto `5173` y FastAPI en el `8000`.
+- `--skip-checks`: Omite el chequeo de compilación al finalizar.
+- `--no-system-install`: Opera exclusivamente en espacio de usuario.
+- `--frontend-dir <ruta>`: Permite especificar un directorio frontend no estándar.
+- `-h`, `--help`: Muestra la ayuda y diagnóstico del entorno.
+
+---
+
+### Instalación Manual Paso a Paso
+
+Si prefiere configurar el entorno de forma manual e individual:
+
+#### 1. Instalación de Dependencias
 Desde la carpeta `unidad8_frontend/`:
 
 ```bash
 pnpm install
 ```
 
-### 2. Iniciar Servidor de Desarrollo
+#### 2. Iniciar Servidor de Desarrollo
 
 ```bash
 pnpm dev
@@ -53,7 +86,7 @@ pnpm dev
 - **Acceso Web:** [http://localhost:5173](http://localhost:5173)  
 - Se recomienda tener el backend en ejecución en [http://localhost:8000](http://localhost:8000) para interactuar con datos reales.
 
-### 3. Compilación de Producción y Validación de Tipos
+#### 3. Compilación de Producción y Validación de Tipos
 
 ```bash
 pnpm build
