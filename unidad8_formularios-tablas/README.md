@@ -205,6 +205,13 @@ utn-paradigmas4-tp8-formularios-tablas/
         ├── services/               # Clientes de API y funciones fetch
         ├── pages/                  # Vistas: CategoriasPage, ProductsPage, ProductDetailPage
         │                           # (Planificado: IngredientesPage)
-        └── components/             # Componentes presentacionales y modales
+        └── components/             # Componentes presentacionales, modales y estados
+            ├── LoadingState.tsx    # Skeleton accesible y estados de carga (E3.3)
+            ├── EmptyState.tsx      # Colección vacía con mensaje y acción primaria (E3.3)
+            ├── ErrorState.tsx      # Errores bloqueantes y avisos de fondo con reintento (E3.3)
+            ├── CategoriaList.tsx   # Tabla presentacional de categorías (TanStack Table v8)
+            ├── CategoriaModal.tsx  # Formulario modal de categorías (TanStack Form v1)
+            ├── ProductoModal.tsx   # Formulario modal de productos (TanStack Form v1)
+            ├── CategoriaCard.tsx   # Fila/tarjeta presentacional
             └── Navbar.tsx          # Barra de navegación con insignia TP8
 ```

@@ -2,6 +2,7 @@
 import { flexRender, type Table } from '@tanstack/react-table';
 import type { Categoria } from '../types/categoria';
 import { CategoriaCard } from './CategoriaCard';
+import { EmptyState } from './EmptyState';
 
 // [CRUD de Categorías & Tipado TypeScript]:
 // Tabla presentacional pura conectada a TanStack Table v8, con ordenamiento por columnas y paginación accesible.
@@ -21,23 +22,12 @@ export function CategoriaList({
 }: CategoriaListProps) {
   if (totalCount === 0) {
     return (
-      <section
-        aria-label="Catálogo de categorías"
-        className="text-center py-12 px-4 bg-white rounded-xl border border-dashed border-slate-300 space-y-3"
-      >
-        <p role="status" aria-live="polite" className="text-slate-500 text-base">
-          No hay categorías disponibles para mostrar.
-        </p>
-        {onCreateFirst && (
-          <button
-            type="button"
-            onClick={onCreateFirst}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer"
-          >
-            + Crear primera categoría
-          </button>
-        )}
-      </section>
+      <EmptyState
+        ariaLabel="Catálogo de categorías"
+        message="No hay categorías disponibles para mostrar."
+        actionLabel={onCreateFirst ? '+ Crear primera categoría' : undefined}
+        onAction={onCreateFirst}
+      />
     );
   }
 

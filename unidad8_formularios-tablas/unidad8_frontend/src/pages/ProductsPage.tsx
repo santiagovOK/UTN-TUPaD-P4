@@ -29,6 +29,9 @@ import {
 } from '../services/productos.service';
 import { getCategorias } from '../services/categorias.service';
 import { ProductoModal } from '../components/ProductoModal';
+import { LoadingState } from '../components/LoadingState';
+import { EmptyState } from '../components/EmptyState';
+import { ErrorState } from '../components/ErrorState';
 import type {
   Producto,
   ProductoCreate,
@@ -480,95 +483,41 @@ export function ProductsPage() {
 
       {/* Aviso no destructivo si falla un refetch en segundo plano con datos previos */}
       {isError && data !== undefined && (
-        <div
-          role="status"
-          aria-live="polite"
-          className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center justify-between"
-        >
-          <span>
-            No se pudo sincronizar el catálogo en segundo plano:{' '}
-            {(error as Error)?.message || 'Error de conexión.'}
-          </span>
-          <button
-            type="button"
-            onClick={() => void refetch()}
-            className="text-amber-900 font-medium underline text-xs ml-4 cursor-pointer hover:text-amber-950"
-          >
-            Reintentar
-          </button>
-        </div>
+        <ErrorState
+          variant="background"
+          title="No se pudo sincronizar el catálogo en segundo plano"
+          message={(error as Error)?.message || 'Error de conexión.'}
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
       )}
 
       {/* Estado de carga inicial con Skeleton accesible */}
-      {isLoading && (
-        <div
-          role="status"
-          aria-live="polite"
-          aria-busy="true"
-          className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 animate-pulse motion-reduce:animate-none"
-        >
-          <div className="flex justify-between items-center pb-4 border-b border-slate-100">
-            <div className="h-4 bg-slate-200 rounded w-1/4" />
-            <div className="h-4 bg-slate-200 rounded w-1/6" />
-          </div>
-          <div className="space-y-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-8 bg-slate-100 rounded" />
-            ))}
-          </div>
-          <span className="sr-only">Cargando productos...</span>
-        </div>
-      )}
+      {isLoading && <LoadingState message="Cargando productos..." />}
 
       {/* Estado de error inicial sin datos previos */}
       {isError && !data && (
-        <div
-          role="alert"
-          aria-live="assertive"
-          className="p-8 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-center space-y-4"
-        >
-          <div>
-            <p className="font-semibold text-base">
-              Error al cargar los productos
-            </p>
-            <p className="text-sm text-rose-600 mt-1">
-              {(error as Error)?.message ||
-                'Ocurrió un error inesperado al consultar el catálogo.'}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => void refetch()}
-            className="inline-flex items-center px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
-          >
-            Reintentar
-          </button>
-        </div>
+        <ErrorState
+          title="Error al cargar los productos"
+          message={
+            (error as Error)?.message ||
+            'Ocurrió un error inesperado al consultar el catálogo.'
+          }
+          onRetry={() => void refetch()}
+          isRetrying={isFetching}
+        />
       )}
 
       {/* Catálogo vacío */}
       {!isLoading &&
         (!isError || data !== undefined) &&
         productos.length === 0 && (
-          <section
-            aria-label="Catálogo de productos"
-            className="text-center py-12 px-4 bg-white rounded-xl border border-dashed border-slate-300 space-y-3"
-          >
-            <p
-              role="status"
-              aria-live="polite"
-              className="text-slate-500 text-base"
-            >
-              No hay productos disponibles para mostrar.
-            </p>
-            <button
-              type="button"
-              onClick={handleOpenCreate}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
-            >
-              + Crear primer producto
-            </button>
-          </section>
+          <EmptyState
+            ariaLabel="Catálogo de productos"
+            message="No hay productos disponibles para mostrar."
+            actionLabel="+ Crear primer producto"
+            onAction={handleOpenCreate}
+          />
         )}
 
       {/* Tabla presentacional conectada a TanStack Table v8 */}

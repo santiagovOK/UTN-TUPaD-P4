@@ -118,3 +118,5 @@ Ejecuta `tsc -b` (verificación de tipos de extremo a extremo sin emitir código
    Los datos provenientes de la API son administrados exclusivamente por TanStack Query. Queda prohibido copiar el contenido de `data` en un `useState` local. El estado local se reserva para variables de UI: apertura del modal, ítem en edición y términos de búsqueda/filtros.
 4. **Formularios Resilientes:**  
    Los formularios con TanStack Form validan en campo (`onBlur`) y al enviar. Si el backend rechaza la mutación (por ejemplo HTTP 409 por duplicado), el modal permanece abierto con los datos ingresados y presenta el error al usuario.
+5. **Componentes Comunes de Estados Asíncronos:**  
+   Los estados de carga inicial (`LoadingState` con skeletons accesibles y `motion-reduce:animate-none`), vacío de catálogo (`EmptyState` con mensaje y acción primaria opcional) y error (`ErrorState` bloqueante o aviso de fondo no destructivo ante fallo de refetch con opción de reintento) se encuentran desacoplados en `src/components/`, reutilizados transversalmente en Categorías y Productos sin desmontar tablas visuales cuando existen datos previos.
