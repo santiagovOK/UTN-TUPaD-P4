@@ -5,3 +5,4 @@
 export * from "./api";
 export * from "./categorias.service";
 export * from "./productos.service";
+export * from "./ingredientes.service";

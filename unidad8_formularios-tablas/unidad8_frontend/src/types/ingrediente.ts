@@ -1,3 +1,9 @@
+import type {
+  ReactFormExtendedApi,
+  FormValidateOrFn,
+  FormAsyncValidateOrFn,
+} from "@tanstack/react-form";
+
 // [Extensión de catálogo heredada del TP7 - Tipado con TypeScript]:
 //   - Interfaces para UnidadMedida (catálogo inmutable seed), Ingrediente y relación ProductoIngrediente.
 //   - Extensión heredada del TP7: no forma parte del clúster Catálogo del SVG original.
@@ -46,3 +52,25 @@ export interface ProductoIngredienteInput {
 }
 
 export type IngredienteInput = number | ProductoIngredienteInput;
+
+export interface IngredienteFormValues {
+  nombre: string;
+  descripcion: string;
+  unidad_medida_id: string;
+  activo: boolean;
+}
+
+export type IngredienteFormApi = ReactFormExtendedApi<
+  IngredienteFormValues,
+  FormValidateOrFn<IngredienteFormValues> | undefined,
+  FormValidateOrFn<IngredienteFormValues> | undefined,
+  FormAsyncValidateOrFn<IngredienteFormValues> | undefined,
+  FormValidateOrFn<IngredienteFormValues> | undefined,
+  FormAsyncValidateOrFn<IngredienteFormValues> | undefined,
+  FormValidateOrFn<IngredienteFormValues> | undefined,
+  FormAsyncValidateOrFn<IngredienteFormValues> | undefined,
+  FormValidateOrFn<IngredienteFormValues> | undefined,
+  FormAsyncValidateOrFn<IngredienteFormValues> | undefined,
+  FormAsyncValidateOrFn<IngredienteFormValues> | undefined,
+  unknown
+>;

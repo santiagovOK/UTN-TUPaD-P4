@@ -21,9 +21,9 @@ El presente proyecto representa la continuidad directa del **Trabajo Práctico 7
 | **Identidad del Proyecto** | Renombrado a `unidad8_backend/`, `unidad8_frontend/` y sincronización documental completa. | ✅ Épica 0 completada |
 | **Categorías (Frontend)** | CRUD adaptado a TanStack Table v8 y TanStack Form v1. | ✅ Completado (Épica 3, E3.1) |
 | **Productos (Frontend)** | CRUD adaptado a TanStack Table v8 y TanStack Form v1 con ficha de detalle preservada. | ✅ Completado (Épica 3, E3.2) |
-| **Ingredientes (Frontend)** | Tipos TypeScript definidos; sin interfaz de gestión. | ⏳ Planificado: creación de servicio, página CRUD, modal y tabla (Épica 4) |
-| **Catálogo (Backend)** | Categorías, Productos, Ingredientes y Unidades de Medida con persistencia SQLModel. | ✅ Preservado: arquitectura probada, sin regresión |
-| **Pedidos (Backend)** | Inexistente en la base actual. | ⏳ Planificado: modelos, schemas, UoW transaccional, servicio y router REST (Épica 2) |
+| **Ingredientes (Frontend)** | CRUD completo con TanStack Table v8 y TanStack Form v1 (`IngredientesPage.tsx`). | ✅ Completado (Épica 4, E4.1–E4.2) |
+| **Catálogo (Backend)** | Categorías, Productos y Unidades (Service-Router); Ingredientes migrado a Repository + UoW. | ✅ Preservado y ampliado con UoW (Opción B / Tarea E4.4) |
+| **Pedidos (Backend)** | Módulo transaccional implementado (Models, Schemas, UoW, Service, Router y pedidos.http). | ✅ Completado (Épica 2, E2.1–E2.5) |
 
 ---
 
@@ -203,8 +203,7 @@ utn-paradigmas4-tp8-formularios-tablas/
         ├── index.css               # Importación de Tailwind CSS v4
         ├── types/                  # Contratos TypeScript de las entidades
         ├── services/               # Clientes de API y funciones fetch
-        ├── pages/                  # Vistas: CategoriasPage, ProductsPage, ProductDetailPage
-        │                           # (Planificado: IngredientesPage)
+        ├── pages/                  # Vistas: CategoriasPage, ProductsPage, ProductDetailPage, IngredientesPage
         └── components/             # Componentes presentacionales, modales y estados
             ├── LoadingState.tsx    # Skeleton accesible y estados de carga (E3.3)
             ├── EmptyState.tsx      # Colección vacía con mensaje y acción primaria (E3.3)
@@ -212,6 +211,8 @@ utn-paradigmas4-tp8-formularios-tablas/
             ├── CategoriaList.tsx   # Tabla presentacional de categorías (TanStack Table v8)
             ├── CategoriaModal.tsx  # Formulario modal de categorías (TanStack Form v1)
             ├── ProductoModal.tsx   # Formulario modal de productos (TanStack Form v1)
+            ├── IngredienteList.tsx # Tabla presentacional de ingredientes (TanStack Table v8)
+            ├── IngredienteModal.tsx# Formulario modal de ingredientes con unidades (TanStack Form v1)
             ├── CategoriaCard.tsx   # Fila/tarjeta presentacional
             └── Navbar.tsx          # Barra de navegación con insignia TP8
 ```

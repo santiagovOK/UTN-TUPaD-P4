@@ -6,13 +6,14 @@ Backend modular para el Trabajo Práctico de la **Unidad 8** de **Programación 
 
 ## 📋 Alcance y Estado del Backend en la Unidad 8
 
-El backend combina la arquitectura probada del catálogo de alimentos con la planificación de un nuevo subsistema transaccional:
+El backend combina la arquitectura probada del catálogo de alimentos con subsistemas transaccionales desacoplados bajo Unit of Work:
 
-1. **Catálogo de Alimentos (Implementado y Preservado):**  
-   Módulos para `categoria`, `producto`, `ingrediente` y `unidad_medida` (catálogo seed inmutable de 7 unidades oficiales). Paginación `{ total, items }`, filtros dinámicos, baja lógica y validaciones de Pydantic.
-2. **Módulo de Pedidos y DetallePedido (Planificado — Épica 2):**  
-   Arquitectura formal *Models–Schemas–Repository–Unit of Work–Service–Router* para registrar ventas atómicas, congelar precios históricos de productos y gestionar estados (`PENDIENTE`, `CONFIRMADO`, `ENTREGADO`, `CANCELADO`). **No implementado en esta etapa documental.**
-
+1. **Catálogo de Alimentos (Categorías, Productos y Unidades de Medida):**  
+   Módulos para `categoria`, `producto` y `unidad_medida` (catálogo seed inmutable de 7 unidades oficiales) bajo arquitectura *Models–Schemas–Service–Router*. Paginación `{ total, items }`, filtros dinámicos, baja lógica y validaciones de Pydantic.
+2. **Módulo de Ingredientes con Repository y Unit of Work (Implementado — Opción B / Tarea E4.4):**  
+   Refactorización del catálogo de ingredientes bajo el patrón *Models–Schemas–Repository–Unit of Work–Service–Router* (`repository.py`, `unit_of_work.py`, `services.py`), con validación de nombre único insensible a mayúsculas (RN-10) y atomicidad transaccional.
+3. **Módulo de Pedidos y DetallePedido (Implementado — Épica 2):**  
+   Arquitectura formal *Models–Schemas–Repository–Unit of Work–Service–Router* para registrar ventas atómicas, congelar precios históricos de productos y gestionar estados (`PENDIENTE`, `CONFIRMADO`, `ENTREGADO`, `CANCELADO`).
 > **Modalidad de Entrega:**  
 > Comprimido en **`Varela_Santiago_TPI_unidad8_backend.zip`** (excluyendo estrictamente entornos virtuales `.venv/`, `__pycache__/`, bases locales `.db`, temporales y cualquier carpeta `guidelines/`). Consulte [docs/resolucion_tp8.md](../docs/resolucion_tp8.md) para la estrategia detallada y la política de exclusión de bibliografía en los ZIPs de entrega.  
 > Repositorio oficial: [https://github.com/santiagovOK/UTN-TUPaD-P4](https://github.com/santiagovOK/UTN-TUPaD-P4)  
@@ -157,28 +158,28 @@ fastapi dev app/main.py
 | `GET` | `/productos/{id}/categorias` | Categorías activas asociadas al producto. | `200 OK` / `404` |
 | `GET` | `/productos/{id}/ingredientes`| Ingredientes activos asociados al producto. | `200 OK` / `404` |
 
-### 4. Unidades de Medida e Ingredientes (Activo — Extensión Heredada del TP7)
+### 4. Unidades de Medida e Ingredientes (Activo — Repository + Unit of Work en Ingredientes)
 
 | Método | Ruta | Descripción | Código |
 |---|---|---|---|
 | `GET` | `/unidades-medida/` | Catálogo de solo lectura con las 7 unidades de medida oficiales. | `200 OK` |
 | `GET` | `/unidades-medida/{id}` | Consulta de unidad de medida por identificador. | `200 OK` / `404` |
 | `GET` | `/ingredientes/` | Listado paginado de ingredientes con filtro por nombre. | `200 OK` |
-| `POST` | `/ingredientes/` | Alta de ingrediente vinculando una unidad de medida existente. | `201 Created` / `404` / `409` |
+| `POST` | `/ingredientes/` | Alta de ingrediente vinculando una unidad de medida existente (UoW). | `201 Created` / `404` / `409` |
 | `GET` | `/ingredientes/{id}` | Detalle de ingrediente activo por ID. | `200 OK` / `404` |
-| `PUT` | `/ingredientes/{id}` | Actualización de nombre, descripción y unidad de medida. | `200 OK` / `404` / `409` |
-| `DELETE`|`/ingredientes/{id}` | Baja lógica (impide baja si está vinculado a productos). | `204 No Content` / `409` |
+| `PUT` | `/ingredientes/{id}` | Actualización de nombre, descripción y unidad de medida (UoW). | `200 OK` / `404` / `409` |
+| `PATCH`| `/ingredientes/{id}` | Actualización parcial de campos de ingrediente (UoW). | `200 OK` / `404` / `409` |
+| `DELETE`|`/ingredientes/{id}` | Baja lógica (impide baja si está vinculado a productos) (UoW). | `204 No Content` / `409` |
 
-### 5. Pedidos y DetallePedido (⏳ Planificado — Pendiente Épica 2)
+### 5. Pedidos y DetallePedido (Activo — Épica 2)
 
-| Método | Ruta | Descripción | Estado |
+| Método | Ruta | Descripción | Código |
 |---|---|---|:---:|
-| `GET` | `/pedidos/` | Listado de pedidos activos del sistema. | ⏳ Planificado |
-| `GET` | `/pedidos/{id}` | Detalle de pedido con sus ítems y precios unitarios congelados. | ⏳ Planificado |
-| `POST` | `/pedidos/` | Creación atómica de pedido y detalles con Unit of Work transaccional. | ⏳ Planificado |
-| `PUT` | `/pedidos/{id}` | Actualización de estado (`PENDIENTE`, `CONFIRMADO`, `ENTREGADO`, `CANCELADO`). | ⏳ Planificado |
-| `DELETE`|`/pedidos/{id}` | Borrado lógico del pedido (`204 No Content`). | ⏳ Planificado |
-
+| `GET` | `/pedidos/` | Listado de pedidos activos del sistema. | `200 OK` |
+| `GET` | `/pedidos/{id}` | Detalle de pedido con sus ítems y precios unitarios congelados. | `200 OK` / `404` |
+| `POST` | `/pedidos/` | Creación atómica de pedido y detalles con Unit of Work transaccional. | `201 Created` / `404` / `422` |
+| `PUT` | `/pedidos/{id}` | Actualización de estado (`PENDIENTE`, `CONFIRMADO`, `ENTREGADO`, `CANCELADO`). | `200 OK` / `404` / `422` |
+| `DELETE`|`/pedidos/{id}` | Borrado lógico del pedido (`204 No Content`). | `204 No Content` / `404` |
 ---
 
 ## 🧪 Pruebas Automatizadas y REST Client
@@ -200,4 +201,4 @@ pytest
 ### Archivos de Solicitudes REST Client (`.http`)
 
 - `unidad8_backend/productos.http`: Suite integral de solicitudes HTTP para probar el catálogo de alimentos directamente en VS Code o editores compatibles.
-- `unidad8_backend/pedidos.http`: Suite de pruebas REST Client para el módulo de Pedidos (**planificada en tarea E2.5**).
+- `unidad8_backend/pedidos.http`: Suite de pruebas REST Client para el módulo de Pedidos (implementada y verificada en tarea E2.5).

@@ -12,8 +12,8 @@ El frontend continúa la arquitectura desacoplada del catálogo e incorpora la p
    Navegación por páginas (`/categorias`, `/productos`, `/productos/:id`), consumo de API mediante `useQuery` y `useMutation` con invalidación de caché, y modales interactivos controlados con `useState` para operaciones CRUD.
 2. **Adopción de TanStack Form y TanStack Table (Planificado — Épicas 1 y 3):**  
    Reemplazo de los formularios HTML y estados manuales por **TanStack Form** (control unificado, validación tipada, prevención de doble submit), y transformación de las listas/grillas de administración en **TanStack Table v8** con ordenamiento por columnas, filtros locales y paginación en cliente sobre el conjunto total.
-3. **Módulo CRUD de Ingredientes (Planificado — Épica 4):**  
-   Implementación de `src/services/ingredientes.service.ts`, `IngredientesPage.tsx`, modal de alta/edición con selector de unidades de medida y registro de la ruta `/ingredientes` en el Navbar.
+3. **Módulo CRUD de Ingredientes (Implementado — Épica 4):**  
+   Implementación integral de la capa de servicios HTTP (`src/services/ingredientes.service.ts` — E4.1) y la interfaz interactiva completa con `IngredientesPage.tsx`, `IngredienteList.tsx` (TanStack Table v8 con ordenamiento y paginación), `IngredienteModal.tsx` (TanStack Form v1 con selector de `/unidades-medida`) y registro directo de la ruta `/ingredientes` en `App.tsx` y `Navbar.tsx` (E4.2).
 
 > **Modalidad de Entrega:**  
 > Comprimido en **`Varela_Santiago_TPI_unidad8_frontend.zip`** (excluyendo estrictamente `node_modules/`, `dist/`, artefactos temporales y cualquier carpeta `guidelines/`). Consulte [docs/resolucion_tp8.md](../docs/resolucion_tp8.md) para la estrategia detallada y la política de exclusión de bibliografía en los ZIPs de entrega.  
@@ -104,7 +104,7 @@ Ejecuta `tsc -b` (verificación de tipos de extremo a extremo sin emitir código
 | `/categorias` | `CategoriasPage` | ✅ Operativo con TanStack Table v8 y TanStack Form | Migración completada en tarea E3.1 |
 | `/productos` | `ProductsPage` | ✅ Operativo con TanStack Table v8 y TanStack Form | Migración completada en tarea E3.2 |
 | `/productos/:id` | `ProductDetailPage` | Operativo con ficha y detalle | Preservar navegación e ingredientes hidratados |
-| `/ingredientes` | `IngredientesPage` | ⏳ No implementado | Creación completa de página CRUD, tabla y modal (tarea E4.2) |
+| `/ingredientes` | `IngredientesPage` | ✅ Operativo con TanStack Table v8 y TanStack Form | Implementación completada en tarea E4.2 |
 
 ---
 

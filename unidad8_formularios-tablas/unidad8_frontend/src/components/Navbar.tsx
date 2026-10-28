@@ -48,6 +48,11 @@ export function Navbar() {
               Productos
             </NavLink>
           </li>
+          <li>
+            <NavLink to="/ingredientes" className={getLinkClasses}>
+              Ingredientes
+            </NavLink>
+          </li>
         </ul>
       </nav>
     </header>

@@ -6,7 +6,12 @@
 //   - Enrutamiento raíz para la gestión integral de CATEGORIA, PRODUCTO y el detalle con PRODUCTO_CATEGORIA.
 import { Routes, Route } from "react-router-dom";
 import { Navbar } from "./components/Navbar";
-import { CategoriasPage, ProductsPage, ProductDetailPage } from "./pages";
+import {
+  CategoriasPage,
+  ProductsPage,
+  ProductDetailPage,
+  IngredientesPage,
+} from "./pages";
 
 export function App() {
   return (
@@ -18,6 +23,7 @@ export function App() {
           <Route path="/categorias" element={<CategoriasPage />} />
           <Route path="/productos" element={<ProductsPage />} />
           <Route path="/productos/:id" element={<ProductDetailPage />} />
+          <Route path="/ingredientes" element={<IngredientesPage />} />
         </Routes>
       </main>
     </div>
