@@ -164,11 +164,7 @@ utn-paradigmas4-tp8-formularios-tablas/
 ├── docs/                           # Documentación oficial y planificación
 │   ├── consigna.md                 # Especificación evaluativa del TP8
 │   ├── resolucion_tp8.md           # Plan rector, matrices HU/RN y tablero de épicas
-│   ├── UML_FOOD_STORE.svg          # Diagrama UML de clases del dominio
-│   └── guidelines/                 # Referencia conceptual local; excluida de ZIP
-│       ├── unidad8_guia_maestra.md # Criterio normativo Unidad 8 (UoW, Form, Table)
-│       ├── clean_code.md           # Principios Clean Code y refactorización
-│       └── javaismos_guia.md       # Buenas prácticas en Python idiomático
+│   └── UML_FOOD_STORE.svg          # Diagrama UML de clases del dominio
 ├── setup.sh                        # Script automatizado e idempotente de aprovisionamiento y arranque
 ├── package.json                    # Orquestador de scripts concurrentes
 ├── pnpm-lock.yaml                  # Lockfile del orquestador raíz
